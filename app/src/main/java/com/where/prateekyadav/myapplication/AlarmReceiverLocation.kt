@@ -29,7 +29,7 @@ class AlarmReceiverLocation : BroadcastReceiver(), UpdateLocation {
 
     override fun onReceive(context: Context?, intent: Intent?) {
         mContext = context;
-        LocationHelper(context, this).getLocation();
+        LocationHelper(context, this).setLocationListener();
 
         /*Toast.makeText(context,"AlarmReceiver.onReceive()",
                 Toast.LENGTH_LONG).show();*/

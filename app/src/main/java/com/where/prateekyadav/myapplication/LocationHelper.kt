@@ -32,6 +32,7 @@ class LocationHelper {
 
     var mContext: Context? = null;
     var mUpdateLocation: UpdateLocation? = null;
+    var mLocationReceived:Boolean=false;
 
     private var handler: Handleupdate? = null
     private var retroCallImplementor: RetroCallImplementor? = null
@@ -44,12 +45,31 @@ class LocationHelper {
         retroCallImplementor = RetroCallImplementor()
     }
 
-    @SuppressLint("MissingPermission")
-    fun getLocation() {
+    fun setLocationListener() {
         var gps_enabled = false
         var network_enabled = false
 
         locationManager = mContext?.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+        gps_enabled = locationManager!!.isProviderEnabled(LocationManager.GPS_PROVIDER)
+        network_enabled = locationManager!!.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+
+
+        if (gps_enabled) {
+            getLocationFromListner(LocationManager.GPS_PROVIDER)
+        } else if (network_enabled) {
+            getLocationFromListner(LocationManager.NETWORK_PROVIDER)
+        } else {
+            getLocationFromListner(LocationManager.PASSIVE_PROVIDER)
+        }
+
+
+    }
+
+    fun getLocation(): Location? {
+        var gps_enabled = false
+        var network_enabled = false
+
 
         gps_enabled = locationManager!!.isProviderEnabled(LocationManager.GPS_PROVIDER)
         network_enabled = locationManager!!.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
@@ -59,15 +79,9 @@ class LocationHelper {
         var passive_loc: Location? = null
         var finalLoc: Location? = null
 
-         if (gps_enabled) {
-             getLocationFromListner(LocationManager.GPS_PROVIDER)
-         } else if (network_enabled) {
-             getLocationFromListner(LocationManager.NETWORK_PROVIDER)
-         } else {
-             getLocationFromListner(LocationManager.PASSIVE_PROVIDER)
-         }
 
-       /* if (gps_enabled)
+
+        if (gps_enabled)
             gps_loc = locationManager!!.getLastKnownLocation(LocationManager.GPS_PROVIDER)
         if (network_enabled)
             net_loc = locationManager!!.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
@@ -75,12 +89,7 @@ class LocationHelper {
             passive_loc = locationManager!!.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER)
 
         }
-        if (gps_enabled && gps_loc == null) {
-            getLocationFromListner(LocationManager.GPS_PROVIDER)
-        } else if (network_enabled && net_loc == null) {
-            getLocationFromListner(LocationManager.NETWORK_PROVIDER)
-
-        } else if (gps_loc != null || net_loc != null) {
+        if (gps_loc != null || net_loc != null) {
 
             //smaller the number more accurate result will
             if (net_loc != null && gps_loc != null && gps_loc!!.getAccuracy() > net_loc!!.getAccuracy())
@@ -90,23 +99,12 @@ class LocationHelper {
             else if (net_loc != null)
                 finalLoc = net_loc
 
-            mUpdateLocation?.updateLocationAddressList(getCompleteAddressString(finalLoc!!));
-
+            return finalLoc
         } else if (passive_loc != null && !gps_enabled && !network_enabled) {
             //setLocation(passive_loc)
-            mUpdateLocation?.updateLocationAddressList(getCompleteAddressString(passive_loc!!));
-
-        } else {
-            if (gps_enabled) {
-                getLocationFromListner(LocationManager.GPS_PROVIDER)
-            } else if (network_enabled) {
-                getLocationFromListner(LocationManager.NETWORK_PROVIDER)
-
-            } else {
-                getLocationFromListner(LocationManager.PASSIVE_PROVIDER)
-            }
-        }*/
-
+            return passive_loc
+        }
+        return null!!
     }
 
     fun getLocationFromListner(provider: String) {
@@ -122,6 +120,7 @@ class LocationHelper {
                         "Accuracy: " + location.accuracy)
                 Log.i(Constant.E_WORKBOOK_DEBUG_TAG,
                         "Provider: " + location.provider)
+                mLocationReceived=true
                 // Called when a new location is found by the network location provider.
                 mUpdateLocation?.updateLocationAddressList(getCompleteAddressString(location!!));
 
@@ -149,19 +148,24 @@ class LocationHelper {
             mUpdateLocation?.updateLocationAddressList(DatabaseHelper(mContext).readAllVisitedLocation())
             // Register the listener with the Location Manager to receive location updates
             // @RequiresPermission(anyOf = arrayOf("android.permission.ACCESS_COARSE_LOCATION", "android.permission.ACCESS_FINE_LOCATION")) {
-            locationManager!!.requestSingleUpdate(provider,locationListener,null)
+           mLocationReceived=false;
+            locationManager!!.requestSingleUpdate(provider, locationListener, null)
 
             var listHandler = object : Handler() {
                 override fun handleMessage(msg: Message) {
-                    if (msg.what === 0) {
+                    if (msg.what === 0 && !mLocationReceived) {
                         locationManager!!.removeUpdates(locationListener)
-                        Log.i(Constant.E_WORKBOOK_DEBUG_TAG,"Location Updates are now removed")
-                        //Location Updates are now removed
+                        Log.i(Constant.E_WORKBOOK_DEBUG_TAG, "Location Updates are now removed")
+                        //Location Updates are now
+                        var location = getLocation()
+                        if (location != null)
+                            mUpdateLocation?.updateLocationAddressList(getCompleteAddressString(location!!));
+
                     }
                     super.handleMessage(msg)
                 }
             }
-            listHandler.sendEmptyMessageDelayed(0, Constant.LOCATION_SYNC_INSTERVAL-5);
+            listHandler.sendEmptyMessageDelayed(0, Constant.LOCATION_SYNC_TIMEOUT);
 
             Log.i(Constant.E_WORKBOOK_DEBUG_TAG,
                     "requestLocationUpdates")
@@ -245,13 +249,13 @@ class LocationHelper {
 
         var dbLastLocation = Location(LocationManager.GPS_PROVIDER);
         var lastDBLocation = usersDBHelper.readLastVisitedLocation()
-        var lastDBTime:Long=0
+        var lastDBTime: Long = 0
         if (lastDBLocation != null) {
             dbLastLocation.latitude = lastDBLocation!!.latitude
             dbLastLocation.longitude = lastDBLocation!!.longitude
-            lastDBTime=lastDBLocation.dateTime
+            lastDBTime = lastDBLocation.dateTime
         }
-        var insert = true;
+        var insert = false;
         if (spLatitude == 0.0) {
             insert = false;
             pref.setLong(System.currentTimeMillis())
@@ -260,10 +264,10 @@ class LocationHelper {
                     "Distance prev and curr" + previousLocation.distanceTo(currentLocation))
             Log.i(Constant.E_WORKBOOK_DEBUG_TAG,
                     "Distance curr and DB" + currentLocation.distanceTo(dbLastLocation))
-            if (previousLocation.distanceTo(currentLocation) < 500) {
+            if (previousLocation.distanceTo(currentLocation) < Constant.MIN_DISTANCE_RANGE) {
                 insert = true;
             }
-            if (lastDBLocation != null && currentLocation.distanceTo(dbLastLocation) < 500) {
+            if (lastDBLocation != null && currentLocation.distanceTo(dbLastLocation) < Constant.MIN_DISTANCE_RANGE) {
                 insert = false;
             }
 
@@ -271,14 +275,14 @@ class LocationHelper {
         pref.setLocation(LATITUDE, LONGITUDE);
 
         if (insert) {
-            retroCallImplementor!!.getAllPlaces(LATITUDE.toString() + "," + LONGITUDE.toString(), handler,location)
+            retroCallImplementor!!.getAllPlaces(LATITUDE.toString() + "," + LONGITUDE.toString(), handler, location)
         }
         var visitedLocationList = usersDBHelper.readAllVisitedLocation()
 
         return visitedLocationList!!
     }
 
-    fun insertAddress(resultPlace: Result,currentLocation: Location) {
+    fun insertAddress(resultPlace: Result, currentLocation: Location) {
         //
         var result: Boolean = false
         try {
@@ -308,7 +312,7 @@ class LocationHelper {
             //val knownName = addresses[0].getFeatureName() // Only if available else return NULL
             val tsLong = System.currentTimeMillis()
             val locationProvider = currentLocation.provider;
-            val stayTIme:Int = ((System.currentTimeMillis()-pref.getLong())/(1000*60)).toInt()
+            val stayTIme: Int = ((System.currentTimeMillis() - pref.getLong()) / (1000 * 60)).toInt()
 
             result = usersDBHelper.insertVisitedLocation(
                     VisitedLocationInformation(userid = 1, latitude = LATITUDE,
@@ -331,7 +335,7 @@ class LocationHelper {
      */
     internal inner class Handleupdate : RetroCallIneractor {
 
-        override fun updatePlaces(places: List<Result>,location: Location) {
+        override fun updatePlaces(places: List<Result>, location: Location) {
 
             try {
                 var result: Result? = null;
@@ -340,7 +344,7 @@ class LocationHelper {
                 else
                     result = places.get(0)
 
-                insertAddress(result,location)
+                insertAddress(result, location)
 
                 places.forEach {
                     Log.i(Constant.E_WORKBOOK_DEBUG_TAG, it.name);
