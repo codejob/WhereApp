@@ -14,6 +14,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Created by Infobeans on 1/10/2018.
@@ -21,6 +22,8 @@ import java.io.IOException
 class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     var mContext: Context? = null;
+    private val mOpenCounter = AtomicInteger()
+    internal lateinit var sqLiteDatabase: SQLiteDatabase
 
     init {
         mContext = context;
@@ -43,7 +46,31 @@ class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAM
         onUpgrade(db, oldVersion, newVersion)
     }
 
+    /**
+     * Method to get writable data here we create object of SQLite DB
+     *
+     * @return SQLiteDatabase
+     */
+    protected fun getWritableDB(): SQLiteDatabase {
+        if (mOpenCounter.incrementAndGet() == 1) {
+            sqLiteDatabase = this.writableDatabase
+            Log.d("dbcounter", "open db")
+        }
+        return sqLiteDatabase
+    }
 
+    /**
+     * Method to close data base id DB is open
+     *
+     * @param sqLiteDatabase
+     */
+    protected fun closeDataBase(sqLiteDatabase: SQLiteDatabase?) {
+        if (mOpenCounter.decrementAndGet() == 0 && sqLiteDatabase != null && sqLiteDatabase.isOpen) {
+            // Closing database
+            Log.d("dbcounter", "close db")
+            sqLiteDatabase.close()
+        }
+    }
     companion object {
         // If you change the database schema, you must increment the database version.
         val DATABASE_VERSION = 1
@@ -110,7 +137,7 @@ class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAM
 
     fun readUser(userid: String): ArrayList<UserModel> {
         val users = ArrayList<UserModel>()
-        val db = writableDatabase
+        val db = getWritableDB()
         var cursor: Cursor? = null
         try {
             cursor = db.rawQuery("select * from " + DBContract.UserEntry.TABLE_NAME_USER + " WHERE " + DBContract.UserEntry.COLUMN_USER_ID + "='" + userid + "'", null)
@@ -130,13 +157,15 @@ class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAM
                 users.add(UserModel(userid, name, age))
                 cursor.moveToNext()
             }
+            cursor.close()
         }
+        closeDataBase(sqLiteDatabase)
         return users
     }
 
     fun readAllUsers(): ArrayList<UserModel> {
         val users = ArrayList<UserModel>()
-        val db = writableDatabase
+        val db = getWritableDB()
         var cursor: Cursor? = null
         try {
             cursor = db.rawQuery("select * from " + DBContract.UserEntry.TABLE_NAME_USER, null)
@@ -157,7 +186,9 @@ class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAM
                 users.add(UserModel(userid, name, age))
                 cursor.moveToNext()
             }
+            cursor.close()
         }
+        closeDataBase(sqLiteDatabase)
         return users
     }
 
@@ -165,7 +196,7 @@ class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAM
     @Throws(SQLiteConstraintException::class)
     fun insertVisitedLocation(infoLocation: VisitedLocationInformation): Boolean {
         // Gets the data repository in write mode
-        val db = writableDatabase
+        val db = getWritableDB()
         // Create a new map of values, where column names are the keys
         val values = ContentValues()
         values.put(DBContract.UserEntry.COLUMN_USER_ID, infoLocation.userid)
@@ -187,13 +218,14 @@ class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAM
         } else {
             return false
         }
+        closeDataBase(sqLiteDatabase)
 
     }
 
 
     fun readAllVisitedLocation(): ArrayList<VisitedLocationInformation> {
         val visitedLocationInfoList = ArrayList<VisitedLocationInformation>()
-        val db = writableDatabase
+        val db = getWritableDB()
         var cursor: Cursor? = null
         try {
             cursor = db.rawQuery("select * from " + DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION, null)
@@ -233,13 +265,16 @@ class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAM
                         country, postalCode, knownName, stayTime, dateTime, locationProvider))
                 cursor.moveToNext()
             }
+           cursor.close()
         }
+        closeDataBase(sqLiteDatabase)
+        //
         return visitedLocationInfoList
     }
 
     fun readLastVisitedLocation(): VisitedLocationInformation? {
         var visitedLocationInfo: VisitedLocationInformation? = null;
-        val db = writableDatabase
+        val db = getWritableDB()
         var cursor: Cursor? = null
         try {
             cursor = db.rawQuery("select * from " + DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION, null)
@@ -279,7 +314,10 @@ class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAM
                         country, postalCode, knownName, stayTime, dateTime, locationProvider)
                 cursor.moveToNext()
             }
+            cursor.close()
         }
+        closeDataBase(sqLiteDatabase)
+        //
         return visitedLocationInfo
     }
 

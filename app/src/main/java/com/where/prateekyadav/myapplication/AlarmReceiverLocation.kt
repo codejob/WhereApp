@@ -36,6 +36,7 @@ class AlarmReceiverLocation : BroadcastReceiver(), UpdateLocation {
 
         /*Toast.makeText(context,"AlarmReceiver.onReceive()",
                 Toast.LENGTH_LONG).show();*/
+        sendMessage()
     }
 
     // Send an Intent with an action named "custom-event-name". The Intent
