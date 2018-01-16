@@ -19,7 +19,8 @@ open class Constant {
         val RECEIVER_ACTION: String = "LOCATION";
         var MIN_DISTANCE_RANGE: Int = 200;
         val alarmID: Int = 1001;
-
+        val INTENT_UPDATE_LOCATION: String = "update_location";
+        val LOCATION_UPDATE_MESSAGE: String = "update_location_message";
 
     }
 

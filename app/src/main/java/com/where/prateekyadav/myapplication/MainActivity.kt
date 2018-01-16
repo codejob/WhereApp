@@ -1,31 +1,17 @@
 package com.where.prateekyadav.myapplication
 
 import android.Manifest
-import android.content.Context
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.content.Context.LOCATION_SERVICE
-import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_main.*
 import android.content.pm.PackageManager
-import android.Manifest.permission
-import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.support.v4.content.ContextCompat
 import android.support.v4.app.ActivityCompat
-import android.content.DialogInterface
-import android.R.string.ok
-import android.annotation.SuppressLint
-import android.location.*
-import android.support.annotation.RequiresPermission
 import android.support.v7.app.AlertDialog
-import android.util.Log
-import java.io.IOException
-import java.util.*
-import android.app.AlarmManager
-import android.app.PendingIntent
-import android.content.Intent
-import android.widget.Toast
+import android.content.*
+import android.support.v4.content.LocalBroadcastManager
 import com.where.prateekyadav.myapplication.Util.AppUtility
+import com.where.prateekyadav.myapplication.Util.Constant
 import com.where.prateekyadav.myapplication.database.DatabaseHelper
 import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
 
@@ -47,6 +33,10 @@ class MainActivity : AppCompatActivity(), UpdateLocation {
         mLocationHelper = LocationHelper(applicationContext, this);
         checkLocationPermission()
         DatabaseHelper(this).copyDataBaseToSDCard()
+        // Register to receive messages.
+        // We are registering an observer (mMessageReceiver) to receive Intents
+        // with actions named "custom-event-name".
+        registerReceiver()
     }
 
 
@@ -142,5 +132,50 @@ class MainActivity : AppCompatActivity(), UpdateLocation {
         if (address != null)
             list.adapter = LocationsAdapter(this, address)
 
+    }
+
+    // Our handler for received Intents. This will be called whenever an Intent
+    // with an action named "custom-event-name" is broadcasted.
+    private val mMessageReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            // Get extra data included in the Intent
+            val message = intent.getStringExtra("message")
+            val isUpdated = intent.getBooleanExtra(Constant.LOCATION_UPDATE_MESSAGE,false);
+            if (isUpdated)
+                updateLocationAddressList(
+                        DatabaseHelper(this@MainActivity).readAllVisitedLocation())
+        }
+    }
+
+    override fun onStop() {
+
+        unregisterReceiver()
+        super.onStop()
+    }
+
+    private fun unregisterReceiver() {
+        try {
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(
+                    mMessageReceiver);
+        } catch (e: Exception) {
+        e.printStackTrace()
+        }
+    }
+
+    override fun onRestart() {
+        // Register to receive messages.
+        // We are registering an observer (mMessageReceiver) to receive Intents
+        // with actions named "custom-event-name".
+        registerReceiver()
+        super.onRestart()
+    }
+
+    private fun registerReceiver() {
+        try {
+            LocalBroadcastManager.getInstance(this).registerReceiver(
+                    mMessageReceiver, IntentFilter(Constant.INTENT_UPDATE_LOCATION))
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 }
