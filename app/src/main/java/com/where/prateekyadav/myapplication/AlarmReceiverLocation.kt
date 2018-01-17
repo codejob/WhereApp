@@ -17,7 +17,7 @@ import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
  */
 class AlarmReceiverLocation : BroadcastReceiver(), UpdateLocation {
     override fun updateLocationAddressList(addressList: List<VisitedLocationInformation>) {
-
+        sendMessage()
 
         /*if (addressList != null && addressList.size > 0)
             Toast.makeText(mContext,
@@ -36,18 +36,23 @@ class AlarmReceiverLocation : BroadcastReceiver(), UpdateLocation {
 
         /*Toast.makeText(context,"AlarmReceiver.onReceive()",
                 Toast.LENGTH_LONG).show();*/
-        sendMessage()
+
     }
 
     // Send an Intent with an action named "custom-event-name". The Intent
     // sent should
     // be received by the ReceiverActivity.
     private fun sendMessage() {
-        Log.d("sender", "Broadcasting message")
-        val intent = Intent("custom-event-name")
-        // You can also include some extra data.
-        intent.putExtra("message", "Test Message")
-        intent.putExtra(Constant.LOCATION_UPDATE_MESSAGE,true);
-        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent)
+        try {
+            Log.d("sender", "Broadcasting message")
+            val intent = Intent()
+            intent.setAction(Constant.INTENT_UPDATE_LOCATION)
+            // You can also include some extra data.
+            intent.putExtra("message", "Test Message")
+            intent.putExtra(Constant.LOCATION_UPDATE_MESSAGE,true);
+            mContext!!.sendBroadcast(intent)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 }

@@ -10,6 +10,7 @@ import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AlertDialog
 import android.content.*
 import android.support.v4.content.LocalBroadcastManager
+import android.util.Log
 import com.where.prateekyadav.myapplication.Util.AppUtility
 import com.where.prateekyadav.myapplication.Util.Constant
 import com.where.prateekyadav.myapplication.database.DatabaseHelper
@@ -33,10 +34,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation {
         mLocationHelper = LocationHelper(applicationContext, this);
         checkLocationPermission()
         DatabaseHelper(this).copyDataBaseToSDCard()
-        // Register to receive messages.
-        // We are registering an observer (mMessageReceiver) to receive Intents
-        // with actions named "custom-event-name".
-        registerReceiver()
+
     }
 
 
@@ -116,6 +114,8 @@ class MainActivity : AppCompatActivity(), UpdateLocation {
                 AppUtility().startTimerAlarm(this);
             }
         }
+        registerReceiver()
+
     }
 
     override fun onPause() {
@@ -139,43 +139,51 @@ class MainActivity : AppCompatActivity(), UpdateLocation {
     private val mMessageReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             // Get extra data included in the Intent
+            Log.d("Receiver", "Receive message")
             val message = intent.getStringExtra("message")
-            val isUpdated = intent.getBooleanExtra(Constant.LOCATION_UPDATE_MESSAGE,false);
-            if (isUpdated)
-                updateLocationAddressList(
-                        DatabaseHelper(this@MainActivity).readAllVisitedLocation())
+            val isUpdated = intent.getBooleanExtra(Constant.LOCATION_UPDATE_MESSAGE, false);
+            if (isUpdated) {
+
+                runOnUiThread(Runnable {
+                    updateLocationAddressList(
+                            DatabaseHelper(this@MainActivity).readAllVisitedLocation())
+
+                });
+
+            }
         }
     }
 
     override fun onStop() {
-
         unregisterReceiver()
         super.onStop()
     }
 
     private fun unregisterReceiver() {
         try {
-            LocalBroadcastManager.getInstance(this).unregisterReceiver(
-                    mMessageReceiver);
+            unregisterReceiver(mMessageReceiver);
         } catch (e: Exception) {
-        e.printStackTrace()
+            e.printStackTrace()
         }
     }
 
-    override fun onRestart() {
-        // Register to receive messages.
-        // We are registering an observer (mMessageReceiver) to receive Intents
-        // with actions named "custom-event-name".
+    override fun onStart() {
+        super.onStart()
         registerReceiver()
+
+    }
+
+    override fun onRestart() {
         super.onRestart()
     }
 
     private fun registerReceiver() {
         try {
-            LocalBroadcastManager.getInstance(this).registerReceiver(
+            registerReceiver(
                     mMessageReceiver, IntentFilter(Constant.INTENT_UPDATE_LOCATION))
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
+
 }
