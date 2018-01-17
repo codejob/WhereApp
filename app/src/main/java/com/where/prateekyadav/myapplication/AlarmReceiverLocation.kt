@@ -18,7 +18,7 @@ import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
 class AlarmReceiverLocation : BroadcastReceiver(), UpdateLocation {
     override fun updateLocationAddressList(addressList: List<VisitedLocationInformation>) {
 
-
+        sendMessage()
         /*if (addressList != null && addressList.size > 0)
             Toast.makeText(mContext,
                     addressList.get(0).address,
@@ -36,7 +36,7 @@ class AlarmReceiverLocation : BroadcastReceiver(), UpdateLocation {
 
         /*Toast.makeText(context,"AlarmReceiver.onReceive()",
                 Toast.LENGTH_LONG).show();*/
-        sendMessage()
+
     }
 
     // Send an Intent with an action named "custom-event-name". The Intent

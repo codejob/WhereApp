@@ -236,7 +236,7 @@ class LocationHelper {
         var pref = MySharedPref(mContext);
         var spLatitude: Double = pref.getLatitude();
         var spLongitude: Double = pref.getLongitude();
-        var spTime: Long = pref.getLong();
+        var spTime: Long = pref.getLong(Constant.SP_KEY_SPENT_TIME);
 
         var previousLocation = Location(LocationManager.GPS_PROVIDER);
         previousLocation.latitude = spLatitude
@@ -258,7 +258,7 @@ class LocationHelper {
         var insert = false;
         if (spLatitude == 0.0) {
             insert = false;
-            pref.setLong(System.currentTimeMillis())
+            pref.setLong(System.currentTimeMillis(),Constant.SP_KEY_SPENT_TIME)
         } else {
             Log.i(Constant.E_WORKBOOK_DEBUG_TAG,
                     "Distance prev and curr" + previousLocation.distanceTo(currentLocation))
@@ -266,6 +266,8 @@ class LocationHelper {
                     "Distance curr and DB" + currentLocation.distanceTo(dbLastLocation))
             if (previousLocation.distanceTo(currentLocation) < Constant.MIN_DISTANCE_RANGE) {
                 insert = true;
+            }else{
+                pref.setLong(System.currentTimeMillis(),Constant.SP_KEY_SPENT_TIME)
             }
             if (lastDBLocation != null && currentLocation.distanceTo(dbLastLocation) < Constant.MIN_DISTANCE_RANGE) {
                 insert = false;
@@ -312,7 +314,7 @@ class LocationHelper {
             //val knownName = addresses[0].getFeatureName() // Only if available else return NULL
             val tsLong = System.currentTimeMillis()
             val locationProvider = currentLocation.provider;
-            val stayTIme: Int = ((System.currentTimeMillis() - pref.getLong()) / (1000 * 60)).toInt()
+            val stayTIme: Int = ((System.currentTimeMillis() - pref.getLong(Constant.SP_KEY_SPENT_TIME)) / (1000 * 60)).toInt()
 
             result = usersDBHelper.insertVisitedLocation(
                     VisitedLocationInformation(userid = 1, latitude = LATITUDE,
@@ -320,7 +322,7 @@ class LocationHelper {
                             state = state, country = country, postalCode = postalCode,
                             knownName = knownName, stayTime = stayTIme, dateTime = tsLong,
                             locationProvider = locationProvider))
-            pref.setLong(System.currentTimeMillis())
+            pref.setLong(System.currentTimeMillis(),Constant.SP_KEY_SPENT_TIME)
             Log.i(Constant.E_WORKBOOK_DEBUG_TAG,
                     "Location inserted")
         } catch (e: Exception) {
@@ -348,6 +350,11 @@ class LocationHelper {
 
                 places.forEach {
                     Log.i(Constant.E_WORKBOOK_DEBUG_TAG, it.name);
+                    var tempLoc = Location(LocationManager.GPS_PROVIDER);
+                    tempLoc.latitude=it.geometry.location.lat.toDouble()
+                    tempLoc.longitude=it.geometry.location.lng.toDouble()
+                    Log.i("Distance bt curr & res", location.distanceTo(tempLoc).toString());
+
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
