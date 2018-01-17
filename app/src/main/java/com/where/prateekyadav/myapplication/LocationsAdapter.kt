@@ -35,14 +35,13 @@ class LocationsAdapter() : BaseAdapter() {
             mViewHolder = convertView.getTag() as MyViewHolder
         }
         var addresss =
-                   """
-                  Name:  ${mLocationList!!.get(position).address}
+
+                """   Name:  ${mLocationList!!.get(position).address}
 
                  Visinity:   ${mLocationList!!.get(position).knownName}
 
-                    Stay time:=> ${mLocationList!!.get(position).stayTime} minutes
+                 Stay time:=> ${mLocationList!!.get(position).stayTime} minutes """
 
-                   """
 
         mViewHolder.tvTitle.setText(addresss)
 

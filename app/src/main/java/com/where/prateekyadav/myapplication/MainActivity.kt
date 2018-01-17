@@ -9,15 +9,41 @@ import android.support.v4.content.ContextCompat
 import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AlertDialog
 import android.content.*
+import android.support.v4.app.FragmentActivity
 import android.support.v4.content.LocalBroadcastManager
 import android.util.Log
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException
+import com.google.android.gms.common.GooglePlayServicesRepairableException
+import com.google.android.gms.common.api.Status
 import com.where.prateekyadav.myapplication.Util.AppUtility
 import com.where.prateekyadav.myapplication.Util.Constant
 import com.where.prateekyadav.myapplication.database.DatabaseHelper
 import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
+import com.google.android.gms.location.places.Place
+import com.google.android.gms.location.places.ui.PlaceSelectionListener
+import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment
+import com.google.android.gms.location.places.Places.PLACE_DETECTION_API
+import com.google.android.gms.location.places.Places.GEO_DATA_API
+import com.google.android.gms.common.api.GoogleApiClient
+import com.google.android.gms.location.places.Places
+import com.google.android.gms.location.places.AutocompleteFilter
+import com.google.android.gms.location.places.ui.PlaceAutocomplete
 
 
-class MainActivity : AppCompatActivity(), UpdateLocation {
+class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConnectionFailedListener, PlaceSelectionListener {
+    override fun onPlaceSelected(place: Place) {
+        Log.i(Constant.E_WORKBOOK_DEBUG_TAG, "Place: " + place.name)
+    }
+
+    override fun onError(status: Status) {
+        Log.i(Constant.E_WORKBOOK_DEBUG_TAG, "An error occurred: " + status)
+    }
+
+    override fun onConnectionFailed(p0: ConnectionResult) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     override fun updateLocationAddress(address: String) {
     }
 
@@ -34,7 +60,26 @@ class MainActivity : AppCompatActivity(), UpdateLocation {
         mLocationHelper = LocationHelper(applicationContext, this);
         checkLocationPermission()
         DatabaseHelper(this).copyDataBaseToSDCard()
+        setAutoCompleteView()
+        /* val PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
+        try {
+            val intent =
+             PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_FULLSCREEN)
+                    .build(this);
+            startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
+        } catch (e: GooglePlayServicesRepairableException) {
+            // TODO: Handle the error.
+        } catch (e: GooglePlayServicesNotAvailableException) {
+            // TODO: Handle the error.
+        }*/
 
+    }
+
+    fun setAutoCompleteView() {
+
+        val autocompleteFragment = fragmentManager.findFragmentById(R.id.place_autocomplete_fragment) as PlaceAutocompleteFragment
+
+        autocompleteFragment.setOnPlaceSelectedListener(this)
     }
 
 
