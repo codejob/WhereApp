@@ -62,8 +62,6 @@ class MainActivity : AppCompatActivity(), UpdateLocation {
                         })
                         .create()
                         .show()
-
-
             } else {
                 // No explanation needed, we can request the permission.
                 ActivityCompat.requestPermissions(this,
@@ -94,10 +92,8 @@ class MainActivity : AppCompatActivity(), UpdateLocation {
                     }
 
                 } else {
-
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
-
                 }
                 return
             }
