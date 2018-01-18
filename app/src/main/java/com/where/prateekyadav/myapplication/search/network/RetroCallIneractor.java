@@ -12,7 +12,7 @@ import java.util.List;
  */
 
 public interface RetroCallIneractor {
-    public void updatePlaces(List<Result> places, Location location);
+    public void updatePlaces(List<Result> places, Location location,String locationType);
     public void updatePlaceDetails(Result place);
     public void onFailure();
 }

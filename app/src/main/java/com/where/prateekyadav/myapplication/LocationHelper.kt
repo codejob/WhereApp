@@ -122,7 +122,7 @@ class LocationHelper {
                         "Provider: " + location.provider)
                 mLocationReceived=true
                 // Called when a new location is found by the network location provider.
-                mUpdateLocation?.updateLocationAddressList(getCompleteAddressString(location!!));
+                mUpdateLocation?.updateLocationAddressList(getCompleteAddressString(location!!,Constant.LOCATION_UPDATE_TYPE_CURRENT));
 
                 //locationManager!!.removeUpdates(this);
                 //AppUtility().startTimerAlarm(mContext!!.applicationContext)
@@ -159,7 +159,7 @@ class LocationHelper {
                         //Location Updates are now
                         var location = getLocation()
                         if (location != null)
-                            mUpdateLocation?.updateLocationAddressList(getCompleteAddressString(location!!));
+                            mUpdateLocation?.updateLocationAddressList(getCompleteAddressString(location!!,Constant.LOCATION_UPDATE_TYPE_LAST_KNOWN));
 
                     }
                     super.handleMessage(msg)
@@ -225,7 +225,7 @@ class LocationHelper {
         }
     }
 
-    private fun getCompleteAddressString(location: Location): List<VisitedLocationInformation> {
+    private fun getCompleteAddressString(location: Location,locationType:String): List<VisitedLocationInformation> {
         //
         var LATITUDE: Double = location.latitude
         var LONGITUDE: Double = location.longitude
@@ -272,20 +272,21 @@ class LocationHelper {
             if (lastDBLocation != null && currentLocation.distanceTo(dbLastLocation) < Constant.MIN_DISTANCE_RANGE) {
                 insert = false;
                 val stayTIme: Int = ((System.currentTimeMillis() - pref.getLong(Constant.SP_KEY_SPENT_TIME)) / (1000 * 60)).toInt()
+                usersDBHelper.updateStayTime(lastDBLocation.rowID,stayTIme);
             }
 
         }
         pref.setLocation(LATITUDE, LONGITUDE);
 
         if (insert) {
-            retroCallImplementor!!.getAllPlaces(LATITUDE.toString() + "," + LONGITUDE.toString(), handler, location)
+            retroCallImplementor!!.getAllPlaces(LATITUDE.toString() + "," + LONGITUDE.toString(), handler, location,locationType)
         }
         var visitedLocationList = usersDBHelper.readAllVisitedLocation()
 
         return visitedLocationList!!
     }
 
-    fun insertAddress(resultPlace: Result, currentLocation: Location) {
+    fun insertAddress(resultPlace: Result, currentLocation: Location,locationType: String) {
         //
         var result: Boolean = false
         try {
@@ -322,7 +323,7 @@ class LocationHelper {
                             longitude = LONGITUDE, address = address, city = city,
                             state = state, country = country, postalCode = postalCode,
                             knownName = knownName, stayTime = stayTIme, dateTime = tsLong,
-                            locationProvider = locationProvider))
+                            locationProvider = locationProvider,rowID = 0,locationRequestType = locationType))
             pref.setLong(System.currentTimeMillis(),Constant.SP_KEY_SPENT_TIME)
             Log.i(Constant.E_WORKBOOK_DEBUG_TAG,
                     "Location inserted")
@@ -338,7 +339,7 @@ class LocationHelper {
      */
     internal inner class Handleupdate : RetroCallIneractor {
 
-        override fun updatePlaces(places: List<Result>, location: Location) {
+        override fun updatePlaces(places: List<Result>, location: Location,locationType: String) {
 
             try {
                 var result: Result? = null;
@@ -347,7 +348,7 @@ class LocationHelper {
                 else
                     result = places.get(0)
 
-                insertAddress(result, location)
+                insertAddress(result, location,locationType)
 
                 places.forEach {
                     Log.i(Constant.E_WORKBOOK_DEBUG_TAG, it.name);

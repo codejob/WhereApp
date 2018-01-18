@@ -25,7 +25,8 @@ import retrofit2.Response;
 public class RetroCallImplementor {
 
 
-    public void getAllPlaces(String query , final RetroCallIneractor retroCallIneractor, final Location location){
+    public void getAllPlaces(String query , final RetroCallIneractor retroCallIneractor, final Location location,
+                             final String locationType){
         ApiInterface apiService =
                 ApiClient.getClient().create(ApiInterface.class);
 
@@ -35,7 +36,7 @@ public class RetroCallImplementor {
             public void onResponse(Call<Places> call, Response<Places> response) {
                 int statusCode = response.code();
 
-                retroCallIneractor.updatePlaces( response.body().getResults(),location);
+                retroCallIneractor.updatePlaces( response.body().getResults(),location,locationType);
                 // recyclerView.setAdapter(new MoviesAdapter(movies, R.layout.list_item_movie, getApplicationContext()));
             }
 

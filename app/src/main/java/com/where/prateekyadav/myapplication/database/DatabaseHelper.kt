@@ -97,7 +97,9 @@ class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAM
                         DBContract.VisitedLocationData.COLUMN_KNOWN_NAME + " TEXT," +
                         DBContract.VisitedLocationData.COLUMN_STAY_TIME + " INTEGER," +
                         DBContract.VisitedLocationData.COLUMN_DATE_TIME + " TEXT," +
-                        DBContract.VisitedLocationData.COLUMN_LOCATION_PROVIDER + " TEXT)"
+                        DBContract.VisitedLocationData.COLUMN_LOCATION_PROVIDER + " TEXT," +
+                        DBContract.VisitedLocationData.COLUMN_LOCATION_REQUEST_TYPE + " TEXT)"
+
 
 
         private val SQL_DELETE_ENTRIES = "DROP TABLE IF EXISTS " + DBContract.UserEntry.TABLE_NAME_USER
@@ -211,6 +213,8 @@ class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAM
         values.put(DBContract.VisitedLocationData.COLUMN_STAY_TIME, infoLocation.stayTime)
         values.put(DBContract.VisitedLocationData.COLUMN_DATE_TIME, infoLocation.dateTime)
         values.put(DBContract.VisitedLocationData.COLUMN_LOCATION_PROVIDER, infoLocation.locationProvider)
+        values.put(DBContract.VisitedLocationData.COLUMN_LOCATION_REQUEST_TYPE, infoLocation.locationRequestType)
+
         // Insert the new row, returning the primary key value of the new row
         val newRowId = db.insert(DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION, null, values)
 
@@ -218,7 +222,7 @@ class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAM
         return newRowId > 0
     }
 
-    fun updateStayTime(rowID:Long,stayTime:Int){
+    fun updateStayTime(rowID:Int,stayTime:Int){
         try {// Gets the data repository in write mode
             val db = getWritableDB()
             // Create a new map of values, where column names are the keys
@@ -246,7 +250,7 @@ class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAM
             db.execSQL(SQL_CREATE_VISIT_LOCATION_TABLE)
             return ArrayList()
         }
-
+        var rowID: Int
         var userId: Int
         var latitude: Double
         var longitude: Double
@@ -259,9 +263,11 @@ class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAM
         var stayTime: Int
         var dateTime: Long
         var locationProvider: String
+        var locationRequestType: String
         //
         if (cursor!!.moveToFirst()) {
             while (cursor.isAfterLast == false) {
+                rowID = cursor.getInt(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_ROW_ID))
                 userId = cursor.getInt(cursor.getColumnIndex(DBContract.UserEntry.COLUMN_USER_ID))
                 latitude = cursor.getDouble(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_LATITUDE))
                 longitude = cursor.getDouble(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_LONGITUDE))
@@ -274,8 +280,10 @@ class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAM
                 stayTime = cursor.getInt(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_STAY_TIME))
                 dateTime = cursor.getLong(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_DATE_TIME))
                 locationProvider = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_LOCATION_PROVIDER))
+                locationRequestType = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_LOCATION_REQUEST_TYPE))
+
                 visitedLocationInfoList.add(VisitedLocationInformation(userId, latitude, longitude, address, city, state,
-                        country, postalCode, knownName, stayTime, dateTime, locationProvider))
+                        country, postalCode, knownName, stayTime, dateTime, locationProvider,locationRequestType,rowID))
                 cursor.moveToNext()
             }
            cursor.close()
@@ -295,7 +303,7 @@ class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAM
             db.execSQL(SQL_CREATE_VISIT_LOCATION_TABLE)
             return visitedLocationInfo
         }
-
+        var rowID: Int
         var userId: Int
         var latitude: Double
         var longitude: Double
@@ -308,9 +316,11 @@ class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAM
         var stayTime: Int
         var dateTime: Long
         var locationProvider: String
+        var locationRequestType: String
         //
         if (cursor.count > 0 && cursor!!.moveToLast()) {
             while (cursor.isAfterLast == false) {
+                rowID = cursor.getInt(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_ROW_ID))
                 userId = cursor.getInt(cursor.getColumnIndex(DBContract.UserEntry.COLUMN_USER_ID))
                 latitude = cursor.getDouble(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_LATITUDE))
                 longitude = cursor.getDouble(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_LONGITUDE))
@@ -323,8 +333,10 @@ class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAM
                 stayTime = cursor.getInt(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_STAY_TIME))
                 dateTime = cursor.getLong(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_DATE_TIME))
                 locationProvider = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_LOCATION_PROVIDER))
+                locationRequestType = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_LOCATION_REQUEST_TYPE))
+
                 visitedLocationInfo = VisitedLocationInformation(userId, latitude, longitude, address, city, state,
-                        country, postalCode, knownName, stayTime, dateTime, locationProvider)
+                        country, postalCode, knownName, stayTime, dateTime, locationProvider,locationRequestType,rowID)
                 cursor.moveToNext()
             }
             cursor.close()
