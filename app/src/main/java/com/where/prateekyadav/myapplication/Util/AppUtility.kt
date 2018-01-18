@@ -8,7 +8,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.support.v4.app.ActivityCompat
 import android.util.Log
-import android.widget.Toast
 import com.where.prateekyadav.myapplication.AlarmReceiverLocation
 import java.io.File
 import java.util.*
@@ -27,16 +26,16 @@ class AppUtility {
     }
 
     fun checkStoragePermissions(context: Context?): Boolean {
-        Log.i(Constant.E_WORKBOOK_DEBUG_TAG, "Checking permissions.")
+        Log.i(Constant.TAG_KOTLIN_DEMO_APP, "Checking permissions.")
 
         // Verify that all required Storage permissions have been granted.
         if (ActivityCompat.checkSelfPermission(context!!, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             // Storage permissions have not been granted.
-            Log.i(Constant.E_WORKBOOK_DEBUG_TAG, "permissions has NOT been granted. Requesting permissions.")
+            Log.i(Constant.TAG_KOTLIN_DEMO_APP, "permissions has NOT been granted. Requesting permissions.")
             return false
         } else {
             // Storage permissions have been granted. Show the contacts fragment.
-            Log.i(Constant.E_WORKBOOK_DEBUG_TAG,
+            Log.i(Constant.TAG_KOTLIN_DEMO_APP,
                     "storage permissions have already been granted.")
             return true
         }
@@ -62,7 +61,7 @@ class AppUtility {
             /*Toast.makeText(applicationContext,
                     "call alarmManager.set()",
                     Toast.LENGTH_LONG).show();*/
-            Log.i(Constant.E_WORKBOOK_DEBUG_TAG,
+            Log.i(Constant.TAG_KOTLIN_DEMO_APP,
                     "TImer set")
         }
     }

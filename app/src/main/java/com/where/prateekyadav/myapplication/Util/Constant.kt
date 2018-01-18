@@ -12,7 +12,7 @@ open class Constant {
         var sharedKeyLongitude: String = "longitude";
         var SP_KEY_SPENT_TIME: String = "sp_key_spent_time";
         val FOLDER_PATH = Environment.getExternalStorageDirectory().path + "/WhereApp/"
-        val E_WORKBOOK_DEBUG_TAG = "eWorkBook-"
+        val TAG_KOTLIN_DEMO_APP = "KotlinDemoApp"
         // Seconds
         val LOCATION_SYNC_INSTERVAL: Long =  10* 60 * 1000;
         val LOCATION_SYNC_TIMEOUT: Long = 40 *1000;

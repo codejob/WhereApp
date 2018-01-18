@@ -9,47 +9,21 @@ import android.support.v4.content.ContextCompat
 import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AlertDialog
 import android.content.*
-import android.support.v4.app.FragmentActivity
-import android.support.v4.content.LocalBroadcastManager
 import android.util.Log
 import com.google.android.gms.common.ConnectionResult
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException
-import com.google.android.gms.common.GooglePlayServicesRepairableException
 import com.google.android.gms.common.api.Status
 import com.where.prateekyadav.myapplication.Util.AppUtility
 import com.where.prateekyadav.myapplication.Util.Constant
-import com.where.prateekyadav.myapplication.database.DatabaseHelper
 import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
 import com.google.android.gms.location.places.Place
 import com.google.android.gms.location.places.ui.PlaceSelectionListener
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment
-import com.google.android.gms.location.places.Places.PLACE_DETECTION_API
-import com.google.android.gms.location.places.Places.GEO_DATA_API
 import com.google.android.gms.common.api.GoogleApiClient
-import com.google.android.gms.location.places.Places
-import com.google.android.gms.location.places.AutocompleteFilter
-import com.google.android.gms.location.places.ui.PlaceAutocomplete
+import com.where.prateekyadav.myapplication.database.DataBaseController
 
 
 class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConnectionFailedListener, PlaceSelectionListener {
-    override fun onPlaceSelected(place: Place) {
-        Log.i(Constant.E_WORKBOOK_DEBUG_TAG, "Place: " + place.name)
-    }
 
-    override fun onError(status: Status) {
-        Log.i(Constant.E_WORKBOOK_DEBUG_TAG, "An error occurred: " + status)
-    }
-
-    override fun onConnectionFailed(p0: ConnectionResult) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun updateLocationAddress(address: String) {
-    }
-
-    override fun updateLocationAddressList(addressList: List<VisitedLocationInformation>) {
-        setLocation(addressList)
-    }
 
     val RQS_1 = 1
     var mLocationHelper: LocationHelper? = null;
@@ -59,7 +33,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
         setContentView(R.layout.activity_main)
         mLocationHelper = LocationHelper(applicationContext, this);
         checkLocationPermission()
-        DatabaseHelper(this).copyDataBaseToSDCard()
+        DataBaseController(this).copyDataBaseToSDCard()
         setAutoCompleteView()
         /* val PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
         try {
@@ -107,8 +81,6 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
                         })
                         .create()
                         .show()
-
-
             } else {
                 // No explanation needed, we can request the permission.
                 ActivityCompat.requestPermissions(this,
@@ -139,10 +111,8 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
                     }
 
                 } else {
-
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
-
                 }
                 return
             }
@@ -153,7 +123,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
         super.onResume()
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            setLocation(DatabaseHelper(this).readAllVisitedLocation())
+            setLocation(DataBaseController(this).readAllVisitedLocation())
             //mLocationHelper?.getLocation()
             if (!AppUtility().checkAlarmAlreadySet(this)) {
                 AppUtility().startTimerAlarm(this);
@@ -191,7 +161,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
 
                 runOnUiThread(Runnable {
                     updateLocationAddressList(
-                            DatabaseHelper(this@MainActivity).readAllVisitedLocation())
+                            DataBaseController(this@MainActivity).readAllVisitedLocation())
 
                 });
 
@@ -230,5 +200,22 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
             e.printStackTrace()
         }
     }
+    override fun onPlaceSelected(place: Place) {
+        Log.i(Constant.TAG_KOTLIN_DEMO_APP, "Place: " + place.name)
+    }
 
+    override fun onError(status: Status) {
+        Log.i(Constant.TAG_KOTLIN_DEMO_APP, "An error occurred: " + status)
+    }
+
+    override fun onConnectionFailed(p0: ConnectionResult) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun updateLocationAddress(address: String) {
+    }
+
+    override fun updateLocationAddressList(addressList: List<VisitedLocationInformation>) {
+        setLocation(addressList)
+    }
 }

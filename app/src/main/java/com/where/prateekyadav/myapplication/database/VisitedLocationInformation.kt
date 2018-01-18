@@ -3,7 +3,7 @@ package com.where.prateekyadav.myapplication.database
 /**
  * Created by Infobeans on 1/10/2018.
  */
-data class VisitedLocationInformation(val userid: Int,
+data class VisitedLocationInformation(val userId: Int,
                                       val latitude: Double,
                                       val longitude: Double,
                                       val address: String,
@@ -16,4 +16,9 @@ data class VisitedLocationInformation(val userid: Int,
                                       val dateTime: Long,
                                       val locationProvider: String,
                                       val locationRequestType: String,
-                                      val rowID: Int)
+                                      val rowID: Int,
+                                      val vicinity: String,
+                                      val placeId: String,
+                                      val photoUrl: String,
+                                      val nearByPlacesIds: String,
+                                      val isAddressSet: Int)

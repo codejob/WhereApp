@@ -3,6 +3,7 @@ package com.where.prateekyadav.myapplication.search.model;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.where.prateekyadav.myapplication.database.VisitedLocationInformation;
 import com.where.prateekyadav.myapplication.search.model.placesdetails.Result;
 
 import java.util.ArrayList;
@@ -77,5 +78,8 @@ public class Places {
     public void setStatus(String status) {
         this.status = status;
     }
+
+
+
 
 }
