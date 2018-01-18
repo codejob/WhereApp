@@ -25,6 +25,7 @@ object DBContract {
     class VisitedLocationData : BaseColumns {
         companion object {
             val TABLE_NAME_VISITED_LOCATION = "visitedLocation"
+            val COLUMN_ROW_ID = "id"
             val COLUMN_USER_ID = "userId"
             val COLUMN_LATITUDE = "latitude"
             val COLUMN_LONGITUDE = "longitude"
@@ -37,6 +38,7 @@ object DBContract {
             val COLUMN_STAY_TIME="stayTime"
             val COLUMN_DATE_TIME="dateTime"
             val COLUMN_LOCATION_PROVIDER="locationProvider"
+            val COLUMN_LOCATION_REQUEST_TYPE="location_request_type"
         }
 
 

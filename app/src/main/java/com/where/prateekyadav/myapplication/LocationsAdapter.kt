@@ -40,7 +40,14 @@ class LocationsAdapter() : BaseAdapter() {
 
                  Visinity:   ${mLocationList!!.get(position).knownName}
 
-                 Stay time:=> ${mLocationList!!.get(position).stayTime} minutes """
+                 Stay time:=> ${mLocationList!!.get(position).stayTime} minutes
+                 Req Type:=> ${mLocationList!!.get(position).locationRequestType}
+                 Provider :=> ${mLocationList!!.get(position).locationProvider}
+
+                 Lat:=> ${mLocationList!!.get(position).latitude}
+                 Long:=> ${mLocationList!!.get(position).longitude} """
+
+
 
 
         mViewHolder.tvTitle.setText(addresss)
