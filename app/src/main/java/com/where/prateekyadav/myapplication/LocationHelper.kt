@@ -467,14 +467,13 @@ class LocationHelper {
             var mList = ArrayList<VisitedLocationInformation>()
             places.forEach {
                 var result: Boolean = false
-
                 try {
                     var pref = MySharedPref(mContext);
                     val address = it.name;
                     val vicinity = it.vicinity
                     val placeId = it.placeId
                     val photoUrl = it.photos.toString()
-                    val nearByPlaces="";
+                    val nearPlaces="";
                     val isAddressSet=1;
                     var LATITUDE: Double = it.geometry.location.lat
                     var LONGITUDE: Double = it.geometry.location.lng
@@ -499,10 +498,15 @@ class LocationHelper {
                             knownName = knownName, stayTime = stayTIme, dateTime = tsLong,
                             locationProvider = locationProvider,rowID = 0,
                             locationRequestType = locationType,vicinity = vicinity,
-                            placeId = placeId,photoUrl = photoUrl,nearByPlacesIds = nearByPlaces,
+                            placeId = placeId,photoUrl = photoUrl,nearByPlacesIds = nearPlaces,
                             isAddressSet = isAddressSet));
-                    //
-                    nearByPlacesIds=nearByPlaces+","+placeId;
+
+                    // add near by place id
+                    if(nearByPlacesIds.isEmpty()) {
+                        nearByPlacesIds =  placeId;
+                    }else{
+                        nearByPlacesIds = nearByPlacesIds + "," + placeId;
+                    }
 
                 } catch (e: Exception) {
                     e.printStackTrace()
