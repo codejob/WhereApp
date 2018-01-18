@@ -71,6 +71,7 @@ class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAM
             sqLiteDatabase.close()
         }
     }
+
     companion object {
         // If you change the database schema, you must increment the database version.
         val DATABASE_VERSION = 1
@@ -78,6 +79,7 @@ class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAM
 
         private val SQL_CREATE_ENTRIES =
                 "CREATE TABLE " + DBContract.UserEntry.TABLE_NAME_USER + " (" +
+                        DBContract.VisitedLocationData.COLUMN_ROW_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                         DBContract.UserEntry.COLUMN_USER_ID + " INTEGER," +
                         DBContract.UserEntry.COLUMN_USER_NAME + " TEXT," +
                         DBContract.UserEntry.COLUMN_PASSWORD + " TEXT," +
@@ -86,6 +88,7 @@ class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAM
         private val SQL_CREATE_VISIT_LOCATION_TABLE =
                 "CREATE TABLE " +
                         DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION + " (" +
+                        DBContract.VisitedLocationData.COLUMN_ROW_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                         DBContract.UserEntry.COLUMN_USER_ID + " INTEGER," +
                         DBContract.VisitedLocationData.COLUMN_LATITUDE + " INTEGER," +
                         DBContract.VisitedLocationData.COLUMN_LONGITUDE + " INTEGER," +
@@ -99,7 +102,6 @@ class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAM
                         DBContract.VisitedLocationData.COLUMN_DATE_TIME + " TEXT," +
                         DBContract.VisitedLocationData.COLUMN_LOCATION_PROVIDER + " TEXT," +
                         DBContract.VisitedLocationData.COLUMN_LOCATION_REQUEST_TYPE + " TEXT)"
-
 
 
         private val SQL_DELETE_ENTRIES = "DROP TABLE IF EXISTS " + DBContract.UserEntry.TABLE_NAME_USER
@@ -222,7 +224,7 @@ class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAM
         return newRowId > 0
     }
 
-    fun updateStayTime(rowID:Int,stayTime:Int){
+    fun updateStayTime(rowID: Int, stayTime: Int) {
         try {// Gets the data repository in write mode
             val db = getWritableDB()
             // Create a new map of values, where column names are the keys
@@ -232,7 +234,7 @@ class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAM
             val whereArgs = arrayOf(rowID.toString())
 
             db.update(DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION
-            ,values,whereClause,whereArgs)
+                    , values, whereClause, whereArgs)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -283,10 +285,10 @@ class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAM
                 locationRequestType = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_LOCATION_REQUEST_TYPE))
 
                 visitedLocationInfoList.add(VisitedLocationInformation(userId, latitude, longitude, address, city, state,
-                        country, postalCode, knownName, stayTime, dateTime, locationProvider,locationRequestType,rowID))
+                        country, postalCode, knownName, stayTime, dateTime, locationProvider, locationRequestType, rowID))
                 cursor.moveToNext()
             }
-           cursor.close()
+            cursor.close()
         }
         closeDataBase(sqLiteDatabase)
         //
@@ -336,7 +338,7 @@ class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAM
                 locationRequestType = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_LOCATION_REQUEST_TYPE))
 
                 visitedLocationInfo = VisitedLocationInformation(userId, latitude, longitude, address, city, state,
-                        country, postalCode, knownName, stayTime, dateTime, locationProvider,locationRequestType,rowID)
+                        country, postalCode, knownName, stayTime, dateTime, locationProvider, locationRequestType, rowID)
                 cursor.moveToNext()
             }
             cursor.close()
