@@ -387,7 +387,7 @@ class LocationHelper {
                     "Location inserted")
 
             //
-            addNearByPlaces(mPlacesList,placeId)
+            addNearByPlaces(mPlacesList,placeId,addresses)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -449,7 +449,7 @@ class LocationHelper {
         }
     }
 
-    fun addNearByPlaces(places: List<Result>,mainPlaceId:String) {
+    fun addNearByPlaces(places: List<Result>,mainPlaceId:String,addresses: List<Address>) {
         //
         if (places != null && places.size > 1)
         {
@@ -460,10 +460,6 @@ class LocationHelper {
 
                 try {
                     var pref = MySharedPref(mContext);
-                    var geocoder = Geocoder(mContext, Locale.getDefault())
-                    //var location: Location = Location(LocationManager.GPS_PROVIDER)
-                    //location.latitude = resultPlace.geometry.location.lat.toDouble()
-                    //location.longitude = resultPlace.geometry.location.lng.toDouble()
                     val address = it.name;
                     val vicinity = it.vicinity
                     val placeId = it.placeId
@@ -472,10 +468,7 @@ class LocationHelper {
                     val isAddressSet=1;
                     var LATITUDE: Double = it.geometry.location.lat
                     var LONGITUDE: Double = it.geometry.location.lng
-                    val addresses: List<Address>
-                    geocoder = Geocoder(mContext, Locale.getDefault())
 
-                    addresses = geocoder.getFromLocation(LATITUDE, LONGITUDE, 1) // Here 1 represent max location result to returned, by documents it recommended 1 to 5
                     if (addresses == null || addresses.size == 0) {
                         return null!!;
                     }
