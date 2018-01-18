@@ -230,7 +230,7 @@ class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAM
             // Create a new map of values, where column names are the keys
             val values = ContentValues()
             values.put(DBContract.VisitedLocationData.COLUMN_STAY_TIME, stayTime)
-            val whereClause = "id ?"
+            val whereClause = "id = ?"
             val whereArgs = arrayOf(rowID.toString())
 
             db.update(DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION
