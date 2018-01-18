@@ -38,7 +38,7 @@ class LocationsAdapter() : BaseAdapter() {
 
                 """   Name:  ${mLocationList!!.get(position).address}
 
-                 Visinity:   ${mLocationList!!.get(position).knownName}
+                 Visinity:   ${mLocationList!!.get(position).vicinity}
 
                  Stay time:=> ${mLocationList!!.get(position).stayTime} minutes
                  Req Type:=> ${mLocationList!!.get(position).locationRequestType}
