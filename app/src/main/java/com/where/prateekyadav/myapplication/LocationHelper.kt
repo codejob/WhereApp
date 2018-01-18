@@ -420,7 +420,15 @@ class LocationHelper {
                     tempLoc.latitude = it.geometry.location.lat.toDouble()
                     tempLoc.longitude = it.geometry.location.lng.toDouble()
                     val distance = location.distanceTo(tempLoc)
-                    if (pos == 0) {
+                    // Just to pick first prominent place within 10 metre
+                    if(distance<10 && pos==0){
+                        minDistance = distance
+                        result = it
+                        pos += 1
+                    }
+
+
+                   /* if (pos == 0) {
                         minDistance = distance
                         result = it
 
@@ -429,6 +437,8 @@ class LocationHelper {
                         result = it
                     }
                     pos += 1
+                    */
+
                     Log.i("Distance bt curr & res", it.name + "  " + location.distanceTo(tempLoc).toString());
 
                 }
@@ -505,7 +515,7 @@ class LocationHelper {
                     e.printStackTrace()
                 }
                 //
-                Log.i(Constant.TAG_KOTLIN_DEMO_APP, it.name);
+                //Log.i(Constant.TAG_KOTLIN_DEMO_APP, it.name);
             }
             // Here call method to insert the near by places into table
             DataBaseController(mContext).insertNearByPlaces(mList);

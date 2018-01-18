@@ -296,8 +296,8 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
                                             fieldValue: String): Boolean {
         val sqLiteDatabase = getWritableDB()
 
-        val Query = SELECT_FROM + TableName + WHERE + dbfield + EQUALS_TO + fieldValue
-        val cursor = sqLiteDatabase.rawQuery(Query, null)
+        val Query = SELECT_FROM + TableName + WHERE + dbfield + " =?"
+        val cursor = sqLiteDatabase.rawQuery(Query, arrayOf(fieldValue))
         if (cursor.count <= 0) {
             cursor.close()
             return false
