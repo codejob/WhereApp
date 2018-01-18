@@ -213,12 +213,25 @@ class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAM
         values.put(DBContract.VisitedLocationData.COLUMN_LOCATION_PROVIDER, infoLocation.locationProvider)
         // Insert the new row, returning the primary key value of the new row
         val newRowId = db.insert(DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION, null, values)
-        if (newRowId > 0) {
-            return true
-        } else {
-            return false
-        }
+
         closeDataBase(sqLiteDatabase)
+        return newRowId > 0
+    }
+
+    fun updateStayTime(rowID:Long,stayTime:Int){
+        try {// Gets the data repository in write mode
+            val db = getWritableDB()
+            // Create a new map of values, where column names are the keys
+            val values = ContentValues()
+            values.put(DBContract.VisitedLocationData.COLUMN_STAY_TIME, stayTime)
+            val whereClause = "id ?"
+            val whereArgs = arrayOf(rowID.toString())
+
+            db.update(DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION
+            ,values,whereClause,whereArgs)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
 
     }
 
