@@ -129,18 +129,18 @@ class LocationHelper {
                             "Accuracy: " + location.accuracy)
                     Log.i(Constant.TAG_KOTLIN_DEMO_APP,
                             "Provider: " + location.provider)
-                    if(bestLocation==null){
-                        bestLocation=location
-                    }else if(location.accuracy < bestLocation!!.accuracy){
-                        bestLocation=location
+                    if (bestLocation == null) {
+                        bestLocation = location
+                    } else if (location.accuracy < bestLocation!!.accuracy) {
+                        bestLocation = location
                     }
                     if (!mLocationReceived) {
-                        listHandler?.sendEmptyMessageDelayed(3, 3000);
+                        listHandler?.sendEmptyMessageDelayed(3, 5000);
 
                         mLocationReceived = true
                     }
                     // Called when a new location is found by the network location provider.
-                   // mUpdateLocation?.updateLocationAddressList(getCompleteAddressString(location!!, Constant.LOCATION_UPDATE_TYPE_CURRENT));
+                    // mUpdateLocation?.updateLocationAddressList(getCompleteAddressString(location!!, Constant.LOCATION_UPDATE_TYPE_CURRENT));
                 }
 
                 override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {
@@ -184,12 +184,12 @@ class LocationHelper {
                             mUpdateLocation?.updateLocationAddressList(getCompleteAddressString(location!!, Constant.LOCATION_UPDATE_TYPE_LAST_KNOWN));
 
                     } else if (msg.what === 3 && mLocationReceived) {
-                        Log.i(Constant.TAG_KOTLIN_DEMO_APP, "best location accuracy "+bestLocation!!.accuracy)
+                        Log.i(Constant.TAG_KOTLIN_DEMO_APP, "best location accuracy " + bestLocation!!.accuracy)
 
                         locationManager!!.removeUpdates(locationListener)
                         mUpdateLocation?.updateLocationAddressList(getCompleteAddressString(bestLocation!!, Constant.LOCATION_UPDATE_TYPE_CURRENT));
 
-                    }else {
+                    } else {
                         locationManager!!.removeUpdates(locationListener)
                         Log.i(Constant.TAG_KOTLIN_DEMO_APP, "Location Updates are now removed final:= ")
                     }
@@ -321,7 +321,7 @@ class LocationHelper {
             if (lastDBLocation != null && currentLocation.distanceTo(dbLastLocation) < Constant.MIN_DISTANCE_RANGE) {
                 insert = false;
                 val stayTIme: Int = ((System.currentTimeMillis() - pref.getLong(Constant.SP_KEY_SPENT_TIME)) / (1000 * 60)).toInt()
-                mDataBaseController.updateStayTime(lastDBLocation.rowID,stayTIme);
+                mDataBaseController.updateStayTime(lastDBLocation.rowID, stayTIme);
             }
 
         }
@@ -335,7 +335,7 @@ class LocationHelper {
         return visitedLocationList!!
     }
 
-    fun insertAddress(resultPlace: Result, currentLocation: Location, locationType: String, mPlacesList:List<Result>) {
+    fun insertAddress(resultPlace: Result, currentLocation: Location, locationType: String, mPlacesList: List<Result>) {
         //
         var result: Boolean = false
         try {
@@ -349,8 +349,8 @@ class LocationHelper {
             val vicinity = resultPlace.vicinity
             val placeId = resultPlace.placeId
             val photoUrl = resultPlace.photos.toString()
-            val nearByPlaces="";
-            val isAddressSet=1;
+            val nearByPlaces = "";
+            val isAddressSet = 1;
             var LATITUDE: Double = currentLocation.latitude
             var LONGITUDE: Double = currentLocation.longitude
             val addresses: List<Address>
@@ -376,18 +376,18 @@ class LocationHelper {
                             longitude = LONGITUDE, address = address, city = city,
                             state = state, country = country, postalCode = postalCode,
                             knownName = knownName, stayTime = stayTIme, dateTime = tsLong,
-                            locationProvider = locationProvider,rowID = 0,
-                            locationRequestType = locationType,vicinity = vicinity,
-                            placeId = placeId,photoUrl = photoUrl,nearByPlacesIds = nearByPlaces,
+                            locationProvider = locationProvider, rowID = 0,
+                            locationRequestType = locationType, vicinity = vicinity,
+                            placeId = placeId, photoUrl = photoUrl, nearByPlacesIds = nearByPlaces,
                             isAddressSet = isAddressSet))
             //
-            pref.setLong(System.currentTimeMillis(),Constant.SP_KEY_SPENT_TIME)
+            pref.setLong(System.currentTimeMillis(), Constant.SP_KEY_SPENT_TIME)
             Log.i(Constant.TAG_KOTLIN_DEMO_APP,
 
                     "Location inserted")
 
             //
-            addNearByPlaces(mPlacesList,placeId)
+            addNearByPlaces(mPlacesList, placeId)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -421,28 +421,28 @@ class LocationHelper {
                     tempLoc.longitude = it.geometry.location.lng.toDouble()
                     val distance = location.distanceTo(tempLoc)
                     // Just to pick first prominent place within 10 metre
-                    if(distance<10 && pos==0){
+                    if (distance < 10 && pos == 0) {
                         minDistance = distance
                         result = it
                         pos += 1
                     }
 
+                 //// Code to pick nearest places
+                    /* if (pos == 0) {
+                         minDistance = distance
+                         result = it
 
-                   /* if (pos == 0) {
-                        minDistance = distance
-                        result = it
-
-                    } else if (minDistance > distance) {
-                        minDistance = distance
-                        result = it
-                    }
-                    pos += 1
-                    */
+                     } else if (minDistance > distance) {
+                         minDistance = distance
+                         result = it
+                     }
+                     pos += 1
+                     */
 
                     Log.i("Distance bt curr & res", it.name + "  " + location.distanceTo(tempLoc).toString());
 
                 }
-                insertAddress(result!!, location, locationType,places)
+                insertAddress(result!!, location, locationType, places)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -459,11 +459,10 @@ class LocationHelper {
         }
     }
 
-    fun addNearByPlaces(places: List<Result>,mainPlaceId:String) {
+    fun addNearByPlaces(places: List<Result>, mainPlaceId: String) {
         //
-        if (places != null && places.size > 1)
-        {
-            var nearByPlacesIds="";
+        if (places != null && places.size > 1) {
+            var nearByPlacesIds = "";
             var mList = ArrayList<VisitedLocationInformation>()
             places.forEach {
                 var result: Boolean = false
@@ -478,8 +477,8 @@ class LocationHelper {
                     val vicinity = it.vicinity
                     val placeId = it.placeId
                     val photoUrl = it.photos.toString()
-                    val nearByPlaces="";
-                    val isAddressSet=1;
+                    val nearByPlaces = "";
+                    val isAddressSet = 1;
                     var LATITUDE: Double = it.geometry.location.lat
                     var LONGITUDE: Double = it.geometry.location.lng
                     val addresses: List<Address>
@@ -500,16 +499,16 @@ class LocationHelper {
                     val locationType = "NA";
                     val stayTIme: Int = ((System.currentTimeMillis() - pref.getLong(Constant.SP_KEY_SPENT_TIME)) / (1000 * 60)).toInt()
                     //
-                    mList.add( VisitedLocationInformation(userId = 1, latitude = LATITUDE,
+                    mList.add(VisitedLocationInformation(userId = 1, latitude = LATITUDE,
                             longitude = LONGITUDE, address = address, city = city,
                             state = state, country = country, postalCode = postalCode,
                             knownName = knownName, stayTime = stayTIme, dateTime = tsLong,
-                            locationProvider = locationProvider,rowID = 0,
-                            locationRequestType = locationType,vicinity = vicinity,
-                            placeId = placeId,photoUrl = photoUrl,nearByPlacesIds = nearByPlaces,
+                            locationProvider = locationProvider, rowID = 0,
+                            locationRequestType = locationType, vicinity = vicinity,
+                            placeId = placeId, photoUrl = photoUrl, nearByPlacesIds = nearByPlaces,
                             isAddressSet = isAddressSet));
                     //
-                    nearByPlacesIds=nearByPlaces+","+placeId;
+                    nearByPlacesIds = nearByPlaces + "," + placeId;
 
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -519,13 +518,12 @@ class LocationHelper {
             }
             // Here call method to insert the near by places into table
             DataBaseController(mContext).insertNearByPlaces(mList);
-            DataBaseController(mContext).updateNearByPlaces(mainPlaceId,nearByPlacesIds)
+            DataBaseController(mContext).updateNearByPlaces(mainPlaceId, nearByPlacesIds)
             Log.i(Constant.TAG_KOTLIN_DEMO_APP,
                     "near by location inserted")
         }
 
     }
-
 
 
 }

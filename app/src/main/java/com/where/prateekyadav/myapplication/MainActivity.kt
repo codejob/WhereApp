@@ -35,18 +35,6 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
         checkLocationPermission()
         DataBaseController(this).copyDataBaseToSDCard()
         setAutoCompleteView()
-        /* val PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
-        try {
-            val intent =
-             PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_FULLSCREEN)
-                    .build(this);
-            startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
-        } catch (e: GooglePlayServicesRepairableException) {
-            // TODO: Handle the error.
-        } catch (e: GooglePlayServicesNotAvailableException) {
-            // TODO: Handle the error.
-        }*/
-
     }
 
     fun setAutoCompleteView() {
