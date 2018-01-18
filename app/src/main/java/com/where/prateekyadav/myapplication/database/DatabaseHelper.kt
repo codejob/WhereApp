@@ -19,9 +19,9 @@ import java.util.concurrent.atomic.AtomicInteger
 /**
  * Created by Infobeans on 1/10/2018.
  */
-class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
+open class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
-    var mContext: Context? = null;
+    open var mContext: Context? = null;
     private val mOpenCounter = AtomicInteger()
     internal lateinit var sqLiteDatabase: SQLiteDatabase
 
@@ -30,8 +30,7 @@ class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAM
     }
 
     override fun onCreate(db: SQLiteDatabase) {
-        db.execSQL(SQL_CREATE_ENTRIES)
-        db.execSQL(SQL_CREATE_VISIT_LOCATION_TABLE)
+     createTables(db)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -39,6 +38,7 @@ class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAM
         // to simply to discard the data and start over
         db.execSQL(SQL_DELETE_ENTRIES)
         db.execSQL(SQL_DELETE_VISITED_LOCATION)
+        db.execSQL(SQL_DELETE_NEARBY_PLACES)
         onCreate(db)
     }
 
@@ -98,15 +98,48 @@ class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAM
                         DBContract.VisitedLocationData.COLUMN_COUNTRY + " TEXT," +
                         DBContract.VisitedLocationData.COLUMN_POSTAL_CODE + " TEXT," +
                         DBContract.VisitedLocationData.COLUMN_KNOWN_NAME + " TEXT," +
+                        DBContract.VisitedLocationData.COLUMN_VICINITY + " TEXT," +
                         DBContract.VisitedLocationData.COLUMN_STAY_TIME + " INTEGER," +
                         DBContract.VisitedLocationData.COLUMN_DATE_TIME + " TEXT," +
+                        DBContract.VisitedLocationData.COLUMN_PLACE_ID + " TEXT," +
+                        DBContract.VisitedLocationData.COLUMN_PHOTO_URL + " TEXT," +
+                        DBContract.VisitedLocationData.COLUMN_NEARBY_PLACES_IDS + " TEXT," +
+                        DBContract.VisitedLocationData.COLUMN_IS_ADDRESS_SET + " INTEGER," +
                         DBContract.VisitedLocationData.COLUMN_LOCATION_PROVIDER + " TEXT," +
+                        DBContract.VisitedLocationData.COLUMN_LOCATION_REQUEST_TYPE + " TEXT)"
+
+        private val SQL_CREATE_NEARBY_LOCATION_TABLE =
+                "CREATE TABLE " +
+                        DBContract.NearByLocationData.TABLE_NAME_NEARBY_LOCATION + " (" +
+                        DBContract.VisitedLocationData.COLUMN_ROW_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                        DBContract.VisitedLocationData.COLUMN_LATITUDE + " INTEGER," +
+                        DBContract.VisitedLocationData.COLUMN_LONGITUDE + " INTEGER," +
+                        DBContract.VisitedLocationData.COLUMN_ADDRESS + " TEXT," +
+                        DBContract.VisitedLocationData.COLUMN_KNOWN_NAME + " TEXT," +
+                        DBContract.VisitedLocationData.COLUMN_VICINITY + " TEXT," +
+                        DBContract.VisitedLocationData.COLUMN_PLACE_ID + " TEXT," +
+                        DBContract.VisitedLocationData.COLUMN_PHOTO_URL + " TEXT," +
+                        DBContract.VisitedLocationData.COLUMN_DATE_TIME + " TEXT," +
                         DBContract.VisitedLocationData.COLUMN_LOCATION_REQUEST_TYPE + " TEXT)"
 
 
         private val SQL_DELETE_ENTRIES = "DROP TABLE IF EXISTS " + DBContract.UserEntry.TABLE_NAME_USER
         private val SQL_DELETE_VISITED_LOCATION = "DROP TABLE IF EXISTS " + DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION
+        private val SQL_DELETE_NEARBY_PLACES = "DROP TABLE IF EXISTS " + DBContract.NearByLocationData.TABLE_NAME_NEARBY_LOCATION
     }
+
+    protected fun createTables(db: SQLiteDatabase){
+        db.execSQL(SQL_CREATE_ENTRIES)
+        db.execSQL(SQL_CREATE_VISIT_LOCATION_TABLE)
+        db.execSQL(SQL_CREATE_NEARBY_LOCATION_TABLE)
+    }
+
+
+
+
+
+
+
 
     @Throws(SQLiteConstraintException::class)
     fun insertUser(user: UserModel): Boolean {
@@ -196,199 +229,6 @@ class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAM
         return users
     }
 
-    //
-    @Throws(SQLiteConstraintException::class)
-    fun insertVisitedLocation(infoLocation: VisitedLocationInformation): Boolean {
-        // Gets the data repository in write mode
-        val db = getWritableDB()
-        // Create a new map of values, where column names are the keys
-        val values = ContentValues()
-        values.put(DBContract.UserEntry.COLUMN_USER_ID, infoLocation.userid)
-        values.put(DBContract.VisitedLocationData.COLUMN_LATITUDE, infoLocation.latitude)
-        values.put(DBContract.VisitedLocationData.COLUMN_LONGITUDE, infoLocation.longitude)
-        values.put(DBContract.VisitedLocationData.COLUMN_ADDRESS, infoLocation.address)
-        values.put(DBContract.VisitedLocationData.COLUMN_CITY, infoLocation.city)
-        values.put(DBContract.VisitedLocationData.COLUMN_STATE, infoLocation.state)
-        values.put(DBContract.VisitedLocationData.COLUMN_COUNTRY, infoLocation.country)
-        values.put(DBContract.VisitedLocationData.COLUMN_POSTAL_CODE, infoLocation.postalCode)
-        values.put(DBContract.VisitedLocationData.COLUMN_KNOWN_NAME, infoLocation.knownName)
-        values.put(DBContract.VisitedLocationData.COLUMN_STAY_TIME, infoLocation.stayTime)
-        values.put(DBContract.VisitedLocationData.COLUMN_DATE_TIME, infoLocation.dateTime)
-        values.put(DBContract.VisitedLocationData.COLUMN_LOCATION_PROVIDER, infoLocation.locationProvider)
-        values.put(DBContract.VisitedLocationData.COLUMN_LOCATION_REQUEST_TYPE, infoLocation.locationRequestType)
-
-        // Insert the new row, returning the primary key value of the new row
-        val newRowId = db.insert(DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION, null, values)
-
-        closeDataBase(sqLiteDatabase)
-        return newRowId > 0
-    }
-
-    fun updateStayTime(rowID: Int, stayTime: Int) {
-        try {// Gets the data repository in write mode
-            val db = getWritableDB()
-            // Create a new map of values, where column names are the keys
-            val values = ContentValues()
-            values.put(DBContract.VisitedLocationData.COLUMN_STAY_TIME, stayTime)
-            val whereClause = "id = ?"
-            val whereArgs = arrayOf(rowID.toString())
-
-            db.update(DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION
-                    , values, whereClause, whereArgs)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
-    }
 
 
-    fun readAllVisitedLocation(): ArrayList<VisitedLocationInformation> {
-        val visitedLocationInfoList = ArrayList<VisitedLocationInformation>()
-        val db = getWritableDB()
-        var cursor: Cursor? = null
-        try {
-            cursor = db.rawQuery("select * from " + DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION, null)
-        } catch (e: SQLiteException) {
-            db.execSQL(SQL_CREATE_VISIT_LOCATION_TABLE)
-            return ArrayList()
-        }
-        var rowID: Int
-        var userId: Int
-        var latitude: Double
-        var longitude: Double
-        var address: String
-        var city: String
-        var state: String
-        var country: String
-        var postalCode: String
-        var knownName: String
-        var stayTime: Int
-        var dateTime: Long
-        var locationProvider: String
-        var locationRequestType: String
-        //
-        if (cursor!!.moveToFirst()) {
-            while (cursor.isAfterLast == false) {
-                rowID = cursor.getInt(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_ROW_ID))
-                userId = cursor.getInt(cursor.getColumnIndex(DBContract.UserEntry.COLUMN_USER_ID))
-                latitude = cursor.getDouble(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_LATITUDE))
-                longitude = cursor.getDouble(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_LONGITUDE))
-                address = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_ADDRESS))
-                city = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_CITY))
-                state = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_STATE))
-                country = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_COUNTRY))
-                postalCode = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_POSTAL_CODE))
-                knownName = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_KNOWN_NAME))
-                stayTime = cursor.getInt(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_STAY_TIME))
-                dateTime = cursor.getLong(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_DATE_TIME))
-                locationProvider = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_LOCATION_PROVIDER))
-                locationRequestType = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_LOCATION_REQUEST_TYPE))
-
-                visitedLocationInfoList.add(VisitedLocationInformation(userId, latitude, longitude, address, city, state,
-                        country, postalCode, knownName, stayTime, dateTime, locationProvider, locationRequestType, rowID))
-                cursor.moveToNext()
-            }
-            cursor.close()
-        }
-        closeDataBase(sqLiteDatabase)
-        //
-        return visitedLocationInfoList
-    }
-
-    fun readLastVisitedLocation(): VisitedLocationInformation? {
-        var visitedLocationInfo: VisitedLocationInformation? = null;
-        val db = getWritableDB()
-        var cursor: Cursor? = null
-        try {
-            cursor = db.rawQuery("select * from " + DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION, null)
-        } catch (e: SQLiteException) {
-            db.execSQL(SQL_CREATE_VISIT_LOCATION_TABLE)
-            return visitedLocationInfo
-        }
-        var rowID: Int
-        var userId: Int
-        var latitude: Double
-        var longitude: Double
-        var address: String
-        var city: String
-        var state: String
-        var country: String
-        var postalCode: String
-        var knownName: String
-        var stayTime: Int
-        var dateTime: Long
-        var locationProvider: String
-        var locationRequestType: String
-        //
-        if (cursor.count > 0 && cursor!!.moveToLast()) {
-            while (cursor.isAfterLast == false) {
-                rowID = cursor.getInt(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_ROW_ID))
-                userId = cursor.getInt(cursor.getColumnIndex(DBContract.UserEntry.COLUMN_USER_ID))
-                latitude = cursor.getDouble(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_LATITUDE))
-                longitude = cursor.getDouble(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_LONGITUDE))
-                address = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_ADDRESS))
-                city = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_CITY))
-                state = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_STATE))
-                country = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_COUNTRY))
-                postalCode = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_POSTAL_CODE))
-                knownName = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_KNOWN_NAME))
-                stayTime = cursor.getInt(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_STAY_TIME))
-                dateTime = cursor.getLong(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_DATE_TIME))
-                locationProvider = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_LOCATION_PROVIDER))
-                locationRequestType = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_LOCATION_REQUEST_TYPE))
-
-                visitedLocationInfo = VisitedLocationInformation(userId, latitude, longitude, address, city, state,
-                        country, postalCode, knownName, stayTime, dateTime, locationProvider, locationRequestType, rowID)
-                cursor.moveToNext()
-            }
-            cursor.close()
-        }
-        closeDataBase(sqLiteDatabase)
-        //
-        return visitedLocationInfo
-    }
-
-    /**
-     * Method to copy database into sd card
-     */
-    fun copyDataBaseToSDCard() {
-        try {
-            // if Storage permission granted
-            if (AppUtility().checkStoragePermissions(mContext)) {
-                val myInput = FileInputStream("/data/data/" + mContext!!.getPackageName() + "/databases/" + DATABASE_NAME)
-                AppUtility().makeDirs(Constant.FOLDER_PATH)
-                val file = File(Constant.FOLDER_PATH + "/" + DATABASE_NAME + ".db")
-                if (!file.exists()) {
-                    try {
-                        file.createNewFile()
-                    } catch (e: IOException) {
-                        Log.i("FO", "File creation failed for " + file)
-                    }
-
-                }
-                val myOutput = FileOutputStream(Constant.FOLDER_PATH + "/" + DATABASE_NAME + ".db")
-                val buffer = ByteArray(1024)
-                var length = 0;
-//                while (length>0) {
-//
-//                    myOutput.write(buffer, 0, length)
-//                }
-
-                do {
-                    length = myInput.read(buffer)
-                    if (length > 0) {
-                        myOutput.write(buffer, 0, length)
-                    }
-                } while (length > 0)
-                //Close the streams
-                myOutput.flush()
-                myOutput.close()
-                myInput.close()
-                Log.i("FO", "copied")
-            }
-        } catch (e: Exception) {
-            Log.i("FO", "exception=" + e)
-        }
-
-    }
 }
