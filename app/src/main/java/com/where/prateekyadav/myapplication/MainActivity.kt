@@ -243,7 +243,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
             if (searchResultsList != null && searchResultsList.size > 0) {
                 searchResultsList.forEach {
                     Toast.makeText(this, it.visitedLocationInformation.address, Toast.LENGTH_SHORT).show()
-                    Log.i(Constant.TAG_KOTLIN_DEMO_APP, "Place: " + it.visitedLocationInformation.vicinity)
+                    Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Place: " + it.visitedLocationInformation.vicinity)
 
                 }
                 setLocationRestults(searchResultsList)
