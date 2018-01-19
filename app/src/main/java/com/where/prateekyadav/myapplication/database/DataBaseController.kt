@@ -6,11 +6,14 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteConstraintException
 import android.database.sqlite.SQLiteException
 import android.util.Log
+import com.google.android.gms.location.places.Place
 import com.where.prateekyadav.myapplication.Util.AppUtility
 import com.where.prateekyadav.myapplication.Util.AppConstant
 import com.where.prateekyadav.myapplication.database.DBContract.EQUALS_TO
 import com.where.prateekyadav.myapplication.database.DBContract.SELECT_FROM
 import com.where.prateekyadav.myapplication.database.DBContract.WHERE
+import com.where.prateekyadav.myapplication.modal.NearByPlace
+import com.where.prateekyadav.myapplication.modal.SearchResult
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -236,6 +239,40 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         return visitedLocationInfo;
     }
 
+    private fun prepareNearByLocationObject(cursor: Cursor): NearByPlace? {
+        var nearByPlace: NearByPlace? = null;
+
+        var rowID: Int
+        var latitude: Double
+        var longitude: Double
+        var address: String
+        var knownName: String
+        var dateTime: Long
+        var locationRequestType: String
+        var vicinity: String
+        var placeId: String
+        var photoUrl: String
+
+        rowID = cursor.getInt(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_ROW_ID))
+        latitude = cursor.getDouble(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_LATITUDE))
+        longitude = cursor.getDouble(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_LONGITUDE))
+        address = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_ADDRESS))
+        knownName = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_KNOWN_NAME))
+        dateTime = cursor.getLong(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_DATE_TIME))
+        locationRequestType = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_LOCATION_REQUEST_TYPE))
+        vicinity = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_VICINITY))
+        placeId = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_PLACE_ID))
+        photoUrl = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_PHOTO_URL))
+
+
+        // init VisitedLocationInformation object
+        nearByPlace = NearByPlace(rowID, latitude, longitude,
+                address, knownName, dateTime,
+                locationRequestType, vicinity, placeId,
+                photoUrl)
+        return nearByPlace;
+    }
+
     /**
      * Method is used for update the near by places ids
      */
@@ -320,8 +357,8 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
                     values.put(DBContract.VisitedLocationData.COLUMN_VICINITY, it.vicinity)
                     values.put(DBContract.VisitedLocationData.COLUMN_PLACE_ID, it.placeId)
                     values.put(DBContract.VisitedLocationData.COLUMN_PHOTO_URL, it.locationRequestType)
-                    val isExist=checkIsDataAlreadyInDBorNot(DBContract.NearByLocationData.TABLE_NAME_NEARBY_LOCATION,
-                            DBContract.VisitedLocationData.COLUMN_PLACE_ID,it.placeId);
+                    val isExist = checkIsDataAlreadyInDBorNot(DBContract.NearByLocationData.TABLE_NAME_NEARBY_LOCATION,
+                            DBContract.VisitedLocationData.COLUMN_PLACE_ID, it.placeId);
                     if (isExist) {
                         // Insert the new row, returning the primary key value of the new row
                         val whereClause = DBContract.VisitedLocationData.COLUMN_PLACE_ID + "= ?"
@@ -329,7 +366,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
                         //
                         db.update(DBContract.NearByLocationData.TABLE_NAME_NEARBY_LOCATION
                                 , values, whereClause, whereArgs)
-                    }else{
+                    } else {
                         val newRowId = db.insert(DBContract.NearByLocationData.TABLE_NAME_NEARBY_LOCATION, null, values)
                     }
                 }
@@ -355,14 +392,135 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
 
         val Query = SELECT_FROM + TableName + WHERE + dbfield + " =?"
         val cursor = sqLiteDatabase.rawQuery(Query, arrayOf(fieldValue))
-        if (cursor.count <= 0) {
+        if (cursor != null && cursor.count <= 0) {
             cursor.close()
             return false
         }
         cursor.close()
+        closeDataBase(sqLiteDatabase)
         return true
     }
 
+    public fun searchLocationOnline(place: Place): List<SearchResult>? {
+        var searchResultList = ArrayList<SearchResult>()
+        try {
 
+            var visitedLocationInfoList = ArrayList<VisitedLocationInformation>()
+            visitedLocationInfoList = getVisitedLocationsFromPlaceid(place.id) as ArrayList<VisitedLocationInformation>
+
+            if (visitedLocationInfoList == null || visitedLocationInfoList.size == 0) {
+                visitedLocationInfoList = getVisitedLocationsFromNearByPlaceidArray(place.id) as ArrayList<VisitedLocationInformation>
+                if (visitedLocationInfoList != null && visitedLocationInfoList.size > 0) {
+                    searchResultList = parseSearchResult(visitedLocationInfoList) as ArrayList<SearchResult>
+
+                } else {
+                    ///// No match found from place ID
+                }
+
+            } else {
+                /////////////// Exact match///////////////////
+                searchResultList = parseSearchResult(visitedLocationInfoList) as ArrayList<SearchResult>
+
+            }
+
+            return searchResultList
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return searchResultList
+    }
+
+    public fun parseSearchResult(visitedLocationInfoList: List<VisitedLocationInformation>): List<SearchResult>? {
+        var searchResultList = ArrayList<SearchResult>()
+
+        var searchResult: SearchResult?
+        //// Get the nearby of all the visited location
+        visitedLocationInfoList.forEach {
+            var nearByPlaceList = ArrayList<NearByPlace>()
+            val visitedLocationInformation = it;
+            val nearByIDS = visitedLocationInformation.nearByPlacesIds
+            nearByIDS.split(",").forEach {
+                val id = it
+                nearByPlaceList.add(getNearbyPlace(id)!!)
+
+            }
+            searchResult = SearchResult(visitedLocationInformation, nearByPlaceList)
+
+            searchResultList.add(searchResult!!)
+        }
+        return searchResultList
+    }
+
+    private fun getVisitedLocationsFromPlaceid(placeID: String): List<VisitedLocationInformation>? {
+        val visitedLocationInfoList = ArrayList<VisitedLocationInformation>()
+
+        val sqLiteDatabase = getWritableDB()
+
+        try {
+            val Query = SELECT_FROM + DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION +
+                    WHERE + DBContract.VisitedLocationData.COLUMN_PLACE_ID + " =?"
+            val cursor = sqLiteDatabase.rawQuery(Query, arrayOf(placeID))
+            //
+            if (cursor != null && cursor!!.moveToFirst()) {
+                while (cursor.isAfterLast == false) {
+                    // get visited location object here through prepareVisitedLocationObject function
+                    visitedLocationInfoList.add(prepareVisitedLocationObject(cursor)!!);
+                    cursor.moveToNext()
+                }
+                cursor.close()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        closeDataBase(sqLiteDatabase)
+        return visitedLocationInfoList
+    }
+
+    private fun getVisitedLocationsFromNearByPlaceidArray(placeID: String): List<VisitedLocationInformation>? {
+        val visitedLocationInfoList = ArrayList<VisitedLocationInformation>()
+
+        val sqLiteDatabase = getWritableDB()
+
+        try {
+            val Query = SELECT_FROM + DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION +
+                    WHERE + DBContract.VisitedLocationData.COLUMN_NEARBY_PLACES_IDS +
+                    " LIKE '%" + placeID + "%'"
+            val cursor = sqLiteDatabase.rawQuery(Query, null)
+            //
+            if (cursor != null && cursor!!.moveToFirst()) {
+                while (cursor.isAfterLast == false) {
+                    // get visited location object here through prepareVisitedLocationObject function
+                    visitedLocationInfoList.add(prepareVisitedLocationObject(cursor)!!);
+                    cursor.moveToNext()
+                }
+                cursor.close()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        closeDataBase(sqLiteDatabase)
+        return visitedLocationInfoList
+    }
+
+    private fun getNearbyPlace(placeID: String?): NearByPlace? {
+        var nearbyPlace: NearByPlace? = null
+
+        val sqLiteDatabase = getWritableDB()
+
+        try {
+            val Query = SELECT_FROM + DBContract.NearByLocationData.TABLE_NAME_NEARBY_LOCATION +
+                    WHERE + DBContract.VisitedLocationData.COLUMN_PLACE_ID + " =?"
+            val cursor = sqLiteDatabase.rawQuery(Query, arrayOf(placeID))
+            //
+            if (cursor != null && cursor!!.moveToFirst()) {
+                nearbyPlace = prepareNearByLocationObject(cursor)
+                cursor.close()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        closeDataBase(sqLiteDatabase)
+        return nearbyPlace
+    }
 
 }

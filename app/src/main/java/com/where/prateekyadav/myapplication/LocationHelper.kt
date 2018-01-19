@@ -282,7 +282,7 @@ class LocationHelper {
         }
     }
 
-    private fun getCompleteAddressString(location: Location, locationType: String): List<VisitedLocationInformation> {
+    private  fun  getCompleteAddressString(location: Location, locationType: String): List<VisitedLocationInformation> {
         //
         var LATITUDE: Double = location.latitude
         var LONGITUDE: Double = location.longitude
@@ -332,6 +332,7 @@ class LocationHelper {
                 mDataBaseController.updateStayTime(lastDBLocation.rowID, stayTIme);
 
             }
+
 
         }
         pref.setLocation(LATITUDE, LONGITUDE);

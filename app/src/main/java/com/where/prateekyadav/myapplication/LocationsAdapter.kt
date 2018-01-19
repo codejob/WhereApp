@@ -7,6 +7,7 @@ import android.widget.BaseAdapter
 import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
 import android.view.LayoutInflater
 import android.widget.TextView
+import com.where.prateekyadav.myapplication.modal.SearchResult
 
 
 /**
@@ -14,10 +15,10 @@ import android.widget.TextView
  */
 class LocationsAdapter() : BaseAdapter() {
     var mContext: Context? = null;
-    var mLocationList: List<VisitedLocationInformation>? = null;
+    var mLocationList: List<SearchResult>? = null;
     var inflater: LayoutInflater? = null
 
-    constructor(context: Context, locationList: List<VisitedLocationInformation>) : this() {
+    constructor(context: Context, locationList: List<SearchResult>) : this() {
         mContext = context;
         mLocationList = locationList;
         inflater = LayoutInflater.from(context);
@@ -36,16 +37,16 @@ class LocationsAdapter() : BaseAdapter() {
         }
         var addresss =
 
-                """   Name:  ${mLocationList!!.get(position).address}
+                """   Name:  ${mLocationList!!.get(position).visitedLocationInformation.address}
 
-                 Visinity:   ${mLocationList!!.get(position).vicinity}
+                 Visinity:   ${mLocationList!!.get(position).visitedLocationInformation.vicinity}
 
-                 Stay time:=> ${mLocationList!!.get(position).stayTime} minutes
-                 Req Type:=> ${mLocationList!!.get(position).locationRequestType}
-                 Provider :=> ${mLocationList!!.get(position).locationProvider}
+                 Stay time:=> ${mLocationList!!.get(position).visitedLocationInformation.stayTime} minutes
+                 Req Type:=> ${mLocationList!!.get(position).visitedLocationInformation.locationRequestType}
+                 Provider :=> ${mLocationList!!.get(position).visitedLocationInformation.locationProvider}
 
-                 Lat:=> ${mLocationList!!.get(position).latitude}
-                 Long:=> ${mLocationList!!.get(position).longitude} """
+                 Lat:=> ${mLocationList!!.get(position).visitedLocationInformation.latitude}
+                 Long:=> ${mLocationList!!.get(position).visitedLocationInformation.longitude} """
 
 
 

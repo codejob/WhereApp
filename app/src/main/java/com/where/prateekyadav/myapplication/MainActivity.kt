@@ -1,6 +1,7 @@
 package com.where.prateekyadav.myapplication
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import kotlinx.android.synthetic.main.activity_main.*
@@ -10,6 +11,8 @@ import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AlertDialog
 import android.content.*
 import android.util.Log
+import android.widget.EditText
+import android.widget.Toast
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.Status
 import com.where.prateekyadav.myapplication.Util.AppUtility
@@ -21,6 +24,8 @@ import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment
 import com.google.android.gms.common.api.GoogleApiClient
 import com.where.prateekyadav.myapplication.Util.PermissionCheckHandler
 import com.where.prateekyadav.myapplication.database.DataBaseController
+import com.where.prateekyadav.myapplication.database.DatabaseHelper
+import com.where.prateekyadav.myapplication.modal.SearchResult
 
 
 class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConnectionFailedListener, PlaceSelectionListener {
@@ -28,7 +33,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
 
     val RQS_1 = 1
     var mLocationHelper: LocationHelper? = null;
-
+    var autocompleteFragment:PlaceAutocompleteFragment? = null;
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -39,11 +44,11 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
         setAutoCompleteView()
     }
 
+    @SuppressLint("ResourceType")
     fun setAutoCompleteView() {
+        autocompleteFragment = fragmentManager.findFragmentById(R.id.place_autocomplete_fragment) as PlaceAutocompleteFragment
+        autocompleteFragment!!.setOnPlaceSelectedListener(this)
 
-        val autocompleteFragment = fragmentManager.findFragmentById(R.id.place_autocomplete_fragment) as PlaceAutocompleteFragment
-
-        autocompleteFragment.setOnPlaceSelectedListener(this)
     }
 
 
@@ -128,11 +133,16 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
 
     }
 
+    @SuppressLint("ResourceType")
     override fun onResume() {
         super.onResume()
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            setLocation(DataBaseController(this).readAllVisitedLocation())
+            val text =autocompleteFragment!!.getText(R.id.place_autocomplete_search_input) as String
+           // text.equa
+            //if(autocompleteFragment!=null &&
+            //        autocompleteFragment.getText(R.id.place_autocomplete_search_input).to)
+            //setLocation(DataBaseController(this).readAllVisitedLocation())
             //mLocationHelper?.getLocation()
             if (!AppUtility().checkAlarmAlreadySet(this)) {
                 AppUtility().startTimerAlarm(this);
@@ -153,8 +163,25 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
 
 
     fun setLocation(address: List<VisitedLocationInformation>) {
-        if (address != null)
-            list.adapter = LocationsAdapter(this, address)
+        try {
+            if (address != null) {
+                var searchResults = DataBaseController(this).parseSearchResult(address)
+                list.adapter = LocationsAdapter(this, searchResults!!)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+    }
+
+    fun setLocationRestults(address: List<SearchResult>) {
+        try {
+            if (address != null) {
+                list.adapter = LocationsAdapter(this, address!!)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
 
     }
 
@@ -209,8 +236,27 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
             e.printStackTrace()
         }
     }
+
     override fun onPlaceSelected(place: Place) {
-        Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Place: " + place.name)
+        try {
+            var searchResultsList = DataBaseController(this).searchLocationOnline(place)
+            if (searchResultsList != null && searchResultsList.size > 0) {
+                searchResultsList.forEach {
+                    Toast.makeText(this, it.visitedLocationInformation.address, Toast.LENGTH_SHORT).show()
+                    Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Place: " + it.visitedLocationInformation.vicinity)
+
+                }
+                setLocationRestults(searchResultsList)
+            } else {
+                setLocation(DataBaseController(this).readAllVisitedLocation())
+
+                Toast.makeText(this, "No result found", Toast.LENGTH_SHORT).show()
+
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
     }
 
     override fun onError(status: Status) {
