@@ -52,7 +52,7 @@ public class RetroCallImplementor {
         ApiInterface apiService =
                 ApiClient.getClient().create(ApiInterface.class);
 
-        //Call<Places> call = apiService.getPlacesNearBy(location,radius+"",Constant.API_KEY_PLACES);
+        //Call<Places> call = apiService.getPlacesNearBy(location,radius+"",AppConstant.API_KEY_PLACES);
         Call<PhotoDetails> call = apiService.getPlaceDeatil(placeId,Constant.API_KEY_PLACES);
         call.enqueue(new Callback<PhotoDetails>() {
             @Override

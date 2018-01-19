@@ -1,8 +1,6 @@
 package com.where.prateekyadav.myapplication.Util
 
-import android.R.id.edit
 import android.content.Context
-import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 
 
@@ -22,8 +20,8 @@ class MySharedPref {
 
     fun setLocation(latitude: Double, longitude: Double) {
         val editor = mPref.edit()
-        editor.putFloat(Constant.sharedKeyLatitude, latitude.toFloat())
-        editor.putFloat(Constant.sharedKeyLongitude, longitude.toFloat())
+        editor.putFloat(AppConstant.sharedKeyLatitude, latitude.toFloat())
+        editor.putFloat(AppConstant.sharedKeyLongitude, longitude.toFloat())
         editor.apply()
     }
     fun setLong(long: Long,key:String) {
@@ -33,11 +31,11 @@ class MySharedPref {
     }
 
     fun getLatitude(): Double {
-        return mPref.getFloat(Constant.sharedKeyLatitude, 0.0F).toDouble()
+        return mPref.getFloat(AppConstant.sharedKeyLatitude, 0.0F).toDouble()
     }
 
     fun getLongitude(): Double {
-        return mPref.getFloat(Constant.sharedKeyLongitude, 0.0F).toDouble()
+        return mPref.getFloat(AppConstant.sharedKeyLongitude, 0.0F).toDouble()
     }
     fun getLong(key:String): Long {
         return mPref.getLong(key, 0L)

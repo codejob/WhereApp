@@ -8,12 +8,6 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
-import com.where.prateekyadav.myapplication.Util.AppUtility
-import com.where.prateekyadav.myapplication.Util.Constant
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.io.IOException
 import java.util.concurrent.atomic.AtomicInteger
 
 /**

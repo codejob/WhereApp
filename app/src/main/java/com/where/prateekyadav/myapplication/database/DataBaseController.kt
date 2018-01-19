@@ -8,7 +8,8 @@ import android.database.sqlite.SQLiteException
 import android.util.Log
 import com.google.android.gms.location.places.Place
 import com.where.prateekyadav.myapplication.Util.AppUtility
-import com.where.prateekyadav.myapplication.Util.Constant
+import com.where.prateekyadav.myapplication.Util.AppConstant
+import com.where.prateekyadav.myapplication.database.DBContract.EQUALS_TO
 import com.where.prateekyadav.myapplication.database.DBContract.SELECT_FROM
 import com.where.prateekyadav.myapplication.database.DBContract.WHERE
 import com.where.prateekyadav.myapplication.modal.NearByPlace
@@ -126,6 +127,9 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         return visitedLocationInfoList
     }
 
+    /**
+     * Method to get list of visited location
+     */
     fun readLastVisitedLocation(): VisitedLocationInformation? {
         var visitedLocationInfo: VisitedLocationInformation? = null;
         val db = getWritableDB()
@@ -150,6 +154,39 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         return visitedLocationInfo
     }
 
+
+    /**
+     * Method to get list of visited location which address is not updated
+     */
+    fun getListOfNotUpdatedVisitedLocation(): ArrayList<VisitedLocationInformation>? {
+
+        val query= SELECT_FROM + DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION
+                   WHERE+DBContract.VisitedLocationData.COLUMN_IS_ADDRESS_SET+ EQUALS_TO+0;
+
+
+
+        val visitedLocationInfoList = ArrayList<VisitedLocationInformation>()
+        val db = getWritableDB()
+        var cursor: Cursor? = null
+        try {
+            cursor = db.rawQuery(query, null)
+        } catch (e: SQLiteException) {
+            createTables(db)
+            return ArrayList()
+        }
+        //
+        if (cursor!!.moveToFirst()) {
+            while (cursor.isAfterLast == false) {
+                // get visited location object here through prepareVisitedLocationObject function
+                visitedLocationInfoList.add(prepareVisitedLocationObject(cursor)!!);
+                cursor.moveToNext()
+            }
+            cursor.close()
+        }
+        closeDataBase(sqLiteDatabase)
+        //
+        return visitedLocationInfoList
+    }
 
     private fun prepareVisitedLocationObject(cursor: Cursor): VisitedLocationInformation? {
         var visitedLocationInfo: VisitedLocationInformation? = null;
@@ -264,8 +301,8 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
             // if Storage permission granted
             if (AppUtility().checkStoragePermissions(mContext)) {
                 val myInput = FileInputStream("/data/data/" + mContext!!.getPackageName() + "/databases/" + DatabaseHelper.DATABASE_NAME)
-                AppUtility().makeDirs(Constant.FOLDER_PATH)
-                val file = File(Constant.FOLDER_PATH + "/" + DatabaseHelper.DATABASE_NAME + ".db")
+                AppUtility().makeDirs(AppConstant.FOLDER_PATH)
+                val file = File(AppConstant.FOLDER_PATH + "/" + DatabaseHelper.DATABASE_NAME + ".db")
                 if (!file.exists()) {
                     try {
                         file.createNewFile()
@@ -274,7 +311,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
                     }
 
                 }
-                val myOutput = FileOutputStream(Constant.FOLDER_PATH + "/" + DatabaseHelper.DATABASE_NAME + ".db")
+                val myOutput = FileOutputStream(AppConstant.FOLDER_PATH + "/" + DatabaseHelper.DATABASE_NAME + ".db")
                 val buffer = ByteArray(1024)
                 var length = 0;
 //                while (length>0) {
