@@ -387,7 +387,8 @@ class LocationHelper {
                     "Location inserted")
 
             //
-            addNearByPlaces(mPlacesList, placeId)
+
+            addNearByPlaces(mPlacesList,placeId,addresses)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -459,32 +460,26 @@ class LocationHelper {
         }
     }
 
-    fun addNearByPlaces(places: List<Result>, mainPlaceId: String) {
+    fun addNearByPlaces(places: List<Result>,mainPlaceId:String,addresses: List<Address>) {
         //
         if (places != null && places.size > 1) {
             var nearByPlacesIds = "";
             var mList = ArrayList<VisitedLocationInformation>()
             places.forEach {
                 var result: Boolean = false
-
                 try {
                     var pref = MySharedPref(mContext);
-                    var geocoder = Geocoder(mContext, Locale.getDefault())
-                    //var location: Location = Location(LocationManager.GPS_PROVIDER)
-                    //location.latitude = resultPlace.geometry.location.lat.toDouble()
-                    //location.longitude = resultPlace.geometry.location.lng.toDouble()
                     val address = it.name;
                     val vicinity = it.vicinity
                     val placeId = it.placeId
                     val photoUrl = it.photos.toString()
-                    val nearByPlaces = "";
-                    val isAddressSet = 1;
+
+                    val nearPlaces="";
+                    val isAddressSet=1;
+
                     var LATITUDE: Double = it.geometry.location.lat
                     var LONGITUDE: Double = it.geometry.location.lng
-                    val addresses: List<Address>
-                    geocoder = Geocoder(mContext, Locale.getDefault())
 
-                    addresses = geocoder.getFromLocation(LATITUDE, LONGITUDE, 1) // Here 1 represent max location result to returned, by documents it recommended 1 to 5
                     if (addresses == null || addresses.size == 0) {
                         return null!!;
                     }
@@ -503,12 +498,19 @@ class LocationHelper {
                             longitude = LONGITUDE, address = address, city = city,
                             state = state, country = country, postalCode = postalCode,
                             knownName = knownName, stayTime = stayTIme, dateTime = tsLong,
-                            locationProvider = locationProvider, rowID = 0,
-                            locationRequestType = locationType, vicinity = vicinity,
-                            placeId = placeId, photoUrl = photoUrl, nearByPlacesIds = nearByPlaces,
+
+                            locationProvider = locationProvider,rowID = 0,
+                            locationRequestType = locationType,vicinity = vicinity,
+                            placeId = placeId,photoUrl = photoUrl,nearByPlacesIds = nearPlaces,
                             isAddressSet = isAddressSet));
-                    //
-                    nearByPlacesIds = nearByPlaces + "," + placeId;
+
+                    // add near by place id
+                    if(nearByPlacesIds.isEmpty()) {
+                        nearByPlacesIds =  placeId;
+                    }else{
+                        nearByPlacesIds = nearByPlacesIds + "," + placeId;
+                    }
+
 
                 } catch (e: Exception) {
                     e.printStackTrace()
