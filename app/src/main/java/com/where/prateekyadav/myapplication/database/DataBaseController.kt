@@ -393,7 +393,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         return searchResultList
     }
 
-    private fun parseSearchResult(visitedLocationInfoList: List<VisitedLocationInformation>): List<SearchResult>? {
+    public fun parseSearchResult(visitedLocationInfoList: List<VisitedLocationInformation>): List<SearchResult>? {
         var searchResultList = ArrayList<SearchResult>()
 
         var searchResult: SearchResult?
