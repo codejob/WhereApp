@@ -36,16 +36,27 @@ class LocationHelper {
     var mUpdateLocation: UpdateLocation? = null;
     var mLocationReceived: Boolean = false;
 
+    companion object {
+        var mCurrentObject: LocationHelper? = null;
+        fun getInstance(context: Context?, updateLocation: UpdateLocation): LocationHelper {
+            if (mCurrentObject == null) {
+                mCurrentObject = LocationHelper(context, updateLocation)
+            }
+            return mCurrentObject as LocationHelper;
+        }
+    }
+
     private var handler: Handleupdate? = null
     private var retroCallImplementor: RetroCallImplementor? = null
 
-    constructor(context: Context?, updateLocation: UpdateLocation) {
+    private constructor(context: Context?, updateLocation: UpdateLocation) {
         mContext = context
         mUpdateLocation = updateLocation
         mDataBaseController = DataBaseController(mContext);
         handler = Handleupdate()
         retroCallImplementor = RetroCallImplementor()
     }
+
 
     fun setLocationListener() {
         var gps_enabled = false
@@ -316,12 +327,13 @@ class LocationHelper {
             if (previousLocation.distanceTo(currentLocation) < Constant.MIN_DISTANCE_RANGE) {
                 insert = true;
             } else {
-                pref.setLong(System.currentTimeMillis(), Constant.SP_KEY_SPENT_TIME)
+                //pref.setLong(System.currentTimeMillis(), Constant.SP_KEY_SPENT_TIME)
             }
             if (lastDBLocation != null && currentLocation.distanceTo(dbLastLocation) < Constant.MIN_DISTANCE_RANGE) {
                 insert = false;
                 val stayTIme: Int = ((System.currentTimeMillis() - pref.getLong(Constant.SP_KEY_SPENT_TIME)) / (1000 * 60)).toInt()
                 mDataBaseController.updateStayTime(lastDBLocation.rowID, stayTIme);
+
             }
 
         }
@@ -329,6 +341,8 @@ class LocationHelper {
 
         if (insert) {
             retroCallImplementor!!.getAllPlaces(LATITUDE.toString() + "," + LONGITUDE.toString(), handler, location, locationType)
+        } else {
+            pref.setLong(System.currentTimeMillis(), Constant.SP_KEY_SPENT_TIME)
         }
         var visitedLocationList = mDataBaseController.readAllVisitedLocation()
 
@@ -388,7 +402,7 @@ class LocationHelper {
 
             //
 
-            addNearByPlaces(mPlacesList,placeId,addresses)
+            addNearByPlaces(mPlacesList, placeId, addresses)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -428,7 +442,7 @@ class LocationHelper {
                         pos += 1
                     }
 
-                 //// Code to pick nearest places
+                    //// Code to pick nearest places
                     /* if (pos == 0) {
                          minDistance = distance
                          result = it
@@ -460,7 +474,7 @@ class LocationHelper {
         }
     }
 
-    fun addNearByPlaces(places: List<Result>,mainPlaceId:String,addresses: List<Address>) {
+   @Synchronized fun addNearByPlaces(places: List<Result>, mainPlaceId: String, addresses: List<Address>) {
         //
         if (places != null && places.size > 1) {
             var nearByPlacesIds = "";
@@ -474,8 +488,8 @@ class LocationHelper {
                     val placeId = it.placeId
                     val photoUrl = it.photos.toString()
 
-                    val nearPlaces="";
-                    val isAddressSet=1;
+                    val nearPlaces = "";
+                    val isAddressSet = 1;
 
                     var LATITUDE: Double = it.geometry.location.lat
                     var LONGITUDE: Double = it.geometry.location.lng
@@ -499,15 +513,15 @@ class LocationHelper {
                             state = state, country = country, postalCode = postalCode,
                             knownName = knownName, stayTime = stayTIme, dateTime = tsLong,
 
-                            locationProvider = locationProvider,rowID = 0,
-                            locationRequestType = locationType,vicinity = vicinity,
-                            placeId = placeId,photoUrl = photoUrl,nearByPlacesIds = nearPlaces,
+                            locationProvider = locationProvider, rowID = 0,
+                            locationRequestType = locationType, vicinity = vicinity,
+                            placeId = placeId, photoUrl = photoUrl, nearByPlacesIds = nearPlaces,
                             isAddressSet = isAddressSet));
 
                     // add near by place id
-                    if(nearByPlacesIds.isEmpty()) {
-                        nearByPlacesIds =  placeId;
-                    }else{
+                    if (nearByPlacesIds.isEmpty()) {
+                        nearByPlacesIds = placeId;
+                    } else {
                         nearByPlacesIds = nearByPlacesIds + "," + placeId;
                     }
 

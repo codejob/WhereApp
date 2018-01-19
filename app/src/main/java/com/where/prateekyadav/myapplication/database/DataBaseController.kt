@@ -61,12 +61,33 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         return newRowId > 0
     }
 
+    /**
+     * Method to update stay time into data base for the visited location
+     */
     fun updateStayTime(rowID: Int, stayTime: Int) {
         try {// Gets the data repository in write mode
             val db = getWritableDB()
+            var time=0;
+            val getStayTimeQuery="SELECT stay_time FROM visitedLocation where  id ="+rowID;
+            var cursor: Cursor? = null
+            try {
+                cursor = db.rawQuery(getStayTimeQuery, null)
+            } catch (e: SQLiteException) {
+
+            }
+            //
+            if (cursor!!.moveToFirst()) {
+                while (cursor.isAfterLast == false) {
+                    time = cursor.getInt(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_STAY_TIME))
+                    cursor.moveToNext()
+                }
+                cursor.close()
+            }
             // Create a new map of values, where column names are the keys
             val values = ContentValues()
-            values.put(DBContract.VisitedLocationData.COLUMN_STAY_TIME, stayTime)
+            //
+            time=time+stayTime;
+            values.put(DBContract.VisitedLocationData.COLUMN_STAY_TIME, time)
             val whereClause = "id = ?"
             val whereArgs = arrayOf(rowID.toString())
 
