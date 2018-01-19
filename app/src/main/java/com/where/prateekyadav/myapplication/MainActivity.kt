@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        mLocationHelper = LocationHelper(applicationContext, this);
+        mLocationHelper = LocationHelper.getInstance(applicationContext, this);
         checkLocationPermission()
         DataBaseController(this).copyDataBaseToSDCard()
         setAutoCompleteView()
