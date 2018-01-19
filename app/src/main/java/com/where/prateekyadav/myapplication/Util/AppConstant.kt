@@ -6,7 +6,7 @@ import android.os.Environment
 /**
  * Created by Infobeans on 1/11/2018.
  */
-open class Constant {
+open class AppConstant {
     companion object {
         var sharedKeyLatitude: String = "latitude"
         var sharedKeyLongitude: String = "longitude"
@@ -19,10 +19,16 @@ open class Constant {
         val RECEIVER_ACTION: String = "LOCATION";
         var MIN_DISTANCE_RANGE: Int = 200
         val alarmID: Int = 1001;
-        val INTENT_UPDATE_LOCATION: String = "update_location";
+        //
+        val INTENT_FILTER_UPDATE_LOCATION: String = "update_location";
+        val INTENT_FILTER_INTERNET_CONNECTION: String = "internet_connection";
         val LOCATION_UPDATE_MESSAGE: String = "update_location_message";
+        val KEY_IS_NETWORK_CONNECTED: String = "is_internet_connected"
+        //
         val LOCATION_UPDATE_TYPE_LAST_KNOWN: String = "last_known";
         val LOCATION_UPDATE_TYPE_CURRENT: String = "current";
+
+
 
     }
 

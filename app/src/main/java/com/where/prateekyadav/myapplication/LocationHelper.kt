@@ -1,6 +1,7 @@
 package com.where.prateekyadav.myapplication
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.ProgressDialog
 import android.content.Context
@@ -13,8 +14,9 @@ import android.os.Message
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.util.Log
-import com.where.prateekyadav.myapplication.Util.Constant
+import com.where.prateekyadav.myapplication.Util.AppConstant
 import com.where.prateekyadav.myapplication.Util.MySharedPref
+import com.where.prateekyadav.myapplication.Util.PermissionCheckHandler
 import com.where.prateekyadav.myapplication.database.DataBaseController
 import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
 import com.where.prateekyadav.myapplication.search.model.placesdetails.Result
@@ -79,6 +81,7 @@ class LocationHelper {
 
     }
 
+    @SuppressLint("MissingPermission")
     fun getLocation(): Location? {
         var gps_enabled = false
         var network_enabled = false
@@ -91,54 +94,52 @@ class LocationHelper {
         var gps_loc: Location? = null
         var passive_loc: Location? = null
         var finalLoc: Location? = null
+        // Check Location permission here
+        if (PermissionCheckHandler.checkLocationPermissions(mContext!!)) {
 
+            if (gps_enabled)
+                gps_loc = locationManager!!.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+            if (network_enabled)
+                net_loc = locationManager!!.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+            else {
+                passive_loc = locationManager!!.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER)
 
+            }
+            if (gps_loc != null || net_loc != null) {
 
-        if (gps_enabled)
-            gps_loc = locationManager!!.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-        if (network_enabled)
-            net_loc = locationManager!!.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
-        else {
-            passive_loc = locationManager!!.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER)
+                //smaller the number more accurate result will
+                if (net_loc != null && gps_loc != null && gps_loc!!.getAccuracy() > net_loc!!.getAccuracy())
+                    finalLoc = net_loc
+                else if (gps_loc != null)
+                    finalLoc = gps_loc
+                else if (net_loc != null)
+                    finalLoc = net_loc
 
-        }
-        if (gps_loc != null || net_loc != null) {
-
-            //smaller the number more accurate result will
-            if (net_loc != null && gps_loc != null && gps_loc!!.getAccuracy() > net_loc!!.getAccuracy())
-                finalLoc = net_loc
-            else if (gps_loc != null)
-                finalLoc = gps_loc
-            else if (net_loc != null)
-                finalLoc = net_loc
-
-            return finalLoc
-        } else if (passive_loc != null && !gps_enabled && !network_enabled) {
-            //setLocation(passive_loc)
-            return passive_loc
+                return finalLoc
+            } else if (passive_loc != null && !gps_enabled && !network_enabled) {
+                //setLocation(passive_loc)
+                return passive_loc
+            }
         }
         return null
     }
 
     fun getLocationFromListner(provider: String) {
         // Acquire a reference to the system Location Manager
-
         // Define a listener that responds to location updates
-
         var bestLocation: Location? = null;
         var listHandler: Handler? = null;
         var locationListener: LocationListener? = null;
         try {
-
             locationListener = object : LocationListener {
 
                 override fun onLocationChanged(location: Location) {
                     Log.v("Location Changed", location.getLatitude().toString() + " and " + location.getLongitude().toString());
-                    Log.i(Constant.TAG_KOTLIN_DEMO_APP,
+                    Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
                             "Location updated changed")
-                    Log.i(Constant.TAG_KOTLIN_DEMO_APP,
+                    Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
                             "Accuracy: " + location.accuracy)
-                    Log.i(Constant.TAG_KOTLIN_DEMO_APP,
+                    Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
                             "Provider: " + location.provider)
                     if (bestLocation == null) {
                         bestLocation = location
@@ -151,70 +152,66 @@ class LocationHelper {
                         mLocationReceived = true
                     }
                     // Called when a new location is found by the network location provider.
-                    // mUpdateLocation?.updateLocationAddressList(getCompleteAddressString(location!!, Constant.LOCATION_UPDATE_TYPE_CURRENT));
+                    // mUpdateLocation?.updateLocationAddressList(getCompleteAddressString(location!!, AppConstant.LOCATION_UPDATE_TYPE_CURRENT));
                 }
 
                 override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {
-                    Log.i(Constant.TAG_KOTLIN_DEMO_APP,
+                    Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
                             "onStatusChanged")
                 }
 
                 override fun onProviderEnabled(provider: String) {
-                    Log.i(Constant.TAG_KOTLIN_DEMO_APP,
+                    Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
                             "onProviderEnabled")
                 }
 
                 override fun onProviderDisabled(provider: String) {
                     //AppUtility().startTimerAlarm(mContext!!.applicationContext)
-                    Log.i(Constant.TAG_KOTLIN_DEMO_APP,
+                    Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
                             "onProviderDisabled")
                 }
             }
-
-
-
+            //
             listHandler = object : Handler() {
                 override fun handleMessage(msg: Message) {
                     if (msg.what == 0 && !mLocationReceived) {
                         locationManager!!.removeUpdates(locationListener)
-                        Log.i(Constant.TAG_KOTLIN_DEMO_APP, "Location Updates are now removed msg:= " + msg.what)
-                        sendEmptyMessageDelayed(1, Constant.LOCATION_SYNC_INSTERVAL / 4);
+                        Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Location Updates are now removed msg:= " + msg.what)
+                        sendEmptyMessageDelayed(1, AppConstant.LOCATION_SYNC_INSTERVAL / 4);
 
                     } else if (msg.what == 1 && !mLocationReceived) {
-                        Log.i(Constant.TAG_KOTLIN_DEMO_APP, "Request location update msg:= " + msg.what)
+                        Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Request location update msg:= " + msg.what)
 
                         requestLocation(locationManager!!, provider, locationListener)
-                        sendEmptyMessageDelayed(2, Constant.LOCATION_SYNC_TIMEOUT);
+                        sendEmptyMessageDelayed(2, AppConstant.LOCATION_SYNC_TIMEOUT);
                     } else if (msg.what === 2 && !mLocationReceived) {
                         locationManager!!.removeUpdates(locationListener)
 
-                        Log.i(Constant.TAG_KOTLIN_DEMO_APP, "Location Updates are now removed msg:= " + msg.what)
+                        Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Location Updates are now removed msg:= " + msg.what)
                         //Location Updates are now
                         var location = getLocation()
                         if (location != null)
-                            mUpdateLocation?.updateLocationAddressList(getCompleteAddressString(location!!, Constant.LOCATION_UPDATE_TYPE_LAST_KNOWN));
+                            mUpdateLocation?.updateLocationAddressList(getCompleteAddressString(location!!, AppConstant.LOCATION_UPDATE_TYPE_LAST_KNOWN));
 
                     } else if (msg.what === 3 && mLocationReceived) {
-                        Log.i(Constant.TAG_KOTLIN_DEMO_APP, "best location accuracy " + bestLocation!!.accuracy)
+                        Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "best location accuracy " + bestLocation!!.accuracy)
 
                         locationManager!!.removeUpdates(locationListener)
-                        mUpdateLocation?.updateLocationAddressList(getCompleteAddressString(bestLocation!!, Constant.LOCATION_UPDATE_TYPE_CURRENT));
+                        mUpdateLocation?.updateLocationAddressList(getCompleteAddressString(bestLocation!!, AppConstant.LOCATION_UPDATE_TYPE_CURRENT));
 
                     } else {
                         locationManager!!.removeUpdates(locationListener)
-                        Log.i(Constant.TAG_KOTLIN_DEMO_APP, "Location Updates are now removed final:= ")
+                        Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Location Updates are now removed final:= ")
                     }
                     super.handleMessage(msg)
                 }
             }
-
             //mUpdateLocation?.updateLocationAddressList(DatabaseHelper(mContext).readAllVisitedLocation())
             mLocationReceived = false;
             requestLocation(locationManager!!, provider, locationListener)
-            listHandler.sendEmptyMessageDelayed(2, Constant.LOCATION_SYNC_TIMEOUT);
-
-
-            Log.i(Constant.TAG_KOTLIN_DEMO_APP,
+            listHandler.sendEmptyMessageDelayed(2, AppConstant.LOCATION_SYNC_TIMEOUT);
+            //
+            Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
                     "requestLocationUpdates")
         } catch (e: Exception) {
             e.printStackTrace()
@@ -296,7 +293,7 @@ class LocationHelper {
         var pref = MySharedPref(mContext);
         var spLatitude: Double = pref.getLatitude();
         var spLongitude: Double = pref.getLongitude();
-        var spTime: Long = pref.getLong(Constant.SP_KEY_SPENT_TIME);
+        var spTime: Long = pref.getLong(AppConstant.SP_KEY_SPENT_TIME);
 
         var previousLocation = Location(LocationManager.GPS_PROVIDER);
         previousLocation.latitude = spLatitude
@@ -318,20 +315,20 @@ class LocationHelper {
         var insert = false;
         if (spLatitude == 0.0) {
             insert = false;
-            pref.setLong(System.currentTimeMillis(), Constant.SP_KEY_SPENT_TIME)
+            pref.setLong(System.currentTimeMillis(), AppConstant.SP_KEY_SPENT_TIME)
         } else {
-            Log.i(Constant.TAG_KOTLIN_DEMO_APP,
+            Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
                     "Distance prev and curr" + previousLocation.distanceTo(currentLocation))
-            Log.i(Constant.TAG_KOTLIN_DEMO_APP,
+            Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
                     "Distance curr and DB" + currentLocation.distanceTo(dbLastLocation))
-            if (previousLocation.distanceTo(currentLocation) < Constant.MIN_DISTANCE_RANGE) {
+            if (previousLocation.distanceTo(currentLocation) < AppConstant.MIN_DISTANCE_RANGE) {
                 insert = true;
             } else {
-                //pref.setLong(System.currentTimeMillis(), Constant.SP_KEY_SPENT_TIME)
+                //pref.setLong(System.currentTimeMillis(), AppConstant.SP_KEY_SPENT_TIME)
             }
-            if (lastDBLocation != null && currentLocation.distanceTo(dbLastLocation) < Constant.MIN_DISTANCE_RANGE) {
+            if (lastDBLocation != null && currentLocation.distanceTo(dbLastLocation) < AppConstant.MIN_DISTANCE_RANGE) {
                 insert = false;
-                val stayTIme: Int = ((System.currentTimeMillis() - pref.getLong(Constant.SP_KEY_SPENT_TIME)) / (1000 * 60)).toInt()
+                val stayTIme: Int = ((System.currentTimeMillis() - pref.getLong(AppConstant.SP_KEY_SPENT_TIME)) / (1000 * 60)).toInt()
                 mDataBaseController.updateStayTime(lastDBLocation.rowID, stayTIme);
 
             }
@@ -342,7 +339,7 @@ class LocationHelper {
         if (insert) {
             retroCallImplementor!!.getAllPlaces(LATITUDE.toString() + "," + LONGITUDE.toString(), handler, location, locationType)
         } else {
-            pref.setLong(System.currentTimeMillis(), Constant.SP_KEY_SPENT_TIME)
+            pref.setLong(System.currentTimeMillis(), AppConstant.SP_KEY_SPENT_TIME)
         }
         var visitedLocationList = mDataBaseController.readAllVisitedLocation()
 
@@ -383,7 +380,7 @@ class LocationHelper {
             val knownName = addresses[0].getFeatureName() // Only if available else return NULL
             val tsLong = System.currentTimeMillis()
             val locationProvider = currentLocation.provider;
-            val stayTIme: Int = ((System.currentTimeMillis() - pref.getLong(Constant.SP_KEY_SPENT_TIME)) / (1000 * 60)).toInt()
+            val stayTIme: Int = ((System.currentTimeMillis() - pref.getLong(AppConstant.SP_KEY_SPENT_TIME)) / (1000 * 60)).toInt()
             //
             result = mDataBaseController.insertVisitedLocation(
                     VisitedLocationInformation(userId = 1, latitude = LATITUDE,
@@ -395,8 +392,8 @@ class LocationHelper {
                             placeId = placeId, photoUrl = photoUrl, nearByPlacesIds = nearByPlaces,
                             isAddressSet = isAddressSet))
             //
-            pref.setLong(System.currentTimeMillis(), Constant.SP_KEY_SPENT_TIME)
-            Log.i(Constant.TAG_KOTLIN_DEMO_APP,
+            pref.setLong(System.currentTimeMillis(), AppConstant.SP_KEY_SPENT_TIME)
+            Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
 
                     "Location inserted")
 
@@ -430,7 +427,7 @@ class LocationHelper {
                 var minDistance: Float = 0.0F;
                 var pos: Int = 0;
                 places.forEach {
-                    //Log.i(Constant.TAG_KOTLIN_DEMO_APP, it.name);
+                    //Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, it.name);
                     var tempLoc = Location(LocationManager.GPS_PROVIDER);
                     tempLoc.latitude = it.geometry.location.lat.toDouble()
                     tempLoc.longitude = it.geometry.location.lng.toDouble()
@@ -506,7 +503,7 @@ class LocationHelper {
                     val tsLong = System.currentTimeMillis()
                     val locationProvider = "NA";
                     val locationType = "NA";
-                    val stayTIme: Int = ((System.currentTimeMillis() - pref.getLong(Constant.SP_KEY_SPENT_TIME)) / (1000 * 60)).toInt()
+                    val stayTIme: Int = ((System.currentTimeMillis() - pref.getLong(AppConstant.SP_KEY_SPENT_TIME)) / (1000 * 60)).toInt()
                     //
                     mList.add(VisitedLocationInformation(userId = 1, latitude = LATITUDE,
                             longitude = LONGITUDE, address = address, city = city,
@@ -530,12 +527,12 @@ class LocationHelper {
                     e.printStackTrace()
                 }
                 //
-                //Log.i(Constant.TAG_KOTLIN_DEMO_APP, it.name);
+                //Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, it.name);
             }
             // Here call method to insert the near by places into table
             DataBaseController(mContext).insertNearByPlaces(mList);
             DataBaseController(mContext).updateNearByPlaces(mainPlaceId, nearByPlacesIds)
-            Log.i(Constant.TAG_KOTLIN_DEMO_APP,
+            Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
                     "near by location inserted")
         }
 

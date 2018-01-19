@@ -3,11 +3,8 @@ package com.where.prateekyadav.myapplication
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.support.v4.content.LocalBroadcastManager
 import android.util.Log
-import android.widget.Toast
-import com.where.prateekyadav.myapplication.Util.AppUtility
-import com.where.prateekyadav.myapplication.Util.Constant
+import com.where.prateekyadav.myapplication.Util.AppConstant
 import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
 
 
@@ -46,10 +43,10 @@ class AlarmReceiverLocation : BroadcastReceiver(), UpdateLocation {
         try {
             Log.d("sender", "Broadcasting message")
             val intent = Intent()
-            intent.setAction(Constant.INTENT_UPDATE_LOCATION)
+            intent.setAction(AppConstant.INTENT_FILTER_UPDATE_LOCATION)
             // You can also include some extra data.
             intent.putExtra("message", "Test Message")
-            intent.putExtra(Constant.LOCATION_UPDATE_MESSAGE,true);
+            intent.putExtra(AppConstant.LOCATION_UPDATE_MESSAGE,true);
             mContext!!.sendBroadcast(intent)
         } catch (e: Exception) {
             e.printStackTrace()

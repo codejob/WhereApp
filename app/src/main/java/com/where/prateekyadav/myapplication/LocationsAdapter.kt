@@ -74,4 +74,7 @@ class LocationsAdapter() : BaseAdapter() {
             tvTitle = item.findViewById(R.id.tvTitle) as TextView
         }
     }
+
+
 }
+

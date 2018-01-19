@@ -13,12 +13,13 @@ import android.util.Log
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.Status
 import com.where.prateekyadav.myapplication.Util.AppUtility
-import com.where.prateekyadav.myapplication.Util.Constant
+import com.where.prateekyadav.myapplication.Util.AppConstant
 import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
 import com.google.android.gms.location.places.Place
 import com.google.android.gms.location.places.ui.PlaceSelectionListener
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment
 import com.google.android.gms.common.api.GoogleApiClient
+import com.where.prateekyadav.myapplication.Util.PermissionCheckHandler
 import com.where.prateekyadav.myapplication.database.DataBaseController
 
 
@@ -33,6 +34,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
         setContentView(R.layout.activity_main)
         mLocationHelper = LocationHelper.getInstance(applicationContext, this);
         checkLocationPermission()
+        PermissionCheckHandler.verifyNetWorkPermissions(this@MainActivity)
         DataBaseController(this).copyDataBaseToSDCard()
         setAutoCompleteView()
     }
@@ -102,9 +104,28 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
                 }
+
                 return
             }
+        //
+            PermissionCheckHandler.REQUEST_NETWORK_PERMISSION -> {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permission was granted, yay! Do the
+                    // location-related task you need to do.
+                    if (ContextCompat.checkSelfPermission(this,
+                            Manifest.permission.ACCESS_NETWORK_STATE) == PackageManager.PERMISSION_GRANTED) {
+
+                    }
+
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+            }
         }
+
     }
 
     override fun onResume() {
@@ -144,7 +165,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
             // Get extra data included in the Intent
             Log.d("Receiver", "Receive message")
             val message = intent.getStringExtra("message")
-            val isUpdated = intent.getBooleanExtra(Constant.LOCATION_UPDATE_MESSAGE, false);
+            val isUpdated = intent.getBooleanExtra(AppConstant.LOCATION_UPDATE_MESSAGE, false);
             if (isUpdated) {
 
                 runOnUiThread(Runnable {
@@ -183,17 +204,17 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
     private fun registerReceiver() {
         try {
             registerReceiver(
-                    mMessageReceiver, IntentFilter(Constant.INTENT_UPDATE_LOCATION))
+                    mMessageReceiver, IntentFilter(AppConstant.INTENT_FILTER_UPDATE_LOCATION))
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
     override fun onPlaceSelected(place: Place) {
-        Log.i(Constant.TAG_KOTLIN_DEMO_APP, "Place: " + place.name)
+        Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Place: " + place.name)
     }
 
     override fun onError(status: Status) {
-        Log.i(Constant.TAG_KOTLIN_DEMO_APP, "An error occurred: " + status)
+        Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "An error occurred: " + status)
     }
 
     override fun onConnectionFailed(p0: ConnectionResult) {
