@@ -94,6 +94,23 @@ object PermissionCheckHandler {
         }
     }
 
+    /**
+     *
+     *
+     */
+    fun verifyLocationPermissions(activity: Activity) {
+        // Check if we have write permission
+        val permission = checkLocationPermissions(activity)
+
+        if (!permission) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    activity,
+                    PERMISSIONS_LOCATION,
+                    REQUEST_LOCATION_PERMISSION
+            )
+        }
+    }
 
     /**
      * Checks if the app has permission to write to device storage
@@ -345,7 +362,7 @@ object PermissionCheckHandler {
     fun checkNetWorkPermissions(context: Context): Boolean {
         Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Checking network permissions.")
         // Verify that all required contact permissions have been granted.
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_NETWORK_STATE) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_WIFI_STATE) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_NETWORK_STATE) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_WIFI_STATE) != PackageManager.PERMISSION_GRANTED) {
             // Contacts permissions have not been granted.
             Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "network permissions has NOT been granted. Requesting permissions.")
             return false

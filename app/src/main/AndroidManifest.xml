@@ -29,8 +29,25 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <receiver android:name=".AlarmReceiverLocation" android:process=":remote" />
+       <!--  [ RECEIVERS ] -->
+                <!--  [ ALARM RECEIVER ] -->
+                <receiver
+                    android:name=".AlarmReceiverLocation"
+                    android:process=":remote" />
+                <!--  [ ALARM RECEIVER ] -->
 
+                <!--  [ NETWORK RECEIVER ] -->
+                <receiver
+                    android:name=".broadcastreceiver.NetworkConnectionReceiver"
+                    android:process=":remote" />
+                <!--  [ NETWORK RECEIVER ] -->
+        <!--  [ RECEIVERS ] -->
+
+        <!--  [ SERVICES ] -->
+                <!--  [ ADDRESS UPDATE SERVICE ] -->
+                <service android:name=".Services.AddressUpdateService"/>
+                <!--  [ ADDRESS UPDATE SERVICE ] -->
+        <!--  [ SERVICES ] -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
