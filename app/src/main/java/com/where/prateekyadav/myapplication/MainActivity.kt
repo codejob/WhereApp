@@ -38,8 +38,12 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         mLocationHelper = LocationHelper.getInstance(applicationContext, this);
-        checkLocationPermission()
-        PermissionCheckHandler.verifyNetWorkPermissions(this@MainActivity)
+        if (PermissionCheckHandler.checkNetWorkPermissions(this)){
+            checkLocationPermission()
+        }else{
+            PermissionCheckHandler.verifyLocationPermissions(this)
+        }
+        //
         DataBaseController(this).copyDataBaseToSDCard()
         setAutoCompleteView()
     }
@@ -99,9 +103,11 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
                     // location-related task you need to do.
                     if (ContextCompat.checkSelfPermission(this,
                             Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-
                         //Request location updates:
                         //mLocationHelper?.getLocation();
+                        //
+                        PermissionCheckHandler.verifyNetWorkPermissions(this@MainActivity)
+
                         AppUtility().startTimerAlarm(applicationContext)
                     }
 
@@ -109,8 +115,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
                 }
-
-                return
+                       return
             }
         //
             PermissionCheckHandler.REQUEST_NETWORK_PERMISSION -> {
