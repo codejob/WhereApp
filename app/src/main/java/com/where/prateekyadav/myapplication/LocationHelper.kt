@@ -274,7 +274,7 @@ class LocationHelper {
         }
     }
 
-    private fun getCompleteAddressString(location: Location, locationType: String): List<VisitedLocationInformation> {
+    private  fun  getCompleteAddressString(location: Location, locationType: String): List<VisitedLocationInformation> {
         //
         var LATITUDE: Double = location.latitude
         var LONGITUDE: Double = location.longitude
@@ -313,6 +313,7 @@ class LocationHelper {
                     "Distance prev and curr" + previousLocation.distanceTo(currentLocation))
             Log.i(Constant.TAG_KOTLIN_DEMO_APP,
                     "Distance curr and DB" + currentLocation.distanceTo(dbLastLocation))
+
             if (previousLocation.distanceTo(currentLocation) < Constant.MIN_DISTANCE_RANGE) {
                 insert = true;
             } else {
@@ -323,6 +324,7 @@ class LocationHelper {
                 val stayTIme: Int = ((System.currentTimeMillis() - pref.getLong(Constant.SP_KEY_SPENT_TIME)) / (1000 * 60)).toInt()
                 mDataBaseController.updateStayTime(lastDBLocation.rowID, stayTIme);
             }
+
 
         }
         pref.setLocation(LATITUDE, LONGITUDE);

@@ -10,6 +10,7 @@ import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AlertDialog
 import android.content.*
 import android.util.Log
+import android.widget.Toast
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.Status
 import com.where.prateekyadav.myapplication.Util.AppUtility
@@ -20,6 +21,7 @@ import com.google.android.gms.location.places.ui.PlaceSelectionListener
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment
 import com.google.android.gms.common.api.GoogleApiClient
 import com.where.prateekyadav.myapplication.database.DataBaseController
+import com.where.prateekyadav.myapplication.database.DatabaseHelper
 
 
 class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConnectionFailedListener, PlaceSelectionListener {
@@ -188,8 +190,21 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
             e.printStackTrace()
         }
     }
+
     override fun onPlaceSelected(place: Place) {
-        Log.i(Constant.TAG_KOTLIN_DEMO_APP, "Place: " + place.name)
+        try {
+            var searchResultsList = DataBaseController(this).searchLocationOnline(place)
+            if (searchResultsList != null) {
+                searchResultsList.forEach {
+                    Toast.makeText(this,it.visitedLocationInformation.address,Toast.LENGTH_SHORT).show()
+                    Log.i(Constant.TAG_KOTLIN_DEMO_APP, "Place: " + it.visitedLocationInformation.vicinity)
+
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
     }
 
     override fun onError(status: Status) {
