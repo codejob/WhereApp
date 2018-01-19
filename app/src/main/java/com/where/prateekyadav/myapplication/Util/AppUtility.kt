@@ -12,6 +12,12 @@ import com.where.prateekyadav.myapplication.AlarmReceiverLocation
 import java.io.File
 import java.util.*
 import android.content.ContentValues.TAG
+import android.location.Location
+import android.location.LocationManager
+import com.where.prateekyadav.myapplication.LocationHelper
+import com.where.prateekyadav.myapplication.UpdateLocation
+import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
+import kotlin.collections.ArrayList
 
 
 /**
@@ -57,7 +63,7 @@ class AppUtility {
             //alarmManager.set(AlarmManager.RTC_WAKEUP,
             //        cal.getTimeInMillis(), pendingIntent);
             alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
-                    cal.getTimeInMillis() , AppConstant.LOCATION_SYNC_INSTERVAL, pendingIntent);
+                    cal.getTimeInMillis(), AppConstant.LOCATION_SYNC_INSTERVAL, pendingIntent);
 
             /*Toast.makeText(applicationContext,
                     "call alarmManager.set()",
@@ -74,4 +80,32 @@ class AppUtility {
         Log.d(TAG, "alarm is " + (if (isWorking) "" else "not") + " working...")
         return isWorking;
     }
+
+    ///////////////////////////// Need to delete/////////////////////////
+    fun inssertDemoLocation(context: Context?) {
+        try {
+            val latArr = AppConstant.latArray;
+            val lngArr = AppConstant.lngArray;
+            val locationList = ArrayList<Location>();
+            for (i in latArr.indices) {
+                var location = Location(LocationManager.GPS_PROVIDER);
+                location.latitude = latArr[i]
+                location.longitude = lngArr[i]
+                locationList.add(location)
+                LocationHelper.getInstance(context, DemoUpdate()).getCompleteAddressString(location!!, AppConstant.LOCATION_UPDATE_TYPE_LAST_KNOWN)
+            }
+        } catch (e: Exception) {
+        }
+
+    }
+
+    class DemoUpdate() : UpdateLocation {
+        override fun updateLocationAddress(address: String) {
+        }
+
+        override fun updateLocationAddressList(addressList: List<VisitedLocationInformation>) {
+        }
+
+    }
+    ///////////////////////////Need to delete//////////////////////////////////
 }

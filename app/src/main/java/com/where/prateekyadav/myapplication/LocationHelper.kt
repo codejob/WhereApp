@@ -282,7 +282,7 @@ class LocationHelper {
         }
     }
 
-    private  fun  getCompleteAddressString(location: Location, locationType: String): List<VisitedLocationInformation> {
+    public fun  getCompleteAddressString(location: Location, locationType: String): List<VisitedLocationInformation> {
         //
         var LATITUDE: Double = location.latitude
         var LONGITUDE: Double = location.longitude

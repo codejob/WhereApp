@@ -11,7 +11,9 @@ import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AlertDialog
 import android.content.*
 import android.util.Log
+import android.view.View
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.Toast
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.Status
@@ -33,7 +35,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
 
     val RQS_1 = 1
     var mLocationHelper: LocationHelper? = null;
-    var autocompleteFragment:PlaceAutocompleteFragment? = null;
+    var autocompleteFragment: PlaceAutocompleteFragment? = null;
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -48,6 +50,17 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
     fun setAutoCompleteView() {
         autocompleteFragment = fragmentManager.findFragmentById(R.id.place_autocomplete_fragment) as PlaceAutocompleteFragment
         autocompleteFragment!!.setOnPlaceSelectedListener(this)
+        var clear: ImageButton = autocompleteFragment!!.getView().findViewById(R.id.place_autocomplete_clear_button)
+        clear.setOnClickListener(object : View.OnClickListener {
+            override fun onClick(view: View) {
+                // example : way to access view from PlaceAutoCompleteFragment
+                // ((EditText) autocompleteFragment.getView()
+                // .findViewById(R.id.place_autocomplete_search_input)).setText("");
+                autocompleteFragment!!.setText("")
+                view.setVisibility(View.GONE)
+                setLocation(DataBaseController(this@MainActivity).readAllVisitedLocation())
+            }
+        })
 
     }
 
@@ -138,17 +151,18 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
         super.onResume()
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            val text =autocompleteFragment!!.getText(R.id.place_autocomplete_search_input) as String
-           // text.equa
-            //if(autocompleteFragment!=null &&
-            //        autocompleteFragment.getText(R.id.place_autocomplete_search_input).to)
-            //setLocation(DataBaseController(this).readAllVisitedLocation())
+            var clear: EditText = autocompleteFragment!!.getView().findViewById(R.id.place_autocomplete_search_input)
+            if (clear != null &&
+                    clear.text.isBlank()) {
+                setLocation(DataBaseController(this).readAllVisitedLocation())
+            }
             //mLocationHelper?.getLocation()
             if (!AppUtility().checkAlarmAlreadySet(this)) {
                 AppUtility().startTimerAlarm(this);
             }
         }
         registerReceiver()
+        //AppUtility().inssertDemoLocation(this)
 
     }
 
@@ -242,13 +256,13 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
             var searchResultsList = DataBaseController(this).searchLocationOnline(place)
             if (searchResultsList != null && searchResultsList.size > 0) {
                 searchResultsList.forEach {
-                    Toast.makeText(this, it.visitedLocationInformation.address, Toast.LENGTH_SHORT).show()
+                    //Toast.makeText(this, it.visitedLocationInformation.address, Toast.LENGTH_SHORT).show()
                     Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Place: " + it.visitedLocationInformation.vicinity)
 
                 }
                 setLocationRestults(searchResultsList)
             } else {
-                setLocation(DataBaseController(this).readAllVisitedLocation())
+                //setLocation(DataBaseController(this).readAllVisitedLocation())
 
                 Toast.makeText(this, "No result found", Toast.LENGTH_SHORT).show()
 
@@ -273,4 +287,5 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
     override fun updateLocationAddressList(addressList: List<VisitedLocationInformation>) {
         setLocation(addressList)
     }
+
 }
