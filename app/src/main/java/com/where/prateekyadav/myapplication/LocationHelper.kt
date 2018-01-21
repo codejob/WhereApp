@@ -15,10 +15,13 @@ import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.util.Log
 import com.where.prateekyadav.myapplication.Util.AppConstant
+import com.where.prateekyadav.myapplication.Util.AppUtility
 import com.where.prateekyadav.myapplication.Util.MySharedPref
 import com.where.prateekyadav.myapplication.Util.PermissionCheckHandler
 import com.where.prateekyadav.myapplication.database.DataBaseController
 import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
+import com.where.prateekyadav.myapplication.modal.SearchResult
+import com.where.prateekyadav.myapplication.modal.VisitResults
 import com.where.prateekyadav.myapplication.search.model.placesdetails.Result
 import com.where.prateekyadav.myapplication.search.network.RetroCallImplementor
 import com.where.prateekyadav.myapplication.search.network.RetroCallIneractor
@@ -190,9 +193,17 @@ class LocationHelper {
                         Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Location Updates are now removed msg:= " + msg.what)
                         //Location Updates are now
                         var location = getLocation()
-                        if (location != null)
+                        if (location != null) {
+                            Log.v("Location Changed", location.getLatitude().toString() + " and " + location.getLongitude().toString());
+                            Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
+                                    "Location received last known")
+                            Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
+                                    "Accuracy: " + location.accuracy)
+                            Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
+                                    "Provider: " + location.provider)
                             mUpdateLocation?.updateLocationAddressList(getCompleteAddressString(location!!, AppConstant.LOCATION_UPDATE_TYPE_LAST_KNOWN));
 
+                        }
                     } else if (msg.what === 3 && mLocationReceived) {
                         Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "best location accuracy " + bestLocation!!.accuracy)
 
@@ -282,7 +293,7 @@ class LocationHelper {
         }
     }
 
-    public fun  getCompleteAddressString(location: Location, locationType: String): List<VisitedLocationInformation> {
+    public fun getCompleteAddressString(location: Location, locationType: String): List<SearchResult> {
         //
         var LATITUDE: Double = location.latitude
         var LONGITUDE: Double = location.longitude
@@ -293,15 +304,14 @@ class LocationHelper {
         var pref = MySharedPref(mContext);
         var spLatitude: Double = pref.getLatitude();
         var spLongitude: Double = pref.getLongitude();
-        var spTime: Long = pref.getLong(AppConstant.SP_KEY_SPENT_TIME);
+        var spacuuracy: Float = pref.getFloat(AppConstant.SP_KEY_ACCURACY);
 
         var previousLocation = Location(LocationManager.GPS_PROVIDER);
         previousLocation.latitude = spLatitude
         previousLocation.longitude = spLongitude
+        previousLocation.accuracy = spacuuracy
 
-        var currentLocation = Location(LocationManager.GPS_PROVIDER);
-        currentLocation.latitude = LATITUDE
-        currentLocation.longitude = LONGITUDE
+        var currentLocation = location
 
 
         var dbLastLocation = Location(LocationManager.GPS_PROVIDER);
@@ -310,12 +320,13 @@ class LocationHelper {
         if (lastDBLocation != null) {
             dbLastLocation.latitude = lastDBLocation!!.latitude
             dbLastLocation.longitude = lastDBLocation!!.longitude
-            lastDBTime = lastDBLocation.dateTime
         }
         var insert = false;
         if (spLatitude == 0.0) {
             insert = false;
             pref.setLong(System.currentTimeMillis(), AppConstant.SP_KEY_SPENT_TIME)
+            pref.setFloat(currentLocation.accuracy, AppConstant.SP_KEY_ACCURACY)
+
         } else {
             Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
                     "Distance prev and curr" + previousLocation.distanceTo(currentLocation))
@@ -328,14 +339,20 @@ class LocationHelper {
             }
             if (lastDBLocation != null && currentLocation.distanceTo(dbLastLocation) < AppConstant.MIN_DISTANCE_RANGE) {
                 insert = false;
+                if (spacuuracy > currentLocation.accuracy) {
+                    insert = true
+                }
+                Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Updating stay time")
                 val stayTIme: Int = ((System.currentTimeMillis() - pref.getLong(AppConstant.SP_KEY_SPENT_TIME)) / (1000 * 60)).toInt()
                 mDataBaseController.updateStayTime(lastDBLocation.rowID, stayTIme);
+                AppUtility().sendUpdateMessage(mContext!!);
 
             }
 
 
         }
         pref.setLocation(LATITUDE, LONGITUDE);
+
 
         if (insert) {
             retroCallImplementor!!.getAllPlaces(LATITUDE.toString() + "," + LONGITUDE.toString(), handler, location, locationType)
@@ -344,7 +361,7 @@ class LocationHelper {
         }
         var visitedLocationList = mDataBaseController.readAllVisitedLocation()
 
-        return visitedLocationList!!
+        return (visitedLocationList as List<SearchResult>?)!!
     }
 
     fun insertAddress(resultPlace: Result, currentLocation: Location, locationType: String, mPlacesList: List<Result>) {
@@ -366,7 +383,6 @@ class LocationHelper {
             var LATITUDE: Double = currentLocation.latitude
             var LONGITUDE: Double = currentLocation.longitude
             val addresses: List<Address>
-            geocoder = Geocoder(mContext, Locale.getDefault())
 
             addresses = geocoder.getFromLocation(LATITUDE, LONGITUDE, 1) // Here 1 represent max location result to returned, by documents it recommended 1 to 5
             if (addresses == null || addresses.size == 0) {
@@ -383,24 +399,47 @@ class LocationHelper {
             val locationProvider = currentLocation.provider;
             val stayTIme: Int = ((System.currentTimeMillis() - pref.getLong(AppConstant.SP_KEY_SPENT_TIME)) / (1000 * 60)).toInt()
             //
-            result = mDataBaseController.insertVisitedLocation(
-                    VisitedLocationInformation(userId = 1, latitude = LATITUDE,
-                            longitude = LONGITUDE, address = address, city = city,
-                            state = state, country = country, postalCode = postalCode,
-                            knownName = knownName, stayTime = stayTIme, dateTime = tsLong,
-                            locationProvider = locationProvider, rowID = 0,
-                            locationRequestType = locationType, vicinity = vicinity,
-                            placeId = placeId, photoUrl = photoUrl, nearByPlacesIds = nearByPlaces,
-                            isAddressSet = isAddressSet))
-            //
-            pref.setLong(System.currentTimeMillis(), AppConstant.SP_KEY_SPENT_TIME)
-            Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
+            var dbLastLocation = Location(LocationManager.GPS_PROVIDER);
+            var lastDBLocation = mDataBaseController.readLastVisitedLocation()
+            var lastDBTime: Long = 0
+            if (lastDBLocation != null) {
+                dbLastLocation.latitude = lastDBLocation!!.latitude
+                dbLastLocation.longitude = lastDBLocation!!.longitude
+            }
+            if (lastDBLocation != null && currentLocation.distanceTo(dbLastLocation) < AppConstant.MIN_DISTANCE_RANGE) {
+                result = mDataBaseController.updateVisitedLocation(
+                        VisitedLocationInformation(userId = 1, latitude = LATITUDE,
+                                longitude = LONGITUDE, address = address, city = city,
+                                state = state, country = country, postalCode = postalCode,
+                                knownName = knownName, stayTime = stayTIme, dateTime = tsLong,
+                                locationProvider = locationProvider, rowID = 0,
+                                locationRequestType = locationType, vicinity = vicinity,
+                                placeId = placeId, photoUrl = photoUrl, nearByPlacesIds = nearByPlaces,
+                                isAddressSet = isAddressSet), lastDBLocation.rowID)
+                Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Updating address")
+            } else {
+                result = mDataBaseController.insertVisitedLocation(
+                        VisitedLocationInformation(userId = 1, latitude = LATITUDE,
+                                longitude = LONGITUDE, address = address, city = city,
+                                state = state, country = country, postalCode = postalCode,
+                                knownName = knownName, stayTime = stayTIme, dateTime = tsLong,
+                                locationProvider = locationProvider, rowID = 0,
+                                locationRequestType = locationType, vicinity = vicinity,
+                                placeId = placeId, photoUrl = photoUrl, nearByPlacesIds = nearByPlaces,
+                                isAddressSet = isAddressSet))
+                Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
 
-                    "Location inserted")
+                        "Location inserted")
+            }
+            pref.setLong(System.currentTimeMillis(), AppConstant.SP_KEY_SPENT_TIME)
+            pref.setFloat(currentLocation.accuracy, AppConstant.SP_KEY_ACCURACY)
+            //
+
 
             //
 
             addNearByPlaces(mPlacesList, placeId, addresses)
+            AppUtility().sendUpdateMessage(mContext!!);
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -434,7 +473,7 @@ class LocationHelper {
                     tempLoc.longitude = it.geometry.location.lng.toDouble()
                     val distance = location.distanceTo(tempLoc)
                     // Just to pick first prominent place within 10 metre
-                    if (distance < 10 && pos == 0) {
+                    if (distance < location.accuracy && pos == 0) {
                         minDistance = distance
                         result = it
                         pos += 1
@@ -472,7 +511,8 @@ class LocationHelper {
         }
     }
 
-   @Synchronized fun addNearByPlaces(places: List<Result>, mainPlaceId: String, addresses: List<Address>) {
+    @Synchronized
+    fun addNearByPlaces(places: List<Result>, mainPlaceId: String, addresses: List<Address>) {
         //
         if (places != null && places.size > 1) {
             var nearByPlacesIds = "";

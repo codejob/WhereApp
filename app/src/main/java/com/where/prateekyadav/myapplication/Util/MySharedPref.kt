@@ -24,11 +24,7 @@ class MySharedPref {
         editor.putFloat(AppConstant.sharedKeyLongitude, longitude.toFloat())
         editor.apply()
     }
-    fun setLong(long: Long,key:String) {
-        val editor = mPref.edit()
-        editor.putLong(key, long)
-        editor.apply()
-    }
+
 
     fun getLatitude(): Double {
         return mPref.getFloat(AppConstant.sharedKeyLatitude, 0.0F).toDouble()
@@ -39,5 +35,19 @@ class MySharedPref {
     }
     fun getLong(key:String): Long {
         return mPref.getLong(key, 0L)
+    }
+    fun setLong(long: Long,key:String) {
+        val editor = mPref.edit()
+        editor.putLong(key, long)
+        editor.apply()
+    }
+
+    fun getFloat(key:String): Float {
+        return mPref.getFloat(key, 0F)
+    }
+    fun setFloat(float: Float,key:String) {
+        val editor = mPref.edit()
+        editor.putFloat(key, float)
+        editor.apply()
     }
 }

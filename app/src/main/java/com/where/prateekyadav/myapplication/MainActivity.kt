@@ -28,6 +28,9 @@ import com.where.prateekyadav.myapplication.Util.PermissionCheckHandler
 import com.where.prateekyadav.myapplication.database.DataBaseController
 import com.where.prateekyadav.myapplication.database.DatabaseHelper
 import com.where.prateekyadav.myapplication.modal.SearchResult
+import com.where.prateekyadav.myapplication.modal.VisitResults
+import android.text.Editable
+import android.text.TextWatcher
 
 
 class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConnectionFailedListener, PlaceSelectionListener {
@@ -36,18 +39,38 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
     val RQS_1 = 1
     var mLocationHelper: LocationHelper? = null;
     var autocompleteFragment: PlaceAutocompleteFragment? = null;
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         mLocationHelper = LocationHelper.getInstance(applicationContext, this);
-        if (PermissionCheckHandler.checkNetWorkPermissions(this)){
+        if (PermissionCheckHandler.checkNetWorkPermissions(this)) {
             checkLocationPermission()
-        }else{
+        } else {
             PermissionCheckHandler.verifyLocationPermissions(this)
         }
         //
         DataBaseController(this).copyDataBaseToSDCard()
         setAutoCompleteView()
+        setSearchListener()
+    }
+
+    fun setSearchListener() {
+        val searchEdittext = findViewById<EditText>(R.id.edt_search)
+        searchEdittext.addTextChangedListener(object : TextWatcher {
+
+            override fun afterTextChanged(s: Editable) {}
+
+            override fun beforeTextChanged(s: CharSequence, start: Int,
+                                           count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence, start: Int,
+                                       before: Int, count: Int) {
+                if (s.length > 2 || s.length==0)
+                    search(s.toString())
+            }
+        })
     }
 
     @SuppressLint("ResourceType")
@@ -62,7 +85,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
                 // .findViewById(R.id.place_autocomplete_search_input)).setText("");
                 autocompleteFragment!!.setText("")
                 view.setVisibility(View.GONE)
-                setLocation(DataBaseController(this@MainActivity).readAllVisitedLocation())
+                setLocationRestults(DataBaseController(this@MainActivity).readAllVisitedLocation())
             }
         })
 
@@ -128,7 +151,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
                 }
-                       return
+                return
             }
         //
             PermissionCheckHandler.REQUEST_NETWORK_PERMISSION -> {
@@ -159,15 +182,17 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
             var clear: EditText = autocompleteFragment!!.getView().findViewById(R.id.place_autocomplete_search_input)
             if (clear != null &&
                     clear.text.isBlank()) {
-                setLocation(DataBaseController(this).readAllVisitedLocation())
+                setLocationRestults(DataBaseController(this).readAllVisitedLocation())
             }
             //mLocationHelper?.getLocation()
             if (!AppUtility().checkAlarmAlreadySet(this)) {
                 AppUtility().startTimerAlarm(this);
             }
         }
-        registerReceiver()
+        //registerReceiver()
         //AppUtility().inssertDemoLocation(this)
+        //LocationHelper.getInstance(this, this).setLocationListener();
+
 
     }
 
@@ -181,7 +206,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
     }
 
 
-    fun setLocation(address: List<VisitedLocationInformation>) {
+    /*fun setLocation(address: List<VisitedLocationInformation>) {
         try {
             if (address != null) {
                 var searchResults = DataBaseController(this).parseSearchResult(address)
@@ -191,7 +216,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
             e.printStackTrace()
         }
 
-    }
+    }*/
 
     fun setLocationRestults(address: List<SearchResult>) {
         try {
@@ -213,8 +238,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
             val message = intent.getStringExtra("message")
             val isUpdated = intent.getBooleanExtra(AppConstant.LOCATION_UPDATE_MESSAGE, false);
             if (isUpdated) {
-
-                runOnUiThread(Runnable {
+                runOnUiThread({
                     updateLocationAddressList(
                             DataBaseController(this@MainActivity).readAllVisitedLocation())
 
@@ -258,11 +282,37 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
 
     override fun onPlaceSelected(place: Place) {
         try {
-            var searchResultsList = DataBaseController(this).searchLocationOnline(place)
+            // var searchResultsList = DataBaseController(this).searchLocationOnline(place)
+            var searchResultsList = DataBaseController(this).searchLocationOffline(place.name.toString())
+
             if (searchResultsList != null && searchResultsList.size > 0) {
                 searchResultsList.forEach {
                     //Toast.makeText(this, it.visitedLocationInformation.address, Toast.LENGTH_SHORT).show()
-                    Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Place: " + it.visitedLocationInformation.vicinity)
+                    Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Place: " + it.visitResults.visitedLocationInformation.vicinity)
+
+                }
+                setLocationRestults(searchResultsList)
+            } else {
+                //setLocation(DataBaseController(this).readAllVisitedLocation())
+
+                Toast.makeText(this, "No result found", Toast.LENGTH_SHORT).show()
+
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+    }
+
+    fun search(place: String) {
+        try {
+            // var searchResultsList = DataBaseController(this).searchLocationOnline(place)
+            var searchResultsList = DataBaseController(this).searchLocationOffline(place)
+
+            if (searchResultsList != null && searchResultsList.size > 0) {
+                searchResultsList.forEach {
+                    //Toast.makeText(this, it.visitedLocationInformation.address, Toast.LENGTH_SHORT).show()
+                    Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Place: " + it.visitResults.visitedLocationInformation.vicinity)
 
                 }
                 setLocationRestults(searchResultsList)
@@ -289,8 +339,8 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
     override fun updateLocationAddress(address: String) {
     }
 
-    override fun updateLocationAddressList(addressList: List<VisitedLocationInformation>) {
-        setLocation(addressList)
+    override fun updateLocationAddressList(addressList: List<SearchResult>) {
+        setLocationRestults(addressList)
     }
 
 }

@@ -10,12 +10,13 @@ open class AppConstant {
     companion object {
         var sharedKeyLatitude: String = "latitude";
         var sharedKeyLongitude: String = "longitude";
-        var SP_KEY_SPENT_TIME: String = "sp_key_spent_time";
+        var SP_KEY_SPENT_TIME: String = "sp_key_spent_time"
+        var SP_KEY_ACCURACY: String = "sp_key_accuracy";
         val FOLDER_PATH = Environment.getExternalStorageDirectory().path + "/WhereApp/"
         val TAG_KOTLIN_DEMO_APP = "KotlinDemoApp"
         // Seconds
-        val LOCATION_SYNC_INSTERVAL: Long =   10 *60 * 1000;
-        val LOCATION_SYNC_TIMEOUT: Long = 40 *1000;
+        val LOCATION_SYNC_INSTERVAL: Long = 10 * 60 * 1000;
+        val LOCATION_SYNC_TIMEOUT: Long = 40 * 1000;
         val RECEIVER_ACTION: String = "LOCATION";
         var MIN_DISTANCE_RANGE: Int = 200;
         val alarmID: Int = 1001;
@@ -27,8 +28,8 @@ open class AppConstant {
         //
         val LOCATION_UPDATE_TYPE_LAST_KNOWN: String = "last_known";
         val LOCATION_UPDATE_TYPE_CURRENT: String = "current";
-        val latArray = arrayOf(24.585445,24.602968,15.557049)
-        val lngArray = arrayOf(73.712479,73.685511,73.754851)
+        val latArray = arrayOf(24.585445, 24.602968, 15.557049)
+        val lngArray = arrayOf(73.712479, 73.685511, 73.754851)
 
 
     }

@@ -48,7 +48,7 @@ open class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABAS
     protected fun getWritableDB(): SQLiteDatabase {
         if (mOpenCounter.incrementAndGet() == 1) {
             sqLiteDatabase = this.writableDatabase
-            Log.d("dbcounter", "open db")
+           // Log.d("dbcounter", "open db")
         }
         return sqLiteDatabase
     }
@@ -61,7 +61,7 @@ open class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABAS
     protected fun closeDataBase(sqLiteDatabase: SQLiteDatabase?) {
         if (mOpenCounter.decrementAndGet() == 0 && sqLiteDatabase != null && sqLiteDatabase.isOpen) {
             // Closing database
-            Log.d("dbcounter", "close db")
+            //Log.d("dbcounter", "close db")
             sqLiteDatabase.close()
         }
     }

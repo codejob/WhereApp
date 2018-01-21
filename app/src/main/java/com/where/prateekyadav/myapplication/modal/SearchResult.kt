@@ -6,6 +6,7 @@ import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
 /**
  * Created by Infobeans on 1/19/2018.
  */
-class SearchResult(var visitedLocationInformation: VisitedLocationInformation,
+class SearchResult(var visitResults: VisitResults,
                    var listNearByPlace: List<NearByPlace>) {
+
 }

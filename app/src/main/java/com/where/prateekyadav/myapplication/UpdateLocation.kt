@@ -1,6 +1,8 @@
 package com.where.prateekyadav.myapplication
 
 import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
+import com.where.prateekyadav.myapplication.modal.SearchResult
+import com.where.prateekyadav.myapplication.modal.VisitResults
 
 
 /**
@@ -8,5 +10,5 @@ import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
  */
 interface UpdateLocation {
     fun updateLocationAddress(address: String);
-    fun updateLocationAddressList(addressList: List<VisitedLocationInformation>);
+    fun updateLocationAddressList(addressList: List<SearchResult>);
 }

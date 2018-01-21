@@ -7,7 +7,10 @@ import android.widget.BaseAdapter
 import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
 import android.view.LayoutInflater
 import android.widget.TextView
+import com.where.prateekyadav.myapplication.Util.AppConstant
+import com.where.prateekyadav.myapplication.Util.MySharedPref
 import com.where.prateekyadav.myapplication.modal.SearchResult
+import java.util.*
 
 
 /**
@@ -35,18 +38,32 @@ class LocationsAdapter() : BaseAdapter() {
         } else {
             mViewHolder = convertView.getTag() as MyViewHolder
         }
+        if (mLocationList!!.get(position).visitResults.showFromNearBy) {
+            val nearAddress = mLocationList!!.get(position).visitResults.nearByPlaceIDToShow!!.address
+            val nearVisinity = mLocationList!!.get(position).visitResults.nearByPlaceIDToShow!!.vicinity
+            mLocationList!!.get(position).visitResults.visitedLocationInformation.address = nearAddress
+            mLocationList!!.get(position).visitResults.visitedLocationInformation.vicinity = nearVisinity
+
+        } else {
+
+        }
+        val cal = Calendar.getInstance();
+        cal.timeInMillis = mLocationList!!.get(position).visitResults.visitedLocationInformation.dateTime
         var addresss =
 
-                """   Name:  ${mLocationList!!.get(position).visitedLocationInformation.address}
+                """   Name:  ${mLocationList!!.get(position).visitResults.visitedLocationInformation.address}
 
-                 Visinity:   ${mLocationList!!.get(position).visitedLocationInformation.vicinity}
+                 Visinity:   ${mLocationList!!.get(position).visitResults.visitedLocationInformation.vicinity}
 
-                 Stay time:=> ${mLocationList!!.get(position).visitedLocationInformation.stayTime} minutes
-                 Req Type:=> ${mLocationList!!.get(position).visitedLocationInformation.locationRequestType}
-                 Provider :=> ${mLocationList!!.get(position).visitedLocationInformation.locationProvider}
+                 No of visits:   ${mLocationList!!.get(position).visitResults.noOfVisits}
 
-                 Lat:=> ${mLocationList!!.get(position).visitedLocationInformation.latitude}
-                 Long:=> ${mLocationList!!.get(position).visitedLocationInformation.longitude} """
+                 Stay time:=> ${mLocationList!!.get(position).visitResults.visitedLocationInformation.stayTime} minutes
+                 Req Type:=> ${mLocationList!!.get(position).visitResults.visitedLocationInformation.locationRequestType}
+                 Provider :=> ${mLocationList!!.get(position).visitResults.visitedLocationInformation.locationProvider}
+                 Time updated :=> ${cal.time}
+                 Last accuracy :=> ${MySharedPref(mContext).getFloat(AppConstant.SP_KEY_ACCURACY)}
+                 Lat:=> ${mLocationList!!.get(position).visitResults.visitedLocationInformation.latitude}
+                 Long:=> ${mLocationList!!.get(position).visitResults.visitedLocationInformation.longitude} """
 
 
 

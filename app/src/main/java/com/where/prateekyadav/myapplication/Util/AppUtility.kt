@@ -14,9 +14,14 @@ import java.util.*
 import android.content.ContentValues.TAG
 import android.location.Location
 import android.location.LocationManager
+import android.widget.Toast
 import com.where.prateekyadav.myapplication.LocationHelper
 import com.where.prateekyadav.myapplication.UpdateLocation
 import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
+import com.where.prateekyadav.myapplication.modal.SearchResult
+import com.where.prateekyadav.myapplication.search.model.placesdetails.Result
+import com.where.prateekyadav.myapplication.search.network.RetroCallImplementor
+import com.where.prateekyadav.myapplication.search.network.RetroCallIneractor
 import kotlin.collections.ArrayList
 
 
@@ -30,6 +35,12 @@ class AppUtility {
         val dir = File(location)
         dir.mkdirs()
         return dir
+    }
+
+    companion object {
+        fun showToast(context: Context, msg: String) {
+            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+        }
     }
 
     fun checkStoragePermissions(context: Context?): Boolean {
@@ -91,21 +102,46 @@ class AppUtility {
                 var location = Location(LocationManager.GPS_PROVIDER);
                 location.latitude = latArr[i]
                 location.longitude = lngArr[i]
+                location.accuracy = 50F
                 locationList.add(location)
-                LocationHelper.getInstance(context, DemoUpdate()).getCompleteAddressString(location!!, AppConstant.LOCATION_UPDATE_TYPE_LAST_KNOWN)
+                var hanlder = LocationHelper.getInstance(context, DemoUpdate()).Handleupdate()
+                //LocationHelper.getInstance(context, DemoUpdate()).getCompleteAddressString(location!!, AppConstant.LOCATION_UPDATE_TYPE_LAST_KNOWN)
+                //LocationHelper.getInstance(context, DemoUpdate()).getCompleteAddressString(location!!, AppConstant.LOCATION_UPDATE_TYPE_LAST_KNOWN)
+                var retroCallImplementor = RetroCallImplementor()
+                retroCallImplementor!!.getAllPlaces(location.latitude.toString() + "," + location.longitude.toString(), hanlder, location, location.provider)
+
             }
         } catch (e: Exception) {
         }
 
     }
 
+
     class DemoUpdate() : UpdateLocation {
         override fun updateLocationAddress(address: String) {
         }
 
-        override fun updateLocationAddressList(addressList: List<VisitedLocationInformation>) {
+        override fun updateLocationAddressList(addressList: List<SearchResult>) {
         }
 
     }
     ///////////////////////////Need to delete//////////////////////////////////
+
+
+    // Send an Intent with an action named "custom-event-name". The Intent
+    // sent should
+    // be received by the ReceiverActivity.
+    public fun sendUpdateMessage(context: Context?) {
+        try {
+            Log.d("sender", "Broadcasting message")
+            val intent = Intent()
+            intent.setAction(AppConstant.INTENT_FILTER_UPDATE_LOCATION)
+            // You can also include some extra data.
+            intent.putExtra("message", "Test Message")
+            intent.putExtra(AppConstant.LOCATION_UPDATE_MESSAGE, true);
+            context!!.sendBroadcast(intent)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 }

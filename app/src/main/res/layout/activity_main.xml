@@ -9,7 +9,8 @@
     <LinearLayout
         android:id="@+id/lyt_lin_search"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:visibility="gone">
 
         <fragment
             android:id="@+id/place_autocomplete_fragment"
@@ -18,11 +19,24 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/lyt_lin_search_offline"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="visible">
+
+        <EditText
+            android:id="@+id/edt_search"
+            android:layout_width="match_parent"
+            android:layout_height="50dp" />
+
+    </LinearLayout>
+
     <ListView
         android:id="@+id/list"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/lyt_lin_search" />
+        android:layout_below="@+id/lyt_lin_search_offline" />
 
 
 </RelativeLayout>

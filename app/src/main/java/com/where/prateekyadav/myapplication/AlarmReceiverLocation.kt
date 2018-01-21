@@ -5,7 +5,9 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.where.prateekyadav.myapplication.Util.AppConstant
+import com.where.prateekyadav.myapplication.Util.AppUtility
 import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
+import com.where.prateekyadav.myapplication.modal.SearchResult
 
 
 /**
@@ -13,13 +15,8 @@ import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
  *
  */
 class AlarmReceiverLocation : BroadcastReceiver(), UpdateLocation {
-    override fun updateLocationAddressList(addressList: List<VisitedLocationInformation>) {
-        sendMessage()
-
-        /*if (addressList != null && addressList.size > 0)
-            Toast.makeText(mContext,
-                    addressList.get(0).address,
-                    Toast.LENGTH_LONG).show();*/
+    override fun updateLocationAddressList(addressList: List<SearchResult>) {
+        //AppUtility().sendUpdateMessage(mContext!!);
     }
 
     var mContext: Context? = null;
@@ -30,26 +27,7 @@ class AlarmReceiverLocation : BroadcastReceiver(), UpdateLocation {
     override fun onReceive(context: Context?, intent: Intent?) {
         mContext = context;
         LocationHelper.getInstance(context, this).setLocationListener();
-
-        /*Toast.makeText(context,"AlarmReceiver.onReceive()",
-                Toast.LENGTH_LONG).show();*/
-
     }
 
-    // Send an Intent with an action named "custom-event-name". The Intent
-    // sent should
-    // be received by the ReceiverActivity.
-    private fun sendMessage() {
-        try {
-            Log.d("sender", "Broadcasting message")
-            val intent = Intent()
-            intent.setAction(AppConstant.INTENT_FILTER_UPDATE_LOCATION)
-            // You can also include some extra data.
-            intent.putExtra("message", "Test Message")
-            intent.putExtra(AppConstant.LOCATION_UPDATE_MESSAGE,true);
-            mContext!!.sendBroadcast(intent)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
+
 }
