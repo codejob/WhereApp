@@ -9,6 +9,7 @@ import android.os.Handler
 
 import com.where.prateekyadav.myapplication.Services.AddressUpdateService
 import com.where.prateekyadav.myapplication.Util.AppConstant
+import com.where.prateekyadav.myapplication.Util.AppUtility
 
 
 /**
@@ -18,7 +19,7 @@ class NetworkConnectionReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
 
         val info = intent.getParcelableExtra<NetworkInfo>(WifiManager.EXTRA_NETWORK_INFO)
-
+        AppUtility.showToast(context, info.state.toString())
         if (info != null && info.isConnected) {
             if (info.state == NetworkInfo.State.CONNECTED && ISONLINE != 1) {
                 updateNetworkConnection(context, info.isConnected)
@@ -99,11 +100,11 @@ class NetworkConnectionReceiver : BroadcastReceiver() {
         //
         // This function will create an intent. This intent must take as parameter the "unique_name" that you registered your activity with
         internal fun updateNetworkConnection(context: Context, isConnected: Boolean?) {
-             val intent =  Intent(AppConstant.INTENT_FILTER_INTERNET_CONNECTION);
-        //put whatever data you want to send, if any
-        intent.putExtra(AppConstant.KEY_IS_NETWORK_CONNECTED,isConnected);
-        //send broadcast
-        context.sendBroadcast(intent);
+            val intent = Intent(AppConstant.INTENT_FILTER_INTERNET_CONNECTION);
+            //put whatever data you want to send, if any
+            intent.putExtra(AppConstant.KEY_IS_NETWORK_CONNECTED, isConnected);
+            //send broadcast
+            context.sendBroadcast(intent);
             //
         }
     }

@@ -10,6 +10,7 @@ import android.support.v4.content.ContextCompat
 import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AlertDialog
 import android.content.*
+import android.os.Build
 import android.util.Log
 import android.view.View
 import android.widget.EditText
@@ -31,6 +32,7 @@ import com.where.prateekyadav.myapplication.modal.SearchResult
 import com.where.prateekyadav.myapplication.modal.VisitResults
 import android.text.Editable
 import android.text.TextWatcher
+import com.where.prateekyadav.myapplication.Services.TimerService
 
 
 class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConnectionFailedListener, PlaceSelectionListener {
@@ -146,8 +148,9 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
                         //mLocationHelper?.getLocation();
                         //
                         PermissionCheckHandler.verifyNetWorkPermissions(this@MainActivity)
-
+                        AppUtility().validateAutoStartTimer(this)
                         AppUtility().startTimerAlarm(applicationContext)
+                        //startService(Intent(this, TimerService::class.java));
                     }
 
                 } else {
@@ -182,16 +185,22 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
         super.onResume()
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-           /* var clear: EditText = autocompleteFragment!!.getView().findViewById(R.id.place_autocomplete_search_input)
-            if (clear != null &&
-                    clear.text.isBlank()) {
-            }*/
+            /* var clear: EditText = autocompleteFragment!!.getView().findViewById(R.id.place_autocomplete_search_input)
+             if (clear != null &&
+                     clear.text.isBlank()) {
+             }*/
             setLocationRestults(DataBaseController(this).readAllVisitedLocation())
 
             //mLocationHelper?.getLocation()
-            if (!AppUtility().checkAlarmAlreadySet(this)) {
+            /*if (!AppUtility().checkAlarmAlreadySet(this)) {
                 AppUtility().startTimerAlarm(this);
-            }
+            }*/
+        } else {
+
+        }
+        AppUtility().validateAutoStartTimer(this)
+        if (!AppUtility().checkAlarmAlreadySet(this)) {
+            AppUtility().startTimerAlarm(this);
         }
         //registerReceiver()
         //AppUtility().inssertDemoLocation(this)
@@ -313,7 +322,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
             // var searchResultsList = DataBaseController(this).searchLocationOnline(place)
             var searchResultsList = DataBaseController(this).searchLocationOffline(place)
 
-            if (searchResultsList != null ) {
+            if (searchResultsList != null) {
                 searchResultsList.forEach {
                     //Toast.makeText(this, it.visitedLocationInformation.address, Toast.LENGTH_SHORT).show()
                     Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Place: " + it.visitResults.visitedLocationInformation.vicinity)
@@ -340,8 +349,6 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun updateLocationAddress(address: String) {
-    }
 
     override fun updateLocationAddressList(addressList: List<SearchResult>) {
         setLocationRestults(addressList)

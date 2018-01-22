@@ -3,6 +3,7 @@ package com.where.prateekyadav.myapplication.Util
 import android.Manifest
 import android.app.AlarmManager
 import android.app.PendingIntent
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -14,6 +15,7 @@ import java.util.*
 import android.content.ContentValues.TAG
 import android.location.Location
 import android.location.LocationManager
+import android.os.Build
 import android.widget.Toast
 import com.where.prateekyadav.myapplication.LocationHelper
 import com.where.prateekyadav.myapplication.UpdateLocation
@@ -61,9 +63,15 @@ class AppUtility {
 
     fun startTimerAlarm(applicationContext: Context?) {
         if (!checkAlarmAlreadySet(applicationContext)) {
+
+            var pref:MySharedPref = MySharedPref.getinstance(applicationContext);
+            pref.setLong(System.currentTimeMillis(),AppConstant.SP_KEY_LAST_TIMER_TIME)
             //10 seconds later
             val cal = Calendar.getInstance()
             cal.add(Calendar.SECOND, 5)
+
+            val calTest = Calendar.getInstance()
+            calTest.add(Calendar.SECOND, 60)
 
             val intent = Intent(applicationContext, AlarmReceiverLocation::class.java);
             intent.action = AppConstant.RECEIVER_ACTION
@@ -71,8 +79,8 @@ class AppUtility {
             val pendingIntent = PendingIntent.getBroadcast(applicationContext,
                     AppConstant.alarmID, intent, PendingIntent.FLAG_UPDATE_CURRENT)
             val alarmManager = applicationContext!!.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            //alarmManager.set(AlarmManager.RTC_WAKEUP,
-            //        cal.getTimeInMillis(), pendingIntent);
+            alarmManager.set(AlarmManager.RTC_WAKEUP,
+                    calTest.getTimeInMillis(), pendingIntent);
             alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
                     cal.getTimeInMillis(), AppConstant.LOCATION_SYNC_INSTERVAL, pendingIntent);
 
@@ -118,8 +126,6 @@ class AppUtility {
 
 
     class DemoUpdate() : UpdateLocation {
-        override fun updateLocationAddress(address: String) {
-        }
 
         override fun updateLocationAddressList(addressList: List<SearchResult>) {
         }
@@ -142,6 +148,22 @@ class AppUtility {
             context!!.sendBroadcast(intent)
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    fun validateAutoStartTimer(context: Context?) {
+        try {
+            var pref: MySharedPref = MySharedPref.getinstance(context);
+            val lastTimeStamp = pref.getLong(AppConstant.SP_KEY_LAST_TIMER_TIME)
+            val diff = (System.currentTimeMillis() - lastTimeStamp) / (1000 * 60)
+            if (diff > 20) {
+                if (Build.BRAND.equals("xiaomi")) {
+                    val intent = Intent()
+                    intent.setComponent(ComponentName("com.miui.securitycenter", "com.miui.permcenter.autostart.AutoStartManagementActivity"));
+                    context!!.startActivity(intent);
+                }
+            }
+        } catch (e: Exception) {
         }
     }
 }
