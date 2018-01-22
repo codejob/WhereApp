@@ -13,7 +13,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <uses-feature android:name="android.hardware.location.gps" />
-       <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
 
     <application
         android:allowBackup="true"
@@ -29,31 +29,38 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-       <!--  [ RECEIVERS ] -->
-                <!--  [ ALARM RECEIVER ] -->
-                <receiver
-                    android:name=".AlarmReceiverLocation"
-                    android:process=":remote" />
-                <!--  [ ALARM RECEIVER ] -->
+        <!--  [ RECEIVERS ] -->
 
-                <!--  [ NETWORK RECEIVER ] -->
-                <receiver
-                    android:name=".broadcastreceiver.NetworkConnectionReceiver"
-                    android:process=":remote" />
-                <!--  [ NETWORK RECEIVER ] -->
+        <!--  [ ALARM RECEIVER ] -->
+        <receiver
+            android:name=".AlarmReceiverLocation"
+            android:process=":remote" />
+        <!--  [ ALARM RECEIVER ] -->
+
+        <!--  [ NETWORK RECEIVER ] -->
+        <receiver android:name=".broadcastreceiver.NetworkConnectionReceiver"
+            android:label="NetworkConnectionReceiver" >
+            <intent-filter >
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+                <action android:name="android.net.wifi.STATE_CHANGE" />
+            </intent-filter>
+        </receiver>
+
+        <!--  [ NETWORK RECEIVER ] -->
+
         <!--  [ RECEIVERS ] -->
 
         <!--  [ SERVICES ] -->
-                <!--  [ ADDRESS UPDATE SERVICE ] -->
-                <service android:name=".Services.AddressUpdateService"/>
-                <!--  [ ADDRESS UPDATE SERVICE ] -->
+
+        <!--  [ ADDRESS UPDATE SERVICE ] -->
+        <service android:name=".Services.AddressUpdateService" />
+        <!--  [ ADDRESS UPDATE SERVICE ] -->
+
         <!--  [ SERVICES ] -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
     </application>
-
-
 
 
 </manifest>

@@ -6,15 +6,19 @@ import android.content.Intent
 import android.location.Address
 import android.location.Geocoder
 import android.location.Location
+import android.location.LocationManager
 import android.os.Handler
 import android.os.IBinder
 import android.os.Message
 import android.util.Log
+import com.where.prateekyadav.myapplication.LocationHelper
 import com.where.prateekyadav.myapplication.Util.AppConstant
 import com.where.prateekyadav.myapplication.Util.MySharedPref
 import com.where.prateekyadav.myapplication.database.DataBaseController
 import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
 import com.where.prateekyadav.myapplication.search.model.placesdetails.Result
+import com.where.prateekyadav.myapplication.search.network.RetroCallImplementor
+import com.where.prateekyadav.myapplication.search.network.RetroCallIneractor
 import java.util.*
 
 /**
@@ -23,8 +27,9 @@ import java.util.*
 class AddressUpdateService : Service() {
 
     private var mContext: Context? = null
+    private var handler: AddressUpdateService.Handleupdate? = null
 
-    private val handler = object : Handler() {
+    private val testHandler = object : Handler() {
         override fun handleMessage(msg: Message) {
 
         }
@@ -35,6 +40,8 @@ class AddressUpdateService : Service() {
         super.onCreate()
         Log.d("service", "oncreate service")
         mContext = this
+        handler=Handleupdate()
+
     }
 
     override fun onDestroy() {
@@ -55,6 +62,15 @@ class AddressUpdateService : Service() {
         Log.d("service", "onStartCommand")
         val mList=DataBaseController(mContext).getListOfNotUpdatedVisitedLocation();
         mList!!.forEach {
+            // TODO : write add address code here
+            val retroCallImplementor= RetroCallImplementor()
+           // var retroCallImplementor = RetroCallImplementor()
+            val latitude=it.latitude
+            val longitude=it.longitude
+            val location : Location = Location(it.locationProvider)
+            location.latitude=latitude
+            location.longitude=longitude
+            retroCallImplementor!!.getAllPlaces(latitude.toString() + "," + longitude.toString(), handler, location, location.provider)
 
         }
         //
@@ -71,6 +87,63 @@ class AddressUpdateService : Service() {
         }
 
     }
+
+
+
+    /*
+   This will handle the response from the API
+   we are setting the adapter here and update the recycler view.
+    */
+    internal inner class Handleupdate : RetroCallIneractor {
+
+        override fun updatePlaces(places: List<Result>, location: Location, locationType: String) {
+
+            try {
+                var result: Result? = null;
+
+                var minDistance: Float = 0.0F;
+                var pos: Int = 0;
+                places.forEach {
+                    //Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, it.name);
+                    var tempLoc = Location(LocationManager.GPS_PROVIDER);
+                    tempLoc.latitude = it.geometry.location.lat.toDouble()
+                    tempLoc.longitude = it.geometry.location.lng.toDouble()
+                    val distance = location.distanceTo(tempLoc)
+                    // Just to pick first prominent place within 10 metre
+                    if (distance < location.accuracy && pos == 0) {
+                        minDistance = distance
+                        result = it
+                        pos += 1
+                    }
+
+                    Log.i("Distance bt curr & res", it.name + "  " + location.distanceTo(tempLoc).toString());
+
+                }
+                if (result == null) {
+                    if (places.size > 1) {
+                        result = places.get(1)
+                    } else {
+                        result = places.get(0)
+                    }
+                }
+                //
+                insertAddress(result!!, location, locationType, places)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+        }
+
+        override fun updatePlaceDetails(place: Result) {
+
+        }
+
+
+        override fun onFailure() {
+
+        }
+    }
+    //
     fun insertAddress(resultPlace: Result, currentLocation: Location, locationType: String, mPlacesList: List<Result>) {
         //
         var result: Boolean = false
@@ -104,7 +177,7 @@ class AddressUpdateService : Service() {
             val locationProvider = currentLocation.provider;
             val toTime: Long = System.currentTimeMillis()
             //
-            result = DataBaseController(mContext).insertVisitedLocation(
+            result = DataBaseController(mContext).updateVisitedLocation(
                     VisitedLocationInformation(userId = 1, latitude = LATITUDE,
                             longitude = LONGITUDE, address = address, city = city,
                             state = state, country = country, postalCode = postalCode,
@@ -112,7 +185,7 @@ class AddressUpdateService : Service() {
                             locationProvider = locationProvider, rowID = 0,
                             locationRequestType = locationType, vicinity = vicinity,
                             placeId = placeId, photoUrl = photoUrl, nearByPlacesIds = nearByPlaces,
-                            isAddressSet = isAddressSet))
+                            isAddressSet = isAddressSet),1)
             //
             pref.setLong(System.currentTimeMillis(), AppConstant.SP_KEY_SPENT_TIME)
             Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
@@ -125,4 +198,5 @@ class AddressUpdateService : Service() {
         println(result)
 
     }
+
 }

@@ -67,7 +67,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         return newRowId > 0
     }
 
-    fun getContentValuesForVisitedLocation(infoLocation: VisitedLocationInformation): ContentValues {
+    private fun getContentValuesForVisitedLocation(infoLocation: VisitedLocationInformation): ContentValues {
         // Create a new map of values, where column names are the keys
         val values = ContentValues()
         values.put(DBContract.UserEntry.COLUMN_USER_ID, infoLocation.userId)
