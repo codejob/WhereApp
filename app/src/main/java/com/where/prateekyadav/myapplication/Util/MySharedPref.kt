@@ -47,6 +47,9 @@ class MySharedPref {
     fun getLong(key: String): Long {
         return mPref!!.getLong(key, 0L)
     }
+    fun getLastTimerTime(key: String): Long {
+        return mPref!!.getLong(key, System.currentTimeMillis())
+    }
 
     fun setLong(long: Long, key: String) {
         val editor = mPref!!.edit()
