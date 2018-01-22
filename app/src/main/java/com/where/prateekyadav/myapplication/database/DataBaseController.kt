@@ -54,7 +54,8 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         // Gets the data repository in write mode
         val db = getWritableDB()
         var values = getContentValuesForVisitedLocation(infoLocation)
-        values.remove(DBContract.VisitedLocationData.COLUMN_STAY_TIME)
+        values.remove(DBContract.VisitedLocationData.COLUMN_TO_TIME)
+        values.remove(DBContract.VisitedLocationData.COLUMN_FROM_TIME)
 
         // Update the new row, returning the primary key value of the new row
         val whereClause = "id = ?"
@@ -78,8 +79,8 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         values.put(DBContract.VisitedLocationData.COLUMN_COUNTRY, infoLocation.country)
         values.put(DBContract.VisitedLocationData.COLUMN_POSTAL_CODE, infoLocation.postalCode)
         values.put(DBContract.VisitedLocationData.COLUMN_KNOWN_NAME, infoLocation.knownName)
-        values.put(DBContract.VisitedLocationData.COLUMN_STAY_TIME, infoLocation.stayTime)
-        values.put(DBContract.VisitedLocationData.COLUMN_DATE_TIME, infoLocation.dateTime)
+        values.put(DBContract.VisitedLocationData.COLUMN_TO_TIME, infoLocation.toTime)
+        values.put(DBContract.VisitedLocationData.COLUMN_FROM_TIME, infoLocation.fromTime)
         values.put(DBContract.VisitedLocationData.COLUMN_LOCATION_PROVIDER, infoLocation.locationProvider)
         values.put(DBContract.VisitedLocationData.COLUMN_LOCATION_REQUEST_TYPE, infoLocation.locationRequestType)
         values.put(DBContract.VisitedLocationData.COLUMN_VICINITY, infoLocation.vicinity)
@@ -107,7 +108,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
             //
             if (cursor!!.moveToFirst()) {
                 while (cursor.isAfterLast == false) {
-                    time = cursor.getInt(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_STAY_TIME))
+                    time = cursor.getInt(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_TO_TIME))
                     cursor.moveToNext()
                 }
                 cursor.close()
@@ -116,7 +117,29 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
             val values = ContentValues()
             //
             time = time + stayTime;
-            values.put(DBContract.VisitedLocationData.COLUMN_STAY_TIME, time)
+            values.put(DBContract.VisitedLocationData.COLUMN_TO_TIME, time)
+            val whereClause = "id = ?"
+            val whereArgs = arrayOf(rowID.toString())
+
+            db.update(DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION
+                    , values, whereClause, whereArgs)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+    }
+
+    /**
+     * Method to update stay time into data base for the visited location
+     */
+    fun updateToTime(rowID: Int) {
+        try {// Gets the data repository in write mode
+            val db = getWritableDB()
+
+            // Create a new map of values, where column names are the keys
+            val values = ContentValues()
+            //
+            values.put(DBContract.VisitedLocationData.COLUMN_TO_TIME, System.currentTimeMillis())
             val whereClause = "id = ?"
             val whereArgs = arrayOf(rowID.toString())
 
@@ -140,8 +163,8 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
             return ArrayList()
         }
         //
-        if (cursor!!.moveToFirst()) {
-            while (cursor.isAfterLast == false) {
+        if (cursor!=null && cursor!!.moveToLast()) {
+            while (!cursor.isBeforeFirst) {
                 val visit = prepareVisitedLocationObject(cursor)
                 // get visited location object here through prepareVisitedLocationObject function
                 val QueryCount = "select count(*) from " + DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION +
@@ -154,7 +177,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
                 visitResults.noOfVisits = count.toInt()
                 visitResultsList.add(visitResults)
 
-                cursor.moveToNext()
+                cursor.moveToPrevious()
             }
             cursor.close()
         }
@@ -235,7 +258,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         var country: String
         var postalCode: String
         var knownName: String
-        var stayTime: Int
+        var stayTime: Long
         var dateTime: Long
         var locationProvider: String
         var locationRequestType: String
@@ -255,8 +278,8 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         country = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_COUNTRY))
         postalCode = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_POSTAL_CODE))
         knownName = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_KNOWN_NAME))
-        stayTime = cursor.getInt(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_STAY_TIME))
-        dateTime = cursor.getLong(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_DATE_TIME))
+        stayTime = cursor.getLong(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_TO_TIME))
+        dateTime = cursor.getLong(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_FROM_TIME))
         locationProvider = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_LOCATION_PROVIDER))
         locationRequestType = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_LOCATION_REQUEST_TYPE))
         vicinity = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_VICINITY))
@@ -293,7 +316,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         longitude = cursor.getDouble(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_LONGITUDE))
         address = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_ADDRESS))
         knownName = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_KNOWN_NAME))
-        dateTime = cursor.getLong(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_DATE_TIME))
+        dateTime = cursor.getLong(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_FROM_TIME))
         locationRequestType = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_LOCATION_REQUEST_TYPE))
         vicinity = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_VICINITY))
         placeId = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_PLACE_ID))
@@ -387,7 +410,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
                     values.put(DBContract.VisitedLocationData.COLUMN_LONGITUDE, it.longitude)
                     values.put(DBContract.VisitedLocationData.COLUMN_ADDRESS, it.address)
                     values.put(DBContract.VisitedLocationData.COLUMN_KNOWN_NAME, it.knownName)
-                    values.put(DBContract.VisitedLocationData.COLUMN_DATE_TIME, it.dateTime)
+                    values.put(DBContract.VisitedLocationData.COLUMN_FROM_TIME, it.fromTime)
                     values.put(DBContract.VisitedLocationData.COLUMN_LOCATION_REQUEST_TYPE, it.locationRequestType)
                     values.put(DBContract.VisitedLocationData.COLUMN_VICINITY, it.vicinity)
                     values.put(DBContract.VisitedLocationData.COLUMN_PLACE_ID, it.placeId)
@@ -436,33 +459,33 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         return true
     }
 
-   /* public fun searchLocationOnline(place: Place): List<SearchResult>? {
-        var searchResultList = ArrayList<SearchResult>()
-        try {
-            var visitedLocationInfoList = ArrayList<VisitedLocationInformation>()
-            visitedLocationInfoList = getVisitedLocationsFromPlaceid(place.id) as ArrayList<VisitedLocationInformation>
+    /* public fun searchLocationOnline(place: Place): List<SearchResult>? {
+         var searchResultList = ArrayList<SearchResult>()
+         try {
+             var visitedLocationInfoList = ArrayList<VisitedLocationInformation>()
+             visitedLocationInfoList = getVisitedLocationsFromPlaceid(place.id) as ArrayList<VisitedLocationInformation>
 
-            if (visitedLocationInfoList == null || visitedLocationInfoList.size == 0) {
-                visitedLocationInfoList = getVisitedLocationsFromNearByPlaceidArray(place.id) as ArrayList<VisitedLocationInformation>
-                if (visitedLocationInfoList != null && visitedLocationInfoList.size > 0) {
-                    searchResultList = parseSearchResult(visitedLocationInfoList) as ArrayList<SearchResult>
+             if (visitedLocationInfoList == null || visitedLocationInfoList.size == 0) {
+                 visitedLocationInfoList = getVisitedLocationsFromNearByPlaceidArray(place.id) as ArrayList<VisitedLocationInformation>
+                 if (visitedLocationInfoList != null && visitedLocationInfoList.size > 0) {
+                     searchResultList = parseSearchResult(visitedLocationInfoList) as ArrayList<SearchResult>
 
-                } else {
-                    ///// No match found from place ID
-                }
+                 } else {
+                     ///// No match found from place ID
+                 }
 
-            } else {
-                /////////////// Exact match///////////////////
-                searchResultList = parseSearchResult(visitedLocationInfoList) as ArrayList<SearchResult>
+             } else {
+                 /////////////// Exact match///////////////////
+                 searchResultList = parseSearchResult(visitedLocationInfoList) as ArrayList<SearchResult>
 
-            }
+             }
 
-            return searchResultList
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        return searchResultList
-    }*/
+             return searchResultList
+         } catch (e: Exception) {
+             e.printStackTrace()
+         }
+         return searchResultList
+     }*/
 
     public fun parseSearchResult(visitResultsList: List<VisitResults>): List<SearchResult>? {
         var searchResultList = ArrayList<SearchResult>()
@@ -569,7 +592,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
                     searchResultList = parseSearchResult(visitResultsList) as ArrayList<SearchResult>
 
                 } else {
-                   searchResultList= readAllVisitedLocation()
+                    //searchResultList = readAllVisitedLocation()
                     ///// No match found from place ID
                 }
 

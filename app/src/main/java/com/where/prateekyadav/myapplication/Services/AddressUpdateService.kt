@@ -75,7 +75,7 @@ class AddressUpdateService : Service() {
         //
         var result: Boolean = false
         try {
-            var pref = MySharedPref(mContext);
+            var pref = MySharedPref.getinstance(mContext);
             var geocoder = Geocoder(mContext, Locale.getDefault())
             val address = resultPlace.name;
 
@@ -100,15 +100,15 @@ class AddressUpdateService : Service() {
             val country = addresses[0].getCountryName()
             val postalCode = addresses[0].getPostalCode()
             val knownName = addresses[0].getFeatureName() // Only if available else return NULL
-            val tsLong = System.currentTimeMillis()
+            val fromTime = System.currentTimeMillis()
             val locationProvider = currentLocation.provider;
-            val stayTIme: Int = ((System.currentTimeMillis() - pref.getLong(AppConstant.SP_KEY_SPENT_TIME)) / (1000 * 60)).toInt()
+            val toTime: Long = System.currentTimeMillis()
             //
             result = DataBaseController(mContext).insertVisitedLocation(
                     VisitedLocationInformation(userId = 1, latitude = LATITUDE,
                             longitude = LONGITUDE, address = address, city = city,
                             state = state, country = country, postalCode = postalCode,
-                            knownName = knownName, stayTime = stayTIme, dateTime = tsLong,
+                            knownName = knownName, toTime = toTime, fromTime = fromTime,
                             locationProvider = locationProvider, rowID = 0,
                             locationRequestType = locationType, vicinity = vicinity,
                             placeId = placeId, photoUrl = photoUrl, nearByPlacesIds = nearByPlaces,

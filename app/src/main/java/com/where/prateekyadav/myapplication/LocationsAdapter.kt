@@ -20,11 +20,14 @@ class LocationsAdapter() : BaseAdapter() {
     var mContext: Context? = null;
     var mLocationList: List<SearchResult>? = null;
     var inflater: LayoutInflater? = null
+    var pref: MySharedPref? = null
 
     constructor(context: Context, locationList: List<SearchResult>) : this() {
         mContext = context;
         mLocationList = locationList;
         inflater = LayoutInflater.from(context);
+        pref = MySharedPref.getinstance(context)
+        pref!!.getFloat(AppConstant.SP_KEY_ACCURACY)
 
     }
 
@@ -47,8 +50,11 @@ class LocationsAdapter() : BaseAdapter() {
         } else {
 
         }
-        val cal = Calendar.getInstance();
-        cal.timeInMillis = mLocationList!!.get(position).visitResults.visitedLocationInformation.dateTime
+        val calToTime = Calendar.getInstance();
+        val calFromTime = Calendar.getInstance();
+        calToTime.timeInMillis = mLocationList!!.get(position).visitResults.visitedLocationInformation.toTime
+        calFromTime.timeInMillis = mLocationList!!.get(position).visitResults.visitedLocationInformation.fromTime
+
         var addresss =
 
                 """   Name:  ${mLocationList!!.get(position).visitResults.visitedLocationInformation.address}
@@ -57,11 +63,13 @@ class LocationsAdapter() : BaseAdapter() {
 
                  No of visits:   ${mLocationList!!.get(position).visitResults.noOfVisits}
 
-                 Stay time:=> ${mLocationList!!.get(position).visitResults.visitedLocationInformation.stayTime} minutes
+                 FROM time:=> ${calFromTime.time}
+
+                 TO time:=> ${calToTime.time}
+
                  Req Type:=> ${mLocationList!!.get(position).visitResults.visitedLocationInformation.locationRequestType}
                  Provider :=> ${mLocationList!!.get(position).visitResults.visitedLocationInformation.locationProvider}
-                 Time updated :=> ${cal.time}
-                 Last accuracy :=> ${MySharedPref(mContext).getFloat(AppConstant.SP_KEY_ACCURACY)}
+                 Last accuracy :=> ${pref!!.getFloat(AppConstant.SP_KEY_ACCURACY)}
                  Lat:=> ${mLocationList!!.get(position).visitResults.visitedLocationInformation.latitude}
                  Long:=> ${mLocationList!!.get(position).visitResults.visitedLocationInformation.longitude} """
 

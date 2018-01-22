@@ -67,8 +67,11 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
 
             override fun onTextChanged(s: CharSequence, start: Int,
                                        before: Int, count: Int) {
-                if (s.length > 2 || s.length==0)
+                if (s.length > 2)
                     search(s.toString())
+                else if (s.length == 0) {
+                    setLocationRestults(DataBaseController(this@MainActivity).readAllVisitedLocation())
+                }
             }
         })
     }
@@ -179,11 +182,12 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
         super.onResume()
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            var clear: EditText = autocompleteFragment!!.getView().findViewById(R.id.place_autocomplete_search_input)
+           /* var clear: EditText = autocompleteFragment!!.getView().findViewById(R.id.place_autocomplete_search_input)
             if (clear != null &&
                     clear.text.isBlank()) {
-                setLocationRestults(DataBaseController(this).readAllVisitedLocation())
-            }
+            }*/
+            setLocationRestults(DataBaseController(this).readAllVisitedLocation())
+
             //mLocationHelper?.getLocation()
             if (!AppUtility().checkAlarmAlreadySet(this)) {
                 AppUtility().startTimerAlarm(this);
@@ -309,7 +313,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
             // var searchResultsList = DataBaseController(this).searchLocationOnline(place)
             var searchResultsList = DataBaseController(this).searchLocationOffline(place)
 
-            if (searchResultsList != null && searchResultsList.size > 0) {
+            if (searchResultsList != null ) {
                 searchResultsList.forEach {
                     //Toast.makeText(this, it.visitedLocationInformation.address, Toast.LENGTH_SHORT).show()
                     Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Place: " + it.visitResults.visitedLocationInformation.vicinity)

@@ -4,6 +4,7 @@ import android.location.Location;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.where.prateekyadav.myapplication.Util.AppConstant;
 import com.where.prateekyadav.myapplication.search.model.Places;
 import com.where.prateekyadav.myapplication.search.model.placesdetails.PhotoDetails;
 import com.where.prateekyadav.myapplication.search.model.placesdetails.Result;
@@ -30,7 +31,7 @@ public class RetroCallImplementor {
         ApiInterface apiService =
                 ApiClient.getClient().create(ApiInterface.class);
 
-        Call<Places> call = apiService.getPlacesNearBy(query,location.getAccuracy()+"", Constant.API_KEY_PLACES);
+        Call<Places> call = apiService.getPlacesNearBy(query, AppConstant.Companion.getRADIUS_NEARBY_SEARCH()+"", Constant.API_KEY_PLACES);
         call.enqueue(new Callback<Places>() {
             @Override
             public void onResponse(Call<Places> call, Response<Places> response) {

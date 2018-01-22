@@ -301,7 +301,7 @@ class LocationHelper {
         /*Toast.makeText(mContext, address,
                 Toast.LENGTH_LONG).show();*/
 
-        var pref = MySharedPref(mContext);
+        var pref = MySharedPref.getinstance(mContext);
         var spLatitude: Double = pref.getLatitude();
         var spLongitude: Double = pref.getLongitude();
         var spacuuracy: Float = pref.getFloat(AppConstant.SP_KEY_ACCURACY);
@@ -324,8 +324,7 @@ class LocationHelper {
         var insert = false;
         if (spLatitude == 0.0) {
             insert = false;
-            pref.setLong(System.currentTimeMillis(), AppConstant.SP_KEY_SPENT_TIME)
-            pref.setFloat(currentLocation.accuracy, AppConstant.SP_KEY_ACCURACY)
+            pref.setLong(System.currentTimeMillis(), AppConstant.SP_KEY_FIRST_TIME)
 
         } else {
             Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
@@ -343,12 +342,11 @@ class LocationHelper {
                     insert = true
                 }
                 Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Updating stay time")
-                val stayTIme: Int = ((System.currentTimeMillis() - pref.getLong(AppConstant.SP_KEY_SPENT_TIME)) / (1000 * 60)).toInt()
-                mDataBaseController.updateStayTime(lastDBLocation.rowID, stayTIme);
+                //val stayTIme: Int = ((System.currentTimeMillis() - pref.getLong(AppConstant.SP_KEY_SPENT_TIME)) / (1000 * 60)).toInt()
+                mDataBaseController.updateToTime(lastDBLocation.rowID);
                 AppUtility().sendUpdateMessage(mContext!!);
 
             }
-
 
         }
         pref.setLocation(LATITUDE, LONGITUDE);
@@ -368,7 +366,7 @@ class LocationHelper {
         //
         var result: Boolean = false
         try {
-            var pref = MySharedPref(mContext);
+            var pref = MySharedPref.getinstance(mContext);
             var geocoder = Geocoder(mContext, Locale.getDefault())
             //var location: Location = Location(LocationManager.GPS_PROVIDER)
             //location.latitude = resultPlace.geometry.location.lat.toDouble()
@@ -395,9 +393,9 @@ class LocationHelper {
             val country = addresses[0].getCountryName()
             val postalCode = addresses[0].getPostalCode()
             val knownName = addresses[0].getFeatureName() // Only if available else return NULL
-            val tsLong = System.currentTimeMillis()
+            val toTime = System.currentTimeMillis()
             val locationProvider = currentLocation.provider;
-            val stayTIme: Int = ((System.currentTimeMillis() - pref.getLong(AppConstant.SP_KEY_SPENT_TIME)) / (1000 * 60)).toInt()
+            var fromTime: Long = System.currentTimeMillis()
             //
             var dbLastLocation = Location(LocationManager.GPS_PROVIDER);
             var lastDBLocation = mDataBaseController.readLastVisitedLocation()
@@ -406,12 +404,14 @@ class LocationHelper {
                 dbLastLocation.latitude = lastDBLocation!!.latitude
                 dbLastLocation.longitude = lastDBLocation!!.longitude
             }
+            if (lastDBLocation == null) fromTime = pref.getLong(AppConstant.SP_KEY_FIRST_TIME)
+
             if (lastDBLocation != null && currentLocation.distanceTo(dbLastLocation) < AppConstant.MIN_DISTANCE_RANGE) {
                 result = mDataBaseController.updateVisitedLocation(
                         VisitedLocationInformation(userId = 1, latitude = LATITUDE,
                                 longitude = LONGITUDE, address = address, city = city,
                                 state = state, country = country, postalCode = postalCode,
-                                knownName = knownName, stayTime = stayTIme, dateTime = tsLong,
+                                knownName = knownName, toTime = toTime, fromTime = fromTime,
                                 locationProvider = locationProvider, rowID = 0,
                                 locationRequestType = locationType, vicinity = vicinity,
                                 placeId = placeId, photoUrl = photoUrl, nearByPlacesIds = nearByPlaces,
@@ -422,7 +422,7 @@ class LocationHelper {
                         VisitedLocationInformation(userId = 1, latitude = LATITUDE,
                                 longitude = LONGITUDE, address = address, city = city,
                                 state = state, country = country, postalCode = postalCode,
-                                knownName = knownName, stayTime = stayTIme, dateTime = tsLong,
+                                knownName = knownName, toTime = toTime, fromTime = fromTime,
                                 locationProvider = locationProvider, rowID = 0,
                                 locationRequestType = locationType, vicinity = vicinity,
                                 placeId = placeId, photoUrl = photoUrl, nearByPlacesIds = nearByPlaces,
@@ -494,6 +494,13 @@ class LocationHelper {
                     Log.i("Distance bt curr & res", it.name + "  " + location.distanceTo(tempLoc).toString());
 
                 }
+                if (result == null) {
+                    if (places.size > 1) {
+                        result = places.get(1)
+                    } else {
+                        result = places.get(0)
+                    }
+                }
                 insertAddress(result!!, location, locationType, places)
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -520,7 +527,7 @@ class LocationHelper {
             places.forEach {
                 var result: Boolean = false
                 try {
-                    var pref = MySharedPref(mContext);
+                    var pref = MySharedPref.getinstance(mContext);
                     val address = it.name;
                     val vicinity = it.vicinity
                     val placeId = it.placeId
@@ -541,16 +548,15 @@ class LocationHelper {
                     val country = addresses[0].getCountryName()
                     val postalCode = addresses[0].getPostalCode()
                     val knownName = addresses[0].getFeatureName() // Only if available else return NULL
-                    val tsLong = System.currentTimeMillis()
+                    val fromTime = System.currentTimeMillis()
                     val locationProvider = "NA";
                     val locationType = "NA";
-                    val stayTIme: Int = ((System.currentTimeMillis() - pref.getLong(AppConstant.SP_KEY_SPENT_TIME)) / (1000 * 60)).toInt()
+                    val toTime: Long = System.currentTimeMillis();
                     //
                     mList.add(VisitedLocationInformation(userId = 1, latitude = LATITUDE,
                             longitude = LONGITUDE, address = address, city = city,
                             state = state, country = country, postalCode = postalCode,
-                            knownName = knownName, stayTime = stayTIme, dateTime = tsLong,
-
+                            knownName = knownName, toTime = toTime, fromTime = fromTime,
                             locationProvider = locationProvider, rowID = 0,
                             locationRequestType = locationType, vicinity = vicinity,
                             placeId = placeId, photoUrl = photoUrl, nearByPlacesIds = nearPlaces,

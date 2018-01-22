@@ -93,8 +93,8 @@ open class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABAS
                         DBContract.VisitedLocationData.COLUMN_POSTAL_CODE + " TEXT," +
                         DBContract.VisitedLocationData.COLUMN_KNOWN_NAME + " TEXT," +
                         DBContract.VisitedLocationData.COLUMN_VICINITY + " TEXT," +
-                        DBContract.VisitedLocationData.COLUMN_STAY_TIME + " INTEGER," +
-                        DBContract.VisitedLocationData.COLUMN_DATE_TIME + " TEXT," +
+                        DBContract.VisitedLocationData.COLUMN_TO_TIME + " INTEGER," +
+                        DBContract.VisitedLocationData.COLUMN_FROM_TIME + " TEXT," +
                         DBContract.VisitedLocationData.COLUMN_PLACE_ID + " TEXT," +
                         DBContract.VisitedLocationData.COLUMN_PHOTO_URL + " TEXT," +
                         DBContract.VisitedLocationData.COLUMN_NEARBY_PLACES_IDS + " TEXT," +
@@ -113,7 +113,7 @@ open class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABAS
                         DBContract.VisitedLocationData.COLUMN_VICINITY + " TEXT," +
                         DBContract.VisitedLocationData.COLUMN_PLACE_ID + " TEXT," +
                         DBContract.VisitedLocationData.COLUMN_PHOTO_URL + " TEXT," +
-                        DBContract.VisitedLocationData.COLUMN_DATE_TIME + " TEXT," +
+                        DBContract.VisitedLocationData.COLUMN_FROM_TIME + " TEXT," +
                         DBContract.VisitedLocationData.COLUMN_LOCATION_REQUEST_TYPE + " TEXT)"
 
 
