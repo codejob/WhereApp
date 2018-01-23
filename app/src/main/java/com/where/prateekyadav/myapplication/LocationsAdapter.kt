@@ -26,7 +26,7 @@ class LocationsAdapter() : BaseAdapter() {
         mContext = context;
         mLocationList = locationList;
         inflater = LayoutInflater.from(context);
-        pref = MySharedPref.getinstance(context)
+        pref = MySharedPref.getinstance(mContext!!.applicationContext)
         pref!!.getFloat(AppConstant.SP_KEY_ACCURACY)
 
     }

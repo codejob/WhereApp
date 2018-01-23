@@ -37,17 +37,17 @@
             android:name=".AlarmReceiverLocation"
             android:enabled="true"
             android:exported="true"
-            android:process=":remote" />
+            />
         <!--  [ ALARM RECEIVER ] -->
 
         <!--  [ NETWORK RECEIVER ] -->
 
         <receiver android:name=".broadcastreceiver.NetworkConnectionReceiver"
             android:label="NetworkConnectionReceiver" >
-            <intent-filter >
+            <!--<intent-filter >
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
                 <action android:name="android.net.wifi.STATE_CHANGE" />
-            </intent-filter>
+            </intent-filter>-->
         </receiver>
 
         <!--  [ NETWORK RECEIVER ] -->

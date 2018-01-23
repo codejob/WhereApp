@@ -10,10 +10,11 @@ import android.content.SharedPreferences
 class MySharedPref {
 
     open var myPrefName: String = "mypref";
+    var editor: SharedPreferences.Editor? = null
 
     companion object {
         var myPref: MySharedPref? = null
-        var mPref: SharedPreferences?=null
+        var mPref: SharedPreferences? = null
         fun getinstance(context: Context?): MySharedPref {
             if (myPref == null) {
                 myPref = MySharedPref(context)
@@ -29,10 +30,10 @@ class MySharedPref {
 
 
     fun setLocation(latitude: Double, longitude: Double) {
-        val editor = mPref!!.edit()
-        editor.putFloat(AppConstant.sharedKeyLatitude, latitude.toFloat())
-        editor.putFloat(AppConstant.sharedKeyLongitude, longitude.toFloat())
-        editor.apply()
+        editor = mPref!!.edit()
+        editor!!.putFloat(AppConstant.sharedKeyLatitude, latitude.toFloat())
+        editor!!.putFloat(AppConstant.sharedKeyLongitude, longitude.toFloat())
+        editor!!.commit()
     }
 
 
@@ -47,14 +48,12 @@ class MySharedPref {
     fun getLong(key: String): Long {
         return mPref!!.getLong(key, 0L)
     }
-    fun getLastTimerTime(key: String): Long {
-        return mPref!!.getLong(key, System.currentTimeMillis())
-    }
+
 
     fun setLong(long: Long, key: String) {
-        val editor = mPref!!.edit()
-        editor.putLong(key, long)
-        editor.apply()
+        editor = mPref!!.edit()
+        editor!!.putLong(key, long)
+        editor!!.commit()
     }
 
     fun getFloat(key: String): Float {
@@ -62,8 +61,8 @@ class MySharedPref {
     }
 
     fun setFloat(float: Float, key: String) {
-        val editor = mPref!!.edit()
-        editor.putFloat(key, float)
-        editor.apply()
+        editor = mPref!!.edit()
+        editor!!.putFloat(key, float)
+        editor!!.commit()
     }
 }

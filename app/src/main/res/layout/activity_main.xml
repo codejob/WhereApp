@@ -7,19 +7,6 @@
     tools:context="com.where.prateekyadav.myapplication.MainActivity">
 
     <LinearLayout
-        android:id="@+id/lyt_lin_search"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone">
-
-        <fragment
-            android:id="@+id/place_autocomplete_fragment"
-            android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
-
-    <LinearLayout
         android:id="@+id/lyt_lin_search_offline"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -33,7 +20,7 @@
     </LinearLayout>
 
     <ListView
-        android:id="@+id/list"
+        android:id="@+id/lv_address"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/lyt_lin_search_offline" />
