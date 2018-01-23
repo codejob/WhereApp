@@ -513,20 +513,28 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
     public fun parseSearchResult(visitResultsList: List<VisitResults>): List<SearchResult>? {
         var searchResultList = ArrayList<SearchResult>()
 
-        var searchResult: SearchResult?
-        //// Get the nearby of all the visited location
-        visitResultsList.forEach {
-            var nearByPlaceList = ArrayList<NearByPlace>()
-            val visitResults = it;
-            val nearByIDS = visitResults.visitedLocationInformation.nearByPlacesIds
-            nearByIDS.split(",").forEach {
-                val id = it
-                nearByPlaceList.add(getNearbyPlace(id)!!)
+        try {
+            var searchResult: SearchResult?
+            //// Get the nearby of all the visited location
+            visitResultsList.forEach {
+                var nearByPlaceList = ArrayList<NearByPlace>()
+                val visitResults = it;
+                val nearByIDS = visitResults.visitedLocationInformation.nearByPlacesIds
+                try {
+                    nearByIDS.split(",").forEach {
+                        val id = it
+                        nearByPlaceList.add(getNearbyPlace(id)!!)
 
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+                searchResult = SearchResult(visitResults, nearByPlaceList)
+
+                searchResultList.add(searchResult!!)
             }
-            searchResult = SearchResult(visitResults, nearByPlaceList)
-
-            searchResultList.add(searchResult!!)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
         return searchResultList
     }
@@ -741,6 +749,51 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         }
         closeDataBase(sqLiteDatabase)
         return visitedLocationInfo
+    }
+
+    fun deleteVisitedPlaceAndUniqueNearByForIt(visitedLocationInformationList: List<VisitedLocationInformation>) {
+        val sqLiteDatabase = getWritableDB()
+        visitedLocationInformationList.forEach {
+            val visitedLocationInformation = it
+
+            val nearByIDS = visitedLocationInformation.nearByPlacesIds
+            ////////////Deletting the current  visited row////
+            deleteVisitEntry(visitedLocationInformation)
+
+            try {
+                nearByIDS.split(",").forEach {
+                    val id = it
+                    val list = getVisitedLocationsFromNearByPlaceidArray(id)
+                    if (list!!.size == 0) {
+
+                        deleteNearByEntry(id)
+                    }
+
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+        closeDataBase(sqLiteDatabase)
+
+
+    }
+
+    fun deleteVisitEntry(visitedLocationInformation: VisitedLocationInformation) {
+        val whereClause = "id = ?"
+        val whereArgs = arrayOf(visitedLocationInformation.rowID.toString())
+
+        val newRowId = sqLiteDatabase.delete(DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION
+                , whereClause, whereArgs)
+    }
+
+    fun deleteNearByEntry(placeID: String) {
+        val whereClause = DBContract.VisitedLocationData.COLUMN_PLACE_ID + " = ?"
+        val whereArgs = arrayOf(placeID)
+
+        val newRowId = sqLiteDatabase.delete(DBContract.NearByLocationData.TABLE_NAME_NEARBY_LOCATION
+                , whereClause, whereArgs)
+
     }
 
 }

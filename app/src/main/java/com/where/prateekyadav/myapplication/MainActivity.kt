@@ -4,35 +4,30 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import kotlinx.android.synthetic.main.activity_main.*
 import android.content.pm.PackageManager
 import android.support.v4.content.ContextCompat
 import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AlertDialog
 import android.content.*
-import android.os.Build
 import android.util.Log
-import android.view.View
 import android.widget.EditText
-import android.widget.ImageButton
 import android.widget.Toast
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.Status
 import com.where.prateekyadav.myapplication.Util.AppUtility
 import com.where.prateekyadav.myapplication.Util.AppConstant
-import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
 import com.google.android.gms.location.places.Place
 import com.google.android.gms.location.places.ui.PlaceSelectionListener
-import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment
 import com.google.android.gms.common.api.GoogleApiClient
 import com.where.prateekyadav.myapplication.Util.PermissionCheckHandler
 import com.where.prateekyadav.myapplication.database.DataBaseController
-import com.where.prateekyadav.myapplication.database.DatabaseHelper
 import com.where.prateekyadav.myapplication.modal.SearchResult
-import com.where.prateekyadav.myapplication.modal.VisitResults
 import android.text.Editable
 import android.text.TextWatcher
-import com.where.prateekyadav.myapplication.Services.TimerService
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ListView
+import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
 
 
 class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConnectionFailedListener, PlaceSelectionListener {
@@ -40,11 +35,16 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
 
     val RQS_1 = 1
     var mLocationHelper: LocationHelper? = null;
-    var autocompleteFragment: PlaceAutocompleteFragment? = null;
+    var mListView: ListView? = null
+    var mAdapter: LocationsAdapter? = null
+    var mSearchResultsList = ArrayList<SearchResult>();
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        mListView = findViewById(R.id.lv_address)
+        mAdapter = LocationsAdapter(this, mSearchResultsList)
+        mListView!!.adapter = mAdapter
         mLocationHelper = LocationHelper.getInstance(applicationContext, this);
         if (PermissionCheckHandler.checkNetWorkPermissions(this)) {
             checkLocationPermission()
@@ -53,8 +53,22 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
         }
         //
         DataBaseController(this).copyDataBaseToSDCard()
-        setAutoCompleteView()
         setSearchListener()
+        setListClickListener()
+    }
+
+    fun setListClickListener() {
+        mListView!!.setOnItemClickListener(object : AdapterView.OnItemClickListener {
+
+            override fun onItemClick(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+                val listItem = mListView!!.getItemAtPosition(position) as SearchResult
+                val visit = listItem!!.visitResults.visitedLocationInformation
+                val visitList = ArrayList<VisitedLocationInformation>()
+                visitList.add(visit)
+                DataBaseController(this@MainActivity).deleteVisitedPlaceAndUniqueNearByForIt(visitList)
+                setLocationResults(DataBaseController(this@MainActivity).readAllVisitedLocation())
+            }
+        })
     }
 
     fun setSearchListener() {
@@ -72,28 +86,10 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
                 if (s.length > 2)
                     search(s.toString())
                 else if (s.length == 0) {
-                    setLocationRestults(DataBaseController(this@MainActivity).readAllVisitedLocation())
+                    setLocationResults(DataBaseController(this@MainActivity).readAllVisitedLocation())
                 }
             }
         })
-    }
-
-    @SuppressLint("ResourceType")
-    fun setAutoCompleteView() {
-        autocompleteFragment = fragmentManager.findFragmentById(R.id.place_autocomplete_fragment) as PlaceAutocompleteFragment
-        autocompleteFragment!!.setOnPlaceSelectedListener(this)
-        var clear: ImageButton = autocompleteFragment!!.getView().findViewById(R.id.place_autocomplete_clear_button)
-        clear.setOnClickListener(object : View.OnClickListener {
-            override fun onClick(view: View) {
-                // example : way to access view from PlaceAutoCompleteFragment
-                // ((EditText) autocompleteFragment.getView()
-                // .findViewById(R.id.place_autocomplete_search_input)).setText("");
-                autocompleteFragment!!.setText("")
-                view.setVisibility(View.GONE)
-                setLocationRestults(DataBaseController(this@MainActivity).readAllVisitedLocation())
-            }
-        })
-
     }
 
 
@@ -189,7 +185,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
              if (clear != null &&
                      clear.text.isBlank()) {
              }*/
-            setLocationRestults(DataBaseController(this).readAllVisitedLocation())
+            setLocationResults(DataBaseController(this).readAllVisitedLocation())
 
             //mLocationHelper?.getLocation()
             /*if (!AppUtility().checkAlarmAlreadySet(this)) {
@@ -200,7 +196,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
         }
         AppUtility().validateAutoStartTimer(this)
         if (!AppUtility().checkAlarmAlreadySet(this)) {
-            AppUtility().startTimerAlarm(this);
+            AppUtility().startTimerAlarm(this)
         }
         //registerReceiver()
         //AppUtility().inssertDemoLocation(this)
@@ -219,23 +215,13 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
     }
 
 
-    /*fun setLocation(address: List<VisitedLocationInformation>) {
+    fun setLocationResults(address: List<SearchResult>) {
         try {
-            if (address != null) {
-                var searchResults = DataBaseController(this).parseSearchResult(address)
-                list.adapter = LocationsAdapter(this, searchResults!!)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
-    }*/
-
-    fun setLocationRestults(address: List<SearchResult>) {
-        try {
-            if (address != null) {
-                list.adapter = LocationsAdapter(this, address!!)
-            }
+            mSearchResultsList = address as ArrayList<SearchResult>
+            mAdapter = LocationsAdapter(this, mSearchResultsList)
+            mListView!!.adapter = mAdapter
+            // mAdapter!!.notifyDataSetChanged()
+            //mAdapter!!.notifyDataSetInvalidated()
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -252,7 +238,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
             val isUpdated = intent.getBooleanExtra(AppConstant.LOCATION_UPDATE_MESSAGE, false);
             if (isUpdated) {
                 runOnUiThread({
-                    updateLocationAddressList(
+                    setLocationResults(
                             DataBaseController(this@MainActivity).readAllVisitedLocation())
 
                 });
@@ -304,7 +290,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
                     Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Place: " + it.visitResults.visitedLocationInformation.vicinity)
 
                 }
-                setLocationRestults(searchResultsList)
+                setLocationResults(searchResultsList)
             } else {
                 //setLocation(DataBaseController(this).readAllVisitedLocation())
 
@@ -328,7 +314,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
                     Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Place: " + it.visitResults.visitedLocationInformation.vicinity)
 
                 }
-                setLocationRestults(searchResultsList)
+                setLocationResults(searchResultsList)
             } else {
                 //setLocation(DataBaseController(this).readAllVisitedLocation())
 
@@ -351,7 +337,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
 
 
     override fun updateLocationAddressList(addressList: List<SearchResult>) {
-        setLocationRestults(addressList)
+        setLocationResults(addressList)
     }
 
 }

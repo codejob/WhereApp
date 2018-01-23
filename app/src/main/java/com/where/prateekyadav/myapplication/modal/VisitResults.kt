@@ -8,7 +8,7 @@ import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
  */
 class VisitResults(var visitedLocationInformation: VisitedLocationInformation) {
 
-    public var noOfVisits: Int = 0
-    public var showFromNearBy: Boolean = false;
-    public var nearByPlaceIDToShow: NearByPlace? = null;
+    var noOfVisits: Int = 0
+    var showFromNearBy: Boolean = false;
+    var nearByPlaceIDToShow: NearByPlace? = null;
 }

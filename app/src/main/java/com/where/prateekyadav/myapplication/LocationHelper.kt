@@ -382,7 +382,7 @@ class LocationHelper {
         //
         var result: Long = 0
         try {
-            var pref = MySharedPref.getinstance(mContext);
+            var pref = MySharedPref.getinstance(mContext!!.applicationContext);
             var geocoder = Geocoder(mContext, Locale.getDefault())
             //var location: Location = Location(LocationManager.GPS_PROVIDER)
             //location.latitude = resultPlace.geometry.location.lat.toDouble()
@@ -491,7 +491,7 @@ class LocationHelper {
                     tempLoc.longitude = it.geometry.location.lng.toDouble()
                     val distance = location.distanceTo(tempLoc)
                     // Just to pick first prominent place within 10 metre
-                    if (distance < location.accuracy && pos == 0) {
+                    if (distance < AppConstant.RADIUS_NEARBY_SEARCH && pos == 0) {
                         minDistance = distance
                         result = it
                         pos += 1
