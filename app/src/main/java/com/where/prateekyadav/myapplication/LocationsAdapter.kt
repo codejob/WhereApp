@@ -1,15 +1,21 @@
 package com.where.prateekyadav.myapplication
 
 import android.content.Context
+import android.content.Intent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
 import android.view.LayoutInflater
+import android.widget.Button
 import android.widget.TextView
 import com.where.prateekyadav.myapplication.Util.AppConstant
 import com.where.prateekyadav.myapplication.Util.MySharedPref
+import com.where.prateekyadav.myapplication.database.DBContract
 import com.where.prateekyadav.myapplication.modal.SearchResult
+import com.where.prateekyadav.myapplication.view.NearByActivity
+import com.where.prateekyadav.myapplication.view.VisitedActivity
+import java.io.Serializable
 import java.util.*
 
 
@@ -50,6 +56,29 @@ class LocationsAdapter() : BaseAdapter() {
         } else {
 
         }
+
+        mViewHolder.btnAllVisits.setOnClickListener(object : View.OnClickListener {
+            override fun onClick(p0: View?) {
+                 val listItem = getItem(position) as SearchResult
+                 val visit = listItem!!.visitResults.visitedLocationInformation
+                 var intent = Intent(mContext, VisitedActivity::class.java)
+                 intent.putExtra(DBContract.VisitedLocationData.COLUMN_PLACE_ID,visit.placeId)
+                 mContext!!.startActivity(intent)
+            }
+
+        })
+
+        mViewHolder.btnChooseNearBy.setOnClickListener(object : View.OnClickListener {
+            override fun onClick(p0: View?) {
+                val listItem =getItem(position) as SearchResult
+                val visit = listItem!!.listNearByPlace as Serializable
+                var intent = Intent(mContext, NearByActivity::class.java)
+                intent.putExtra("NearByList", visit)
+                mContext!!.startActivity(intent)
+            }
+
+        })
+
         val calToTime = Calendar.getInstance();
         val calFromTime = Calendar.getInstance();
         calToTime.timeInMillis = mLocationList!!.get(position).visitResults.visitedLocationInformation.toTime
@@ -95,9 +124,13 @@ class LocationsAdapter() : BaseAdapter() {
 
     private inner class MyViewHolder(item: View) {
         internal var tvTitle: TextView
+        internal var btnAllVisits: Button
+        internal var btnChooseNearBy: Button
 
         init {
             tvTitle = item.findViewById(R.id.tvTitle) as TextView
+            btnAllVisits = item.findViewById(R.id.btn_all_visits) as Button
+            btnChooseNearBy = item.findViewById(R.id.btn_choose_nearby) as Button
         }
     }
 
