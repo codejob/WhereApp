@@ -46,6 +46,9 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         if (rowId == 0L) {
             // Insert the new row, returning the primary key value of the new row
             newRowId = db.insert(DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION, null, values)
+            var visitedLocationInformation=readLastVisitedLocation();
+            newRowId=visitedLocationInformation!!.rowID;
+
         } else {
             updateVisitedLocation(infoLocation,rowId)
             newRowId=rowId;
@@ -158,13 +161,17 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
 
     }
 
-
+    /**
+     * Read all visited location from data base
+     */
     fun readAllVisitedLocation(): ArrayList<SearchResult> {
         val visitResultsList = ArrayList<VisitResults>()
         val db = getWritableDB()
         var cursor: Cursor? = null
         try {
-            cursor = db.rawQuery("select * from " + DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION, null)
+            var query = SELECT_FROM+ DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION
+                        WHERE+DBContract.VisitedLocationData.COLUMN_IS_ADDRESS_SET+ EQUALS_TO+1
+            cursor = db.rawQuery(query, null)
         } catch (e: SQLiteException) {
             createTables(db)
             return ArrayList()
@@ -309,7 +316,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         visitedLocationInformation.toTime=stayTime
         visitedLocationInformation.fromTime=dateTime
         visitedLocationInformation.locationProvider=locationProvider
-        visitedLocationInformation.rowID=0
+        visitedLocationInformation.rowID=rowID
         visitedLocationInformation.locationRequestType=locationRequestType
         visitedLocationInformation.vicinity=vicinity
         visitedLocationInformation.placeId=placeId

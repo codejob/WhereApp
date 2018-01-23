@@ -138,7 +138,7 @@ class AddressUpdateService : IntentService("ADDRESS UPDATE"), UpdateLocation {
                 }
                 //
                 var locationHelper= LocationHelper.getInstance(mContext,updateLocation!!)
-                locationHelper.addAddressIntoDataBase(result!!, location, locationType, places)
+                locationHelper.addAddressIntoDataBase(result!!, location, locationType, places,rowId)
 
             } catch (e: Exception) {
                 e.printStackTrace()

@@ -378,7 +378,8 @@ class LocationHelper {
     /**
      * Method to add address into database
      */
-    fun addAddressIntoDataBase(resultPlace: Result, currentLocation: Location, locationType: String, mPlacesList: List<Result>) {
+    fun addAddressIntoDataBase(resultPlace: Result, currentLocation: Location, locationType: String,
+                               mPlacesList: List<Result>,rowId: Long) {
         //
         var result: Long = 0
         try {
@@ -517,7 +518,7 @@ class LocationHelper {
                     }
                 }
                 //Add address into data base
-                addAddressIntoDataBase(result!!, location, locationType, places)
+                addAddressIntoDataBase(result!!, location, locationType, places,rowId)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
