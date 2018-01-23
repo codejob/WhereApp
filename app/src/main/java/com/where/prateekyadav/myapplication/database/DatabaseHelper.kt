@@ -99,6 +99,7 @@ open class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABAS
                         DBContract.VisitedLocationData.COLUMN_PHOTO_URL + " TEXT," +
                         DBContract.VisitedLocationData.COLUMN_NEARBY_PLACES_IDS + " TEXT," +
                         DBContract.VisitedLocationData.COLUMN_IS_ADDRESS_SET + " INTEGER," +
+                        DBContract.VisitedLocationData.COLUMN_ACCURACY + " INTEGER," +
                         DBContract.VisitedLocationData.COLUMN_LOCATION_PROVIDER + " TEXT," +
                         DBContract.VisitedLocationData.COLUMN_LOCATION_REQUEST_TYPE + " TEXT)"
 

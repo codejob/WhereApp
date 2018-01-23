@@ -18,7 +18,7 @@ open class AppConstant {
         val TAG_KOTLIN_DEMO_APP = "KotlinDemoApp"
         // Seconds
 
-        val LOCATION_SYNC_INSTERVAL: Long = 10*60 * 1000;
+        val LOCATION_SYNC_INSTERVAL: Long = 1*60 * 1000;
         val LOCATION_SYNC_TIMEOUT: Long = 20 * 1000;
         val RECEIVER_ACTION: String = "LOCATION";
         var MIN_DISTANCE_RANGE: Int = 200;

@@ -3,22 +3,25 @@ package com.where.prateekyadav.myapplication.database
 /**
  * Created by Infobeans on 1/10/2018.
  */
-data class VisitedLocationInformation(val userId: Int,
-                                      val latitude: Double,
-                                      val longitude: Double,
-                                      var address: String,
-                                      val city: String,
-                                      val state: String,
-                                      val country: String,
-                                      val postalCode: String,
-                                      val knownName: String,
-                                      val toTime: Long,
-                                      val fromTime: Long,
-                                      val locationProvider: String,
-                                      val locationRequestType: String,
-                                      val rowID: Int,
-                                      var vicinity: String,
-                                      val placeId: String,
-                                      val photoUrl: String,
-                                      val nearByPlacesIds: String,
-                                      val isAddressSet: Int)
+data class VisitedLocationInformation(var userUniqueNumber:String){
+    var userId: Int=0;
+    var latitude: Double=0.0
+    var longitude: Double=0.0
+    var address: String=""
+    var city: String=""
+    var state: String=""
+    var country: String=""
+    var postalCode: String=""
+    var knownName: String=""
+    var toTime: Long=0L
+    var fromTime: Long=0L
+    var locationProvider: String=""
+    var locationRequestType: String=""
+    var rowID: Long=0L
+    var vicinity: String=""
+    var placeId: String=""
+    var photoUrl: String=""
+    var nearByPlacesIds: String=""
+    var isAddressSet: Int=0
+    var accuracy: Float= 1000.0F
+}

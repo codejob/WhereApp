@@ -76,6 +76,7 @@ object DBContract {
             val COLUMN_PHOTO_URL = "photo_url"
             val COLUMN_NEARBY_PLACES_IDS = "near_by_places_ids"
             val COLUMN_IS_ADDRESS_SET = "is_address_set"
+            val COLUMN_ACCURACY = "accuracy"
         }
     }
 

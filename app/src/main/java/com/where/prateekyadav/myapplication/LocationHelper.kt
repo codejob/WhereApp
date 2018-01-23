@@ -21,7 +21,6 @@ import com.where.prateekyadav.myapplication.Util.PermissionCheckHandler
 import com.where.prateekyadav.myapplication.database.DataBaseController
 import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
 import com.where.prateekyadav.myapplication.modal.SearchResult
-import com.where.prateekyadav.myapplication.modal.VisitResults
 import com.where.prateekyadav.myapplication.search.model.placesdetails.Result
 import com.where.prateekyadav.myapplication.search.network.RetroCallImplementor
 import com.where.prateekyadav.myapplication.search.network.RetroCallIneractor
@@ -34,13 +33,13 @@ import java.util.*
  */
 class LocationHelper {
     lateinit var mDataBaseController: DataBaseController
-
     var locationManager: LocationManager? = null;
-
     var mContext: Context? = null;
     var mUpdateLocation: UpdateLocation? = null;
     var mLocationReceived: Boolean = false;
-
+    //
+    val ADDRESS_NOT_SET=0
+    val ADDRESS_SET=1
     companion object {
         var mCurrentObject: LocationHelper? = null;
         fun getInstance(context: Context?, updateLocation: UpdateLocation): LocationHelper {
@@ -349,11 +348,25 @@ class LocationHelper {
             }
 
         }
+        //
         pref.setLocation(LATITUDE, LONGITUDE);
 
-
         if (insert) {
-            retroCallImplementor!!.getAllPlaces(LATITUDE.toString() + "," + LONGITUDE.toString(), handler, location, locationType)
+            // TODO : insert location only here
+            var visitedLocationInformation = VisitedLocationInformation("");
+            visitedLocationInformation.userId=0;
+            visitedLocationInformation.latitude=LATITUDE
+            visitedLocationInformation.longitude=LONGITUDE
+            visitedLocationInformation.isAddressSet=ADDRESS_NOT_SET
+            visitedLocationInformation.locationProvider=currentLocation.provider
+            visitedLocationInformation.accuracy=currentLocation.accuracy
+            //
+            val insertedId=DataBaseController(mContext).insertVisitedLocation(visitedLocationInformation);
+            //
+            if (insertedId>0L) {
+                retroCallImplementor!!.getAllPlaces(LATITUDE.toString() + "," + LONGITUDE.toString(),
+                        handler, location, locationType, insertedId)
+            }
         } else {
             pref.setLong(System.currentTimeMillis(), AppConstant.SP_KEY_SPENT_TIME)
         }
@@ -362,9 +375,12 @@ class LocationHelper {
         return (visitedLocationList as List<SearchResult>?)!!
     }
 
-    fun insertAddress(resultPlace: Result, currentLocation: Location, locationType: String, mPlacesList: List<Result>) {
+    /**
+     * Method to add address into database
+     */
+    fun addAddressIntoDataBase(resultPlace: Result, currentLocation: Location, locationType: String, mPlacesList: List<Result>) {
         //
-        var result: Boolean = false
+        var result: Long = 0
         try {
             var pref = MySharedPref.getinstance(mContext);
             var geocoder = Geocoder(mContext, Locale.getDefault())
@@ -377,7 +393,7 @@ class LocationHelper {
             val placeId = resultPlace.placeId
             val photoUrl = resultPlace.photos.toString()
             val nearByPlaces = "";
-            val isAddressSet = 1;
+            val isAddressSet = ADDRESS_SET;
             var LATITUDE: Double = currentLocation.latitude
             var LONGITUDE: Double = currentLocation.longitude
             val addresses: List<Address>
@@ -404,47 +420,51 @@ class LocationHelper {
                 dbLastLocation.latitude = lastDBLocation!!.latitude
                 dbLastLocation.longitude = lastDBLocation!!.longitude
             }
+            // set values for visited location information
+            var visitedLocationInformation=VisitedLocationInformation("NA")
+            visitedLocationInformation.userId=1
+            visitedLocationInformation.latitude=LATITUDE
+            visitedLocationInformation.longitude=LONGITUDE
+            visitedLocationInformation.address=address
+            visitedLocationInformation.city=city
+            visitedLocationInformation.state=state
+            visitedLocationInformation.country=country
+            visitedLocationInformation.postalCode=postalCode
+            visitedLocationInformation.knownName=knownName
+            visitedLocationInformation.toTime=toTime
+            visitedLocationInformation.fromTime=fromTime
+            visitedLocationInformation.locationProvider=locationProvider
+            visitedLocationInformation.rowID=0
+            visitedLocationInformation.locationRequestType=locationType
+            visitedLocationInformation.vicinity=vicinity
+            visitedLocationInformation.placeId=placeId
+            visitedLocationInformation.photoUrl=photoUrl
+            visitedLocationInformation.nearByPlacesIds=nearByPlaces
+            visitedLocationInformation.isAddressSet=isAddressSet
+            visitedLocationInformation.accuracy=currentLocation.accuracy
+            //
             if (lastDBLocation == null) fromTime = pref.getLong(AppConstant.SP_KEY_FIRST_TIME)
 
             if (lastDBLocation != null && currentLocation.distanceTo(dbLastLocation) < AppConstant.MIN_DISTANCE_RANGE) {
-                result = mDataBaseController.updateVisitedLocation(
-                        VisitedLocationInformation(userId = 1, latitude = LATITUDE,
-                                longitude = LONGITUDE, address = address, city = city,
-                                state = state, country = country, postalCode = postalCode,
-                                knownName = knownName, toTime = toTime, fromTime = fromTime,
-                                locationProvider = locationProvider, rowID = 0,
-                                locationRequestType = locationType, vicinity = vicinity,
-                                placeId = placeId, photoUrl = photoUrl, nearByPlacesIds = nearByPlaces,
-                                isAddressSet = isAddressSet), lastDBLocation.rowID)
+
+                val updatedRow= mDataBaseController.updateVisitedLocation(
+                      visitedLocationInformation, lastDBLocation.rowID)
                 Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Updating address")
             } else {
                 result = mDataBaseController.insertVisitedLocation(
-                        VisitedLocationInformation(userId = 1, latitude = LATITUDE,
-                                longitude = LONGITUDE, address = address, city = city,
-                                state = state, country = country, postalCode = postalCode,
-                                knownName = knownName, toTime = toTime, fromTime = fromTime,
-                                locationProvider = locationProvider, rowID = 0,
-                                locationRequestType = locationType, vicinity = vicinity,
-                                placeId = placeId, photoUrl = photoUrl, nearByPlacesIds = nearByPlaces,
-                                isAddressSet = isAddressSet))
+                        visitedLocationInformation)
                 Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
-
                         "Location inserted")
             }
+            //
             pref.setLong(System.currentTimeMillis(), AppConstant.SP_KEY_SPENT_TIME)
             pref.setFloat(currentLocation.accuracy, AppConstant.SP_KEY_ACCURACY)
             //
-
-
-            //
-
             addNearByPlaces(mPlacesList, placeId, addresses)
             AppUtility().sendUpdateMessage(mContext!!);
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        println(result)
-
     }
 
     /*
@@ -453,17 +473,15 @@ class LocationHelper {
      */
     internal inner class Handleupdate : RetroCallIneractor {
 
-        override fun updatePlaces(places: List<Result>, location: Location, locationType: String) {
-
-            try {
+        override fun updatePlacesWithId(places: List<Result>, location: Location, locationType: String, rowId: Long) {
+                      try {
                 var result: Result? = null;
 
                 /* if (places != null && places.size > 1)
                      result = places.get(1)
                  else
                      result = places.get(0)
- */
-
+                */
                 var minDistance: Float = 0.0F;
                 var pos: Int = 0;
                 places.forEach {
@@ -478,8 +496,7 @@ class LocationHelper {
                         result = it
                         pos += 1
                     }
-
-                    //// Code to pick nearest places
+                    // Code to pick nearest places
                     /* if (pos == 0) {
                          minDistance = distance
                          result = it
@@ -490,9 +507,7 @@ class LocationHelper {
                      }
                      pos += 1
                      */
-
                     Log.i("Distance bt curr & res", it.name + "  " + location.distanceTo(tempLoc).toString());
-
                 }
                 if (result == null) {
                     if (places.size > 1) {
@@ -501,13 +516,17 @@ class LocationHelper {
                         result = places.get(0)
                     }
                 }
-                insertAddress(result!!, location, locationType, places)
+                //Add address into data base
+                addAddressIntoDataBase(result!!, location, locationType, places)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
 
         }
 
+        override fun updatePlaces(places: MutableList<Result>?, location: Location?, locationType: String?) {
+
+        }
         override fun updatePlaceDetails(place: Result) {
 
         }
@@ -552,15 +571,29 @@ class LocationHelper {
                     val locationProvider = "NA";
                     val locationType = "NA";
                     val toTime: Long = System.currentTimeMillis();
-                    //
-                    mList.add(VisitedLocationInformation(userId = 1, latitude = LATITUDE,
-                            longitude = LONGITUDE, address = address, city = city,
-                            state = state, country = country, postalCode = postalCode,
-                            knownName = knownName, toTime = toTime, fromTime = fromTime,
-                            locationProvider = locationProvider, rowID = 0,
-                            locationRequestType = locationType, vicinity = vicinity,
-                            placeId = placeId, photoUrl = photoUrl, nearByPlacesIds = nearPlaces,
-                            isAddressSet = isAddressSet));
+                    // set values for visited location information
+                    var visitedLocationInformation=VisitedLocationInformation("NA")
+                    visitedLocationInformation.userId=1
+                    visitedLocationInformation.latitude=LATITUDE
+                    visitedLocationInformation.longitude=LONGITUDE
+                    visitedLocationInformation.address=address
+                    visitedLocationInformation.city=city
+                    visitedLocationInformation.state=state
+                    visitedLocationInformation.country=country
+                    visitedLocationInformation.postalCode=postalCode
+                    visitedLocationInformation.knownName=knownName
+                    visitedLocationInformation.toTime=toTime
+                    visitedLocationInformation.fromTime=fromTime
+                    visitedLocationInformation.locationProvider=locationProvider
+                    visitedLocationInformation.rowID=0
+                    visitedLocationInformation.locationRequestType=locationType
+                    visitedLocationInformation.vicinity=vicinity
+                    visitedLocationInformation.placeId=placeId
+                    visitedLocationInformation.photoUrl=photoUrl
+                    visitedLocationInformation.nearByPlacesIds=nearPlaces
+                    visitedLocationInformation.isAddressSet=isAddressSet
+
+                    mList.add(visitedLocationInformation);
 
                     // add near by place id
                     if (nearByPlacesIds.isEmpty()) {
