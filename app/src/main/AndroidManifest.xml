@@ -50,12 +50,13 @@
         <!--  [ NETWORK RECEIVER ] -->
 
         <receiver android:name=".broadcastreceiver.NetworkConnectionReceiver"
-            android:label="NetworkConnectionReceiver" >
-            <!--<intent-filter >
+            android:enabled="true" >
+            <intent-filter >
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
                 <action android:name="android.net.wifi.STATE_CHANGE" />
-            </intent-filter>-->
+            </intent-filter>
         </receiver>
+
 
         <!--  [ NETWORK RECEIVER ] -->
 

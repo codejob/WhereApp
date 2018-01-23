@@ -37,20 +37,26 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
 
     //
     @Throws(SQLiteConstraintException::class)
-    fun insertVisitedLocation(infoLocation: VisitedLocationInformation): Boolean {
+    fun insertVisitedLocation(infoLocation: VisitedLocationInformation): Long {
         // Gets the data repository in write mode
         val db = getWritableDB()
         var values = getContentValuesForVisitedLocation(infoLocation)
+        val rowId = infoLocation.rowID
+        var newRowId: Long = 0
+        if (rowId == 0L) {
+            // Insert the new row, returning the primary key value of the new row
+            newRowId = db.insert(DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION, null, values)
+        } else {
+            updateVisitedLocation(infoLocation,rowId)
+            newRowId=rowId;
 
-        // Insert the new row, returning the primary key value of the new row
-        val newRowId = db.insert(DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION, null, values)
-
+        }
         closeDataBase(sqLiteDatabase)
-        return newRowId > 0
+        return newRowId
     }
 
     @Throws(SQLiteConstraintException::class)
-    fun updateVisitedLocation(infoLocation: VisitedLocationInformation, rowID: Int): Boolean {
+    fun updateVisitedLocation(infoLocation: VisitedLocationInformation, rowID: Long): Int {
         // Gets the data repository in write mode
         val db = getWritableDB()
         var values = getContentValuesForVisitedLocation(infoLocation)
@@ -64,7 +70,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         val newRowId = db.update(DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION
                 , values, whereClause, whereArgs)
         closeDataBase(sqLiteDatabase)
-        return newRowId > 0
+        return newRowId
     }
 
     private fun getContentValuesForVisitedLocation(infoLocation: VisitedLocationInformation): ContentValues {
@@ -88,6 +94,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         values.put(DBContract.VisitedLocationData.COLUMN_NEARBY_PLACES_IDS, infoLocation.photoUrl)
         values.put(DBContract.VisitedLocationData.COLUMN_PHOTO_URL, infoLocation.locationRequestType)
         values.put(DBContract.VisitedLocationData.COLUMN_IS_ADDRESS_SET, infoLocation.isAddressSet)
+        values.put(DBContract.VisitedLocationData.COLUMN_ACCURACY, infoLocation.accuracy)
         return values
     }
 
@@ -132,7 +139,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
     /**
      * Method to update stay time into data base for the visited location
      */
-    fun updateToTime(rowID: Int) {
+    fun updateToTime(rowID: Long) {
         try {// Gets the data repository in write mode
             val db = getWritableDB()
 
@@ -248,7 +255,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
 
     private fun prepareVisitedLocationObject(cursor: Cursor): VisitedLocationInformation? {
         var visitedLocationInfo: VisitedLocationInformation? = null;
-        var rowID: Int
+        var rowID: Long
         var userId: Int
         var latitude: Double
         var longitude: Double
@@ -268,7 +275,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         var nearByPlacesIds: String
         var isAddressSet: Int
 
-        rowID = cursor.getInt(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_ROW_ID))
+        rowID = cursor.getLong(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_ROW_ID))
         userId = cursor.getInt(cursor.getColumnIndex(DBContract.UserEntry.COLUMN_USER_ID))
         latitude = cursor.getDouble(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_LATITUDE))
         longitude = cursor.getDouble(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_LONGITUDE))
@@ -288,13 +295,29 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         nearByPlacesIds = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_NEARBY_PLACES_IDS))
         isAddressSet = cursor.getInt(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_IS_ADDRESS_SET))
 
-
-        // init VisitedLocationInformation object
-        visitedLocationInfo = VisitedLocationInformation(userId, latitude, longitude,
-                address, city, state, country, postalCode, knownName, stayTime, dateTime,
-                locationProvider, locationRequestType, rowID, vicinity, placeId,
-                photoUrl, nearByPlacesIds, isAddressSet)
-        return visitedLocationInfo;
+        // set values for visited location information
+        var visitedLocationInformation=VisitedLocationInformation("NA")
+        visitedLocationInformation.userId=1
+        visitedLocationInformation.latitude=latitude
+        visitedLocationInformation.longitude=longitude
+        visitedLocationInformation.address=address
+        visitedLocationInformation.city=city
+        visitedLocationInformation.state=state
+        visitedLocationInformation.country=country
+        visitedLocationInformation.postalCode=postalCode
+        visitedLocationInformation.knownName=knownName
+        visitedLocationInformation.toTime=stayTime
+        visitedLocationInformation.fromTime=dateTime
+        visitedLocationInformation.locationProvider=locationProvider
+        visitedLocationInformation.rowID=0
+        visitedLocationInformation.locationRequestType=locationRequestType
+        visitedLocationInformation.vicinity=vicinity
+        visitedLocationInformation.placeId=placeId
+        visitedLocationInformation.photoUrl=photoUrl
+        visitedLocationInformation.nearByPlacesIds=nearByPlacesIds
+        visitedLocationInformation.isAddressSet=isAddressSet
+        // return visited location information object
+        return visitedLocationInformation;
     }
 
     private fun prepareNearByLocationObject(cursor: Cursor): NearByPlace? {

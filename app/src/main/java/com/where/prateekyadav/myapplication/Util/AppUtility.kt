@@ -116,7 +116,7 @@ class AppUtility {
                 //LocationHelper.getInstance(context, DemoUpdate()).getCompleteAddressString(location!!, AppConstant.LOCATION_UPDATE_TYPE_LAST_KNOWN)
                 //LocationHelper.getInstance(context, DemoUpdate()).getCompleteAddressString(location!!, AppConstant.LOCATION_UPDATE_TYPE_LAST_KNOWN)
                 var retroCallImplementor = RetroCallImplementor()
-                retroCallImplementor!!.getAllPlaces(location.latitude.toString() + "," + location.longitude.toString(), hanlder, location, location.provider)
+                retroCallImplementor!!.getAllPlaces(location.latitude.toString() + "," + location.longitude.toString(), hanlder, location, location.provider,0)
 
             }
         } catch (e: Exception) {

@@ -1,5 +1,6 @@
 package com.where.prateekyadav.myapplication.Services
 
+import android.app.IntentService
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -12,10 +13,12 @@ import android.os.IBinder
 import android.os.Message
 import android.util.Log
 import com.where.prateekyadav.myapplication.LocationHelper
+import com.where.prateekyadav.myapplication.UpdateLocation
 import com.where.prateekyadav.myapplication.Util.AppConstant
 import com.where.prateekyadav.myapplication.Util.MySharedPref
 import com.where.prateekyadav.myapplication.database.DataBaseController
 import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
+import com.where.prateekyadav.myapplication.modal.SearchResult
 import com.where.prateekyadav.myapplication.search.model.placesdetails.Result
 import com.where.prateekyadav.myapplication.search.network.RetroCallImplementor
 import com.where.prateekyadav.myapplication.search.network.RetroCallIneractor
@@ -24,10 +27,11 @@ import java.util.*
 /**
  * Created by Infobeans on 21-Jul-16.
  */
-class AddressUpdateService : Service() {
+class AddressUpdateService : IntentService("ADDRESS UPDATE"), UpdateLocation {
 
     private var mContext: Context? = null
     private var handler: AddressUpdateService.Handleupdate? = null
+    private var updateLocation:UpdateLocation?=null;
 
     private val testHandler = object : Handler() {
         override fun handleMessage(msg: Message) {
@@ -41,6 +45,7 @@ class AddressUpdateService : Service() {
         Log.d("service", "oncreate service")
         mContext = this
         handler=Handleupdate()
+        updateLocation=this;
 
     }
 
@@ -57,6 +62,9 @@ class AddressUpdateService : Service() {
         super.onStart(intent, startId)
     }
 
+    override fun onHandleIntent(intent: Intent?) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         Log.d("service", "onStartCommand")
@@ -70,7 +78,8 @@ class AddressUpdateService : Service() {
             val location : Location = Location(it.locationProvider)
             location.latitude=latitude
             location.longitude=longitude
-            retroCallImplementor!!.getAllPlaces(latitude.toString() + "," + longitude.toString(), handler, location, location.provider)
+            retroCallImplementor!!.getAllPlaces(latitude.toString() + "," + longitude.toString(),
+                    handler, location, location.provider,it.rowID)
 
         }
         //
@@ -96,7 +105,8 @@ class AddressUpdateService : Service() {
     */
     internal inner class Handleupdate : RetroCallIneractor {
 
-        override fun updatePlaces(places: List<Result>, location: Location, locationType: String) {
+
+        override fun updatePlacesWithId(places: List<Result>, location: Location, locationType: String,rowId:Long) {
 
             try {
                 var result: Result? = null;
@@ -127,13 +137,18 @@ class AddressUpdateService : Service() {
                     }
                 }
                 //
-                insertAddress(result!!, location, locationType, places)
+                var locationHelper= LocationHelper.getInstance(mContext,updateLocation!!)
+                locationHelper.addAddressIntoDataBase(result!!, location, locationType, places)
+
             } catch (e: Exception) {
                 e.printStackTrace()
             }
 
         }
-
+        //
+        override fun updatePlaces(places: MutableList<Result>?, location: Location?, locationType: String?) {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
         override fun updatePlaceDetails(place: Result) {
 
         }
@@ -143,10 +158,13 @@ class AddressUpdateService : Service() {
 
         }
     }
-    //
-    fun insertAddress(resultPlace: Result, currentLocation: Location, locationType: String, mPlacesList: List<Result>) {
+
+    /**
+     *
+     */
+    private fun updateAddressOnLocation(resultPlace: Result, currentLocation: Location, locationType: String, mPlacesList: List<Result>) {
         //
-        var result: Boolean = false
+        var result: Int = 0;
         try {
             var pref = MySharedPref.getinstance(mContext);
             var geocoder = Geocoder(mContext, Locale.getDefault())
@@ -177,26 +195,44 @@ class AddressUpdateService : Service() {
             val locationProvider = currentLocation.provider;
             val toTime: Long = System.currentTimeMillis()
             //
+            // set values for visited location information
+            var visitedLocationInformation=VisitedLocationInformation("NA")
+            visitedLocationInformation.userId=1
+            visitedLocationInformation.latitude=LATITUDE
+            visitedLocationInformation.longitude=LONGITUDE
+            visitedLocationInformation.address=address
+            visitedLocationInformation.city=city
+            visitedLocationInformation.state=state
+            visitedLocationInformation.country=country
+            visitedLocationInformation.postalCode=postalCode
+            visitedLocationInformation.knownName=knownName
+            visitedLocationInformation.toTime=toTime
+            visitedLocationInformation.fromTime=fromTime
+            visitedLocationInformation.locationProvider=locationProvider
+            visitedLocationInformation.rowID=0
+            visitedLocationInformation.locationRequestType=locationType
+            visitedLocationInformation.vicinity=vicinity
+            visitedLocationInformation.placeId=placeId
+            visitedLocationInformation.photoUrl=photoUrl
+            visitedLocationInformation.nearByPlacesIds=""
+            visitedLocationInformation.isAddressSet=isAddressSet
             result = DataBaseController(mContext).updateVisitedLocation(
-                    VisitedLocationInformation(userId = 1, latitude = LATITUDE,
-                            longitude = LONGITUDE, address = address, city = city,
-                            state = state, country = country, postalCode = postalCode,
-                            knownName = knownName, toTime = toTime, fromTime = fromTime,
-                            locationProvider = locationProvider, rowID = 0,
-                            locationRequestType = locationType, vicinity = vicinity,
-                            placeId = placeId, photoUrl = photoUrl, nearByPlacesIds = nearByPlaces,
-                            isAddressSet = isAddressSet),1)
+                   visitedLocationInformation,1)
             //
             pref.setLong(System.currentTimeMillis(), AppConstant.SP_KEY_SPENT_TIME)
-            Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
+            Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,"Address updated")
 
-                    "Location inserted")
-
+            var locationHelper= LocationHelper.getInstance(mContext,this)
+            locationHelper.addNearByPlaces(mPlacesList,placeId,addresses)
         } catch (e: Exception) {
             e.printStackTrace()
         }
         println(result)
 
+    }
+
+    override fun updateLocationAddressList(addressList: List<SearchResult>) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
 }
