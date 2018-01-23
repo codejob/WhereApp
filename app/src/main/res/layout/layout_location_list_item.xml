@@ -3,33 +3,49 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/tvTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="5dp"
-        android:layout_centerHorizontal="true"
-        android:text="Title"
-        android:layout_margin="10dp"
-        android:textAlignment="center" />
-
-    <Button
-        android:layout_margin="10dp"
-        android:id="@+id/btn_all_visits"
+    <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/card_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/tvTitle"
-        android:background="#4d90e2"
-        android:text="@string/str_see_all_visits"
-        android:textColor="#ffffff" />
-
-    <Button
         android:layout_margin="10dp"
-        android:id="@+id/btn_choose_nearby"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/btn_all_visits"
-        android:background="#4d90e2"
-        android:text="@string/choose_from_nearby_locations"
-        android:textColor="#ffffff" />
+        android:background="#f0f0f0"
+        android:layout_gravity="center"
+        card_view:cardCornerRadius="4dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_margin="10dp"
+                android:padding="5dp"
+                android:text="Title"
+                android:textAlignment="center" />
+
+            <Button
+                android:id="@+id/btn_all_visits"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/tvTitle"
+                android:layout_margin="10dp"
+                android:background="#4d90e2"
+                android:text="@string/str_see_all_visits"
+                android:textColor="#ffffff" />
+
+            <Button
+                android:id="@+id/btn_choose_nearby"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/btn_all_visits"
+                android:layout_margin="10dp"
+                android:background="#4d90e2"
+                android:text="@string/choose_from_nearby_locations"
+                android:textColor="#ffffff" />
+        </RelativeLayout>
+    </android.support.v7.widget.CardView>
+
 </RelativeLayout>

@@ -7,12 +7,14 @@ import android.support.v7.app.AppCompatActivity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.BaseAdapter
 import android.widget.ListView
 import android.widget.TextView
 import com.where.prateekyadav.myapplication.R
 import com.where.prateekyadav.myapplication.Util.AppConstant
 import com.where.prateekyadav.myapplication.Util.MySharedPref
+import com.where.prateekyadav.myapplication.database.DataBaseController
 import com.where.prateekyadav.myapplication.modal.NearByPlace
 import com.where.prateekyadav.myapplication.modal.SearchResult
 import java.util.*
@@ -23,14 +25,32 @@ import java.util.*
  */
 class NearByActivity : AppCompatActivity() {
     var mNearByList = ArrayList<NearByPlace>()
+    var mSearchResult: SearchResult? = null
+    var listView: ListView? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_nearby)
-        mNearByList = intent.getSerializableExtra("NearByList") as ArrayList<NearByPlace>
+        mSearchResult = intent.getSerializableExtra("SearchResult") as SearchResult
+        mNearByList = mSearchResult!!.listNearByPlace as ArrayList<NearByPlace>
         if (mNearByList != null) {
-            val listView = findViewById<ListView>(R.id.lv_nearby)
-            listView.adapter = NearByAdapter(mNearByList)
+            listView = findViewById<ListView>(R.id.lv_nearby)
+            listView!!.adapter = NearByAdapter(mNearByList)
         }
+
+        listView!!.onItemClickListener = object : AdapterView.OnItemClickListener {
+
+            override fun onItemClick(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+
+                try {
+                    DataBaseController(this@NearByActivity).updateVisitedLocationWithNearBy(mSearchResult!!.visitResults.visitedLocationInformation,
+                            parent.getItemAtPosition(position) as NearByPlace)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+
+            }
+        }
+
     }
 
 

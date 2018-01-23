@@ -46,12 +46,12 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         if (rowId == 0L) {
             // Insert the new row, returning the primary key value of the new row
             newRowId = db.insert(DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION, null, values)
-            var visitedLocationInformation=readLastVisitedLocation();
-            newRowId=visitedLocationInformation!!.rowID;
+            var visitedLocationInformation = readLastVisitedLocation();
+            newRowId = visitedLocationInformation!!.rowID;
 
         } else {
-            updateVisitedLocation(infoLocation,rowId)
-            newRowId=rowId;
+            updateVisitedLocation(infoLocation, rowId)
+            newRowId = rowId;
 
         }
         closeDataBase(sqLiteDatabase)
@@ -169,8 +169,8 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         val db = getWritableDB()
         var cursor: Cursor? = null
         try {
-            var query = SELECT_FROM+ DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION
-                        WHERE+DBContract.VisitedLocationData.COLUMN_IS_ADDRESS_SET+ EQUALS_TO+1
+            var query = SELECT_FROM + DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION
+            WHERE + DBContract.VisitedLocationData.COLUMN_IS_ADDRESS_SET + EQUALS_TO + 1
             cursor = db.rawQuery(query, null)
         } catch (e: SQLiteException) {
             createTables(db)
@@ -303,26 +303,26 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         isAddressSet = cursor.getInt(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_IS_ADDRESS_SET))
 
         // set values for visited location information
-        var visitedLocationInformation=VisitedLocationInformation("NA")
-        visitedLocationInformation.userId=1
-        visitedLocationInformation.latitude=latitude
-        visitedLocationInformation.longitude=longitude
-        visitedLocationInformation.address=address
-        visitedLocationInformation.city=city
-        visitedLocationInformation.state=state
-        visitedLocationInformation.country=country
-        visitedLocationInformation.postalCode=postalCode
-        visitedLocationInformation.knownName=knownName
-        visitedLocationInformation.toTime=stayTime
-        visitedLocationInformation.fromTime=dateTime
-        visitedLocationInformation.locationProvider=locationProvider
-        visitedLocationInformation.rowID=rowID
-        visitedLocationInformation.locationRequestType=locationRequestType
-        visitedLocationInformation.vicinity=vicinity
-        visitedLocationInformation.placeId=placeId
-        visitedLocationInformation.photoUrl=photoUrl
-        visitedLocationInformation.nearByPlacesIds=nearByPlacesIds
-        visitedLocationInformation.isAddressSet=isAddressSet
+        var visitedLocationInformation = VisitedLocationInformation("NA")
+        visitedLocationInformation.userId = 1
+        visitedLocationInformation.latitude = latitude
+        visitedLocationInformation.longitude = longitude
+        visitedLocationInformation.address = address
+        visitedLocationInformation.city = city
+        visitedLocationInformation.state = state
+        visitedLocationInformation.country = country
+        visitedLocationInformation.postalCode = postalCode
+        visitedLocationInformation.knownName = knownName
+        visitedLocationInformation.toTime = stayTime
+        visitedLocationInformation.fromTime = dateTime
+        visitedLocationInformation.locationProvider = locationProvider
+        visitedLocationInformation.rowID = rowID
+        visitedLocationInformation.locationRequestType = locationRequestType
+        visitedLocationInformation.vicinity = vicinity
+        visitedLocationInformation.placeId = placeId
+        visitedLocationInformation.photoUrl = photoUrl
+        visitedLocationInformation.nearByPlacesIds = nearByPlacesIds
+        visitedLocationInformation.isAddressSet = isAddressSet
         // return visited location information object
         return visitedLocationInformation;
     }
@@ -424,6 +424,23 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         }
     }
 
+    fun prepareContentValuesForNeaby(it: NearByPlace): ContentValues {
+        val values = ContentValues()
+        try {
+            values.put(DBContract.VisitedLocationData.COLUMN_LATITUDE, it.latitude)
+            values.put(DBContract.VisitedLocationData.COLUMN_LONGITUDE, it.longitude)
+            values.put(DBContract.VisitedLocationData.COLUMN_ADDRESS, it.address)
+            values.put(DBContract.VisitedLocationData.COLUMN_KNOWN_NAME, it.knownName)
+            values.put(DBContract.VisitedLocationData.COLUMN_LOCATION_REQUEST_TYPE, it.locationRequestType)
+            values.put(DBContract.VisitedLocationData.COLUMN_VICINITY, it.vicinity)
+            values.put(DBContract.VisitedLocationData.COLUMN_PLACE_ID, it.placeId)
+            values.put(DBContract.VisitedLocationData.COLUMN_PHOTO_URL, it.locationRequestType)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return values
+    }
+
     /**
      * Method to insert or update near by places into Near by places table
      */
@@ -445,6 +462,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
                     values.put(DBContract.VisitedLocationData.COLUMN_VICINITY, it.vicinity)
                     values.put(DBContract.VisitedLocationData.COLUMN_PLACE_ID, it.placeId)
                     values.put(DBContract.VisitedLocationData.COLUMN_PHOTO_URL, it.locationRequestType)
+
                     val isExist = checkIsDataAlreadyInDBorNot(DBContract.NearByLocationData.TABLE_NAME_NEARBY_LOCATION,
                             DBContract.VisitedLocationData.COLUMN_PLACE_ID, it.placeId);
                     if (isExist) {
@@ -807,8 +825,47 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
 
     }
 
+    /**
+     * Method is used for update the near by places ids
+     */
+    fun updateNearByPlace(placeId: String, values: ContentValues) {
+        try {
+
+            val db = getWritableDB()
+            val whereClause = DBContract.VisitedLocationData.COLUMN_PLACE_ID + "= ?"
+            val whereArgs = arrayOf(placeId)
+            //
+            db.update(DBContract.NearByLocationData.TABLE_NAME_NEARBY_LOCATION
+                    , values, whereClause, whereArgs)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     fun updateVisitedLocationWithNearBy(visit: VisitedLocationInformation, nearByPlace: NearByPlace) {
         val sqLiteDatabase = getWritableDB()
+        // Saving vist details
+        val address = visit.address
+        val visinity = visit.vicinity
+        val lat = visit.latitude
+        val lng = visit.longitude
+        val placeID = visit.placeId
+
+        visit.address = nearByPlace.address
+        visit.vicinity = nearByPlace.vicinity
+        visit.latitude = nearByPlace.latitude
+        visit.longitude = nearByPlace.longitude
+        visit.placeId = nearByPlace.placeId
+
+        updateVisitedLocation(visit, visit.rowID)
+
+        nearByPlace.address = address
+        nearByPlace.vicinity = visinity
+        nearByPlace.latitude = lat
+        nearByPlace.longitude = lng
+        val placeIDNearBy = nearByPlace.placeId
+        nearByPlace.placeId = placeID
+        updateNearByPlace(placeIDNearBy, prepareContentValuesForNeaby(nearByPlace))
 
         closeDataBase(sqLiteDatabase)
     }

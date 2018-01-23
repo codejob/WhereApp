@@ -73,7 +73,7 @@ class LocationsAdapter() : BaseAdapter() {
                 val listItem =getItem(position) as SearchResult
                 val visit = listItem!!.listNearByPlace as Serializable
                 var intent = Intent(mContext, NearByActivity::class.java)
-                intent.putExtra("NearByList", visit)
+                intent.putExtra("SearchResult", listItem)
                 mContext!!.startActivity(intent)
             }
 

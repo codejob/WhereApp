@@ -1,9 +1,11 @@
 package com.where.prateekyadav.myapplication.database
 
+import java.io.Serializable
+
 /**
  * Created by Infobeans on 1/10/2018.
  */
-data class VisitedLocationInformation(var userUniqueNumber:String){
+data class VisitedLocationInformation(var userUniqueNumber:String):Serializable{
     var userId: Int=0;
     var latitude: Double=0.0
     var longitude: Double=0.0
