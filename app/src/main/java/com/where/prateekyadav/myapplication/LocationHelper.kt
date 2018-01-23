@@ -14,10 +14,7 @@ import android.os.Message
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.util.Log
-import com.where.prateekyadav.myapplication.Util.AppConstant
-import com.where.prateekyadav.myapplication.Util.AppUtility
-import com.where.prateekyadav.myapplication.Util.MySharedPref
-import com.where.prateekyadav.myapplication.Util.PermissionCheckHandler
+import com.where.prateekyadav.myapplication.Util.*
 import com.where.prateekyadav.myapplication.database.DataBaseController
 import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
 import com.where.prateekyadav.myapplication.modal.SearchResult
@@ -53,6 +50,7 @@ class LocationHelper {
 
     private var handler: Handleupdate? = null
     private var retroCallImplementor: RetroCallImplementor? = null
+    private lateinit var mConnectionDetector:ConnectionDetector;
 
     private constructor(context: Context?, updateLocation: UpdateLocation) {
         mContext = context
@@ -60,6 +58,7 @@ class LocationHelper {
         mDataBaseController = DataBaseController(mContext);
         handler = Handleupdate()
         retroCallImplementor = RetroCallImplementor()
+        mConnectionDetector= ConnectionDetector.getInstance(context!!)
     }
 
 
@@ -297,6 +296,7 @@ class LocationHelper {
         //
         var LATITUDE: Double = location.latitude
         var LONGITUDE: Double = location.longitude
+        var lastRowId:Long=0;
 
         /*Toast.makeText(mContext, address,
                 Toast.LENGTH_LONG).show();*/
@@ -336,8 +336,11 @@ class LocationHelper {
             } else {
                 //pref.setLong(System.currentTimeMillis(), AppConstant.SP_KEY_SPENT_TIME)
             }
+
+            //
             if (lastDBLocation != null && currentLocation.distanceTo(dbLastLocation) < AppConstant.MIN_DISTANCE_RANGE) {
                 insert = false;
+                lastRowId=lastDBLocation.rowID;
                 if (spacuuracy > currentLocation.accuracy) {
                     insert = true
                 }
@@ -355,6 +358,7 @@ class LocationHelper {
         if (insert) {
             //insert location only here
             var visitedLocationInformation = VisitedLocationInformation("");
+            visitedLocationInformation.rowID=lastRowId;
             visitedLocationInformation.userId = 0;
             visitedLocationInformation.latitude = LATITUDE
             visitedLocationInformation.longitude = LONGITUDE
@@ -371,13 +375,17 @@ class LocationHelper {
             //
             val insertedId = DataBaseController(mContext).insertVisitedLocation(visitedLocationInformation);
             //
-            if (insertedId > 0L) {
+            if (insertedId > 0L && mConnectionDetector.isNetworkAvailable()) {
                 retroCallImplementor!!.getAllPlaces(LATITUDE.toString() + "," + LONGITUDE.toString(),
                         handler, location, locationType, insertedId)
             }
+            //
+            pref.setLong(System.currentTimeMillis(), AppConstant.SP_KEY_SPENT_TIME)
+            pref.setFloat(currentLocation.accuracy, AppConstant.SP_KEY_ACCURACY)
         } else {
             pref.setLong(System.currentTimeMillis(), AppConstant.SP_KEY_SPENT_TIME)
         }
+        //
         var visitedLocationList = mDataBaseController.readAllVisitedLocation()
 
         return (visitedLocationList as List<SearchResult>?)!!
@@ -393,11 +401,7 @@ class LocationHelper {
         try {
             var pref = MySharedPref.getinstance(mContext!!.applicationContext);
             var geocoder = Geocoder(mContext, Locale.getDefault())
-            //var location: Location = Location(LocationManager.GPS_PROVIDER)
-            //location.latitude = resultPlace.geometry.location.lat.toDouble()
-            //location.longitude = resultPlace.geometry.location.lng.toDouble()
             val address = resultPlace.name;
-
             val vicinity = resultPlace.vicinity
             val placeId = resultPlace.placeId
             val photoUrl = resultPlace.photos.toString()
@@ -406,13 +410,12 @@ class LocationHelper {
             var LATITUDE: Double = currentLocation.latitude
             var LONGITUDE: Double = currentLocation.longitude
             val addresses: List<Address>
-
+            //
             addresses = geocoder.getFromLocation(LATITUDE, LONGITUDE, 1) // Here 1 represent max location result to returned, by documents it recommended 1 to 5
             if (addresses == null || addresses.size == 0) {
                 return null!!;
             }
-            // val address = addresses[0].getAddressLine(0) // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
-            //val address = addresses
+            //
             val city = addresses[0].getLocality()
             val state = addresses[0].getAdminArea()
             val country = addresses[0].getCountryName()
@@ -454,20 +457,23 @@ class LocationHelper {
             //
             if (lastDBLocation == null) fromTime = pref.getLong(AppConstant.SP_KEY_FIRST_TIME)
 
-            if (lastDBLocation != null && currentLocation.distanceTo(dbLastLocation) < AppConstant.MIN_DISTANCE_RANGE) {
-
+          //  if (lastDBLocation != null && currentLocation.distanceTo(dbLastLocation) < AppConstant.MIN_DISTANCE_RANGE) {
+            if (lastDBLocation != null) {
                 val updatedRow = mDataBaseController.updateVisitedLocation(
                         visitedLocationInformation, lastDBLocation.rowID)
-                Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Updating address")
-            } else {
+                Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
+                        "Updating address for row id -- "+updatedRow)
+            }
+
+            /*} else {
                 result = mDataBaseController.insertVisitedLocation(
                         visitedLocationInformation)
                 Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
                         "Location inserted")
-            }
+            }*/
             //
-            pref.setLong(System.currentTimeMillis(), AppConstant.SP_KEY_SPENT_TIME)
-            pref.setFloat(currentLocation.accuracy, AppConstant.SP_KEY_ACCURACY)
+           /* pref.setLong(System.currentTimeMillis(), AppConstant.SP_KEY_SPENT_TIME)
+            pref.setFloat(currentLocation.accuracy, AppConstant.SP_KEY_ACCURACY)*/
             //
             addNearByPlaces(mPlacesList, placeId, addresses)
             AppUtility().sendUpdateMessage(mContext!!);

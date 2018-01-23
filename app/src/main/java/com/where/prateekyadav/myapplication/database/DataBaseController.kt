@@ -260,6 +260,9 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         return visitedLocationInfoList
     }
 
+    /**
+     * Prepare location object
+     */
     private fun prepareVisitedLocationObject(cursor: Cursor): VisitedLocationInformation? {
         var visitedLocationInfo: VisitedLocationInformation? = null;
         var rowID: Long
@@ -327,6 +330,9 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         return visitedLocationInformation;
     }
 
+    /**
+     * Prepare near by location object here
+     */
     private fun prepareNearByLocationObject(cursor: Cursor): NearByPlace? {
         var nearByPlace: NearByPlace? = null;
 
@@ -516,7 +522,9 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
          }
          return searchResultList
      }*/
-
+    /**
+     * Prepare search result here
+     */
     public fun parseSearchResult(visitResultsList: List<VisitResults>): List<SearchResult>? {
         var searchResultList = ArrayList<SearchResult>()
 
