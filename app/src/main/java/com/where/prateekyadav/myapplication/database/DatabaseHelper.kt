@@ -101,7 +101,8 @@ open class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABAS
                         DBContract.VisitedLocationData.COLUMN_IS_ADDRESS_SET + " INTEGER," +
                         DBContract.VisitedLocationData.COLUMN_ACCURACY + " INTEGER," +
                         DBContract.VisitedLocationData.COLUMN_LOCATION_PROVIDER + " TEXT," +
-                        DBContract.VisitedLocationData.COLUMN_LOCATION_REQUEST_TYPE + " TEXT)"
+                        DBContract.VisitedLocationData.COLUMN_LOCATION_REQUEST_TYPE + " TEXT," +
+                        DBContract.VisitedLocationData.COLUMN_ISPREFERRED + " INTEGER)"
 
         private val SQL_CREATE_NEARBY_LOCATION_TABLE =
                 "CREATE TABLE " +

@@ -26,4 +26,5 @@ data class VisitedLocationInformation(var userUniqueNumber:String):Serializable{
     var nearByPlacesIds: String=""
     var isAddressSet: Int=0
     var accuracy: Float= 1000.0F
+    var isPreferred:Int=0
 }

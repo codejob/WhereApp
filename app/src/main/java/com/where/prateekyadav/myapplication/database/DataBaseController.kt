@@ -94,10 +94,13 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         values.put(DBContract.VisitedLocationData.COLUMN_LOCATION_REQUEST_TYPE, infoLocation.locationRequestType)
         values.put(DBContract.VisitedLocationData.COLUMN_VICINITY, infoLocation.vicinity)
         values.put(DBContract.VisitedLocationData.COLUMN_PLACE_ID, infoLocation.placeId)
-        values.put(DBContract.VisitedLocationData.COLUMN_NEARBY_PLACES_IDS, infoLocation.photoUrl)
+        values.put(DBContract.VisitedLocationData.COLUMN_NEARBY_PLACES_IDS, infoLocation.nearByPlacesIds)
         values.put(DBContract.VisitedLocationData.COLUMN_PHOTO_URL, infoLocation.locationRequestType)
         values.put(DBContract.VisitedLocationData.COLUMN_IS_ADDRESS_SET, infoLocation.isAddressSet)
         values.put(DBContract.VisitedLocationData.COLUMN_ACCURACY, infoLocation.accuracy)
+        values.put(DBContract.VisitedLocationData.COLUMN_ACCURACY, infoLocation.accuracy)
+        values.put(DBContract.VisitedLocationData.COLUMN_ISPREFERRED, infoLocation.isPreferred)
+
         return values
     }
 
@@ -852,6 +855,8 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         visit.latitude = nearByPlace.latitude
         visit.longitude = nearByPlace.longitude
         visit.placeId = nearByPlace.placeId
+        visit.nearByPlacesIds=visit.nearByPlacesIds.replace(nearByPlace.placeId,placeID)
+        visit.isPreferred=1
 
         updateVisitedLocation(visit, visit.rowID)
 
@@ -862,6 +867,8 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         val placeIDNearBy = nearByPlace.placeId
         nearByPlace.placeId = placeID
         updateNearByPlace(placeIDNearBy, prepareContentValuesForNeaby(nearByPlace))
+
+        val  search = readAllVisitedLocation()
 
         closeDataBase(sqLiteDatabase)
     }

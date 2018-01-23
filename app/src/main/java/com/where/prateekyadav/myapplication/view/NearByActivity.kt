@@ -46,6 +46,8 @@ class NearByActivity : AppCompatActivity() {
                             parent.getItemAtPosition(position) as NearByPlace)
                 } catch (e: Exception) {
                     e.printStackTrace()
+                }finally {
+                    finish()
                 }
 
             }

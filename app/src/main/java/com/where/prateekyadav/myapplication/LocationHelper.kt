@@ -338,7 +338,7 @@ class LocationHelper {
             }
             if (lastDBLocation != null && currentLocation.distanceTo(dbLastLocation) < AppConstant.MIN_DISTANCE_RANGE) {
                 insert = false;
-                if (spacuuracy > currentLocation.accuracy) {
+                if (spacuuracy > currentLocation.accuracy && lastDBLocation.isPreferred==0) {
                     insert = true
                 }
                 Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Updating stay time")
@@ -553,14 +553,18 @@ class LocationHelper {
         if (places != null && places.size > 1) {
             var nearByPlacesIds = "";
             var mList = ArrayList<VisitedLocationInformation>()
-            places.forEach {
+            for (i in places.indices) {
                 var result: Boolean = false
                 try {
+                    val it = places.get(i)
                     var pref = MySharedPref.getinstance(mContext);
                     val address = it.name;
                     val vicinity = it.vicinity
                     val placeId = it.placeId
                     val photoUrl = it.photos.toString()
+                    if (placeId == mainPlaceId) {
+                        continue
+                    }
 
                     val nearPlaces = "";
                     val isAddressSet = 1;
