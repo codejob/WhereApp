@@ -546,7 +546,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         return searchResultList
     }
 
-    fun getVisitedLocationsFromPlaceid(placeID: String): List<VisitedLocationInformation>? {
+     fun getVisitedLocationsFromPlaceid(placeID: String): List<VisitedLocationInformation>? {
         val visitedLocationInfoList = ArrayList<VisitedLocationInformation>()
 
         val sqLiteDatabase = getWritableDB()
@@ -787,30 +787,20 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
     }
 
     fun deleteVisitEntry(visitedLocationInformation: VisitedLocationInformation) {
-        val sqLiteDatabase = getWritableDB()
         val whereClause = "id = ?"
         val whereArgs = arrayOf(visitedLocationInformation.rowID.toString())
 
         val newRowId = sqLiteDatabase.delete(DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION
                 , whereClause, whereArgs)
-        closeDataBase(sqLiteDatabase)
     }
 
     fun deleteNearByEntry(placeID: String) {
-        val sqLiteDatabase = getWritableDB()
         val whereClause = DBContract.VisitedLocationData.COLUMN_PLACE_ID + " = ?"
         val whereArgs = arrayOf(placeID)
 
         val newRowId = sqLiteDatabase.delete(DBContract.NearByLocationData.TABLE_NAME_NEARBY_LOCATION
                 , whereClause, whereArgs)
-        closeDataBase(sqLiteDatabase)
 
-    }
-
-    fun updateVisitedLocationWithNearBy(visit: VisitedLocationInformation, nearByPlace: NearByPlace) {
-        val sqLiteDatabase = getWritableDB()
-
-        closeDataBase(sqLiteDatabase)
     }
 
 }
