@@ -25,5 +25,13 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/lyt_lin_search_offline" />
 
+    <TextView
+        android:id="@+id/tv_no_records"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_centerInParent="true"
+        android:text="@string/no_records_found"
+        android:visibility="gone" />
 
 </RelativeLayout>

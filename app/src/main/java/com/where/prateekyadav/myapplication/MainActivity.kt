@@ -10,8 +10,6 @@ import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AlertDialog
 import android.content.*
 import android.util.Log
-import android.widget.EditText
-import android.widget.Toast
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.Status
 import com.where.prateekyadav.myapplication.Util.AppUtility
@@ -25,9 +23,12 @@ import com.where.prateekyadav.myapplication.modal.SearchResult
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ListView
+import android.widget.*
+import com.where.prateekyadav.myapplication.database.DBContract
 import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
+import com.where.prateekyadav.myapplication.view.NearByActivity
+import com.where.prateekyadav.myapplication.view.VisitedActivity
+import java.io.Serializable
 
 
 class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConnectionFailedListener, PlaceSelectionListener {
@@ -54,21 +55,27 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
         //
         DataBaseController(this).copyDataBaseToSDCard()
         setSearchListener()
-        setListClickListener()
+        setClickListener()
     }
 
-    fun setListClickListener() {
-        mListView!!.setOnItemClickListener(object : AdapterView.OnItemClickListener {
+    fun setClickListener() {
+
+        mListView!!.onItemClickListener = object : AdapterView.OnItemClickListener {
 
             override fun onItemClick(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                val listItem = mListView!!.getItemAtPosition(position) as SearchResult
-                val visit = listItem!!.visitResults.visitedLocationInformation
-                val visitList = ArrayList<VisitedLocationInformation>()
-                visitList.add(visit)
-                DataBaseController(this@MainActivity).deleteVisitedPlaceAndUniqueNearByForIt(visitList)
-                setLocationResults(DataBaseController(this@MainActivity).readAllVisitedLocation())
+
+
+                // Delete a visited place code/////
+                /*
+                 val listItem = mListView!!.getItemAtPosition(position) as SearchResult
+                 val visit = listItem!!.visitResults.visitedLocationInformation
+                 val visitList = ArrayList<VisitedLocationInformation>()
+                 visitList.add(visit)
+                 DataBaseController(this@MainActivity).deleteVisitedPlaceAndUniqueNearByForIt(visitList)
+                 setLocationResults(DataBaseController(this@MainActivity).readAllVisitedLocation())*/
+
             }
-        })
+        }
     }
 
     fun setSearchListener() {
