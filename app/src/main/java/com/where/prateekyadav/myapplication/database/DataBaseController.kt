@@ -169,7 +169,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         val db = getWritableDB()
         var cursor: Cursor? = null
         try {
-            var query = SELECT_FROM+ DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION
+            var query = SELECT_FROM+ DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION+
                         WHERE+DBContract.VisitedLocationData.COLUMN_IS_ADDRESS_SET+ EQUALS_TO+1
             cursor = db.rawQuery(query, null)
         } catch (e: SQLiteException) {
