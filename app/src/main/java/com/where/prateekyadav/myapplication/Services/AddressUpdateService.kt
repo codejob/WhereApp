@@ -15,6 +15,7 @@ import android.util.Log
 import com.where.prateekyadav.myapplication.LocationHelper
 import com.where.prateekyadav.myapplication.UpdateLocation
 import com.where.prateekyadav.myapplication.Util.AppConstant
+import com.where.prateekyadav.myapplication.Util.ConnectionDetector
 import com.where.prateekyadav.myapplication.Util.MySharedPref
 import com.where.prateekyadav.myapplication.database.DataBaseController
 import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
@@ -32,6 +33,7 @@ class AddressUpdateService : IntentService("ADDRESS UPDATE"), UpdateLocation {
     private var mContext: Context? = null
     private var handler: AddressUpdateService.Handleupdate? = null
     private var updateLocation:UpdateLocation?=null;
+    private lateinit var mConnectionDetector:ConnectionDetector
 
     private val testHandler = object : Handler() {
         override fun handleMessage(msg: Message) {
@@ -46,6 +48,8 @@ class AddressUpdateService : IntentService("ADDRESS UPDATE"), UpdateLocation {
         mContext = this
         handler=Handleupdate()
         updateLocation=this;
+        mConnectionDetector= ConnectionDetector.getInstance(this)
+
 
     }
 
@@ -70,16 +74,18 @@ class AddressUpdateService : IntentService("ADDRESS UPDATE"), UpdateLocation {
         Log.d("service", "onStartCommand")
         val mList=DataBaseController(mContext).getListOfNotUpdatedVisitedLocation();
         mList!!.forEach {
-            // TODO : write add address code here
-            val retroCallImplementor= RetroCallImplementor()
-           // var retroCallImplementor = RetroCallImplementor()
-            val latitude=it.latitude
-            val longitude=it.longitude
-            val location : Location = Location(it.locationProvider)
-            location.latitude=latitude
-            location.longitude=longitude
-            retroCallImplementor!!.getAllPlaces(latitude.toString() + "," + longitude.toString(),
-                    handler, location, location.provider,it.rowID)
+            if (mConnectionDetector.isNetworkAvailable()) {
+                // Add address code here
+                val retroCallImplementor = RetroCallImplementor()
+                // var retroCallImplementor = RetroCallImplementor()
+                val latitude = it.latitude
+                val longitude = it.longitude
+                val location: Location = Location(it.locationProvider)
+                location.latitude = latitude
+                location.longitude = longitude
+                retroCallImplementor!!.getAllPlaces(latitude.toString() + "," + longitude.toString(),
+                        handler, location, location.provider, it.rowID)
+            }
 
         }
         //
