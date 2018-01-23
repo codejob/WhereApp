@@ -38,8 +38,9 @@ class LocationHelper {
     var mUpdateLocation: UpdateLocation? = null;
     var mLocationReceived: Boolean = false;
     //
-    val ADDRESS_NOT_SET=0
-    val ADDRESS_SET=1
+    val ADDRESS_NOT_SET = 0
+    val ADDRESS_SET = 1
+
     companion object {
         var mCurrentObject: LocationHelper? = null;
         fun getInstance(context: Context?, updateLocation: UpdateLocation): LocationHelper {
@@ -352,18 +353,25 @@ class LocationHelper {
         pref.setLocation(LATITUDE, LONGITUDE);
 
         if (insert) {
-            // TODO : insert location only here
+            //insert location only here
             var visitedLocationInformation = VisitedLocationInformation("");
-            visitedLocationInformation.userId=0;
-            visitedLocationInformation.latitude=LATITUDE
-            visitedLocationInformation.longitude=LONGITUDE
-            visitedLocationInformation.isAddressSet=ADDRESS_NOT_SET
-            visitedLocationInformation.locationProvider=currentLocation.provider
-            visitedLocationInformation.accuracy=currentLocation.accuracy
+            visitedLocationInformation.userId = 0;
+            visitedLocationInformation.latitude = LATITUDE
+            visitedLocationInformation.longitude = LONGITUDE
+            visitedLocationInformation.isAddressSet = ADDRESS_NOT_SET
+            visitedLocationInformation.locationProvider = currentLocation.provider
+            visitedLocationInformation.accuracy = currentLocation.accuracy
+            var fromTime: Long = System.currentTimeMillis()
+            val toTime = System.currentTimeMillis()
+            if (lastDBLocation == null) {
+                fromTime = pref.getLong(AppConstant.SP_KEY_FIRST_TIME)
+            }
+            visitedLocationInformation.toTime = toTime
+            visitedLocationInformation.fromTime = fromTime
             //
-            val insertedId=DataBaseController(mContext).insertVisitedLocation(visitedLocationInformation);
+            val insertedId = DataBaseController(mContext).insertVisitedLocation(visitedLocationInformation);
             //
-            if (insertedId>0L) {
+            if (insertedId > 0L) {
                 retroCallImplementor!!.getAllPlaces(LATITUDE.toString() + "," + LONGITUDE.toString(),
                         handler, location, locationType, insertedId)
             }
@@ -379,7 +387,7 @@ class LocationHelper {
      * Method to add address into database
      */
     fun addAddressIntoDataBase(resultPlace: Result, currentLocation: Location, locationType: String,
-                               mPlacesList: List<Result>,rowId: Long) {
+                               mPlacesList: List<Result>, rowId: Long) {
         //
         var result: Long = 0
         try {
@@ -422,34 +430,34 @@ class LocationHelper {
                 dbLastLocation.longitude = lastDBLocation!!.longitude
             }
             // set values for visited location information
-            var visitedLocationInformation=VisitedLocationInformation("NA")
-            visitedLocationInformation.userId=1
-            visitedLocationInformation.latitude=LATITUDE
-            visitedLocationInformation.longitude=LONGITUDE
-            visitedLocationInformation.address=address
-            visitedLocationInformation.city=city
-            visitedLocationInformation.state=state
-            visitedLocationInformation.country=country
-            visitedLocationInformation.postalCode=postalCode
-            visitedLocationInformation.knownName=knownName
-            visitedLocationInformation.toTime=toTime
-            visitedLocationInformation.fromTime=fromTime
-            visitedLocationInformation.locationProvider=locationProvider
-            visitedLocationInformation.rowID=0
-            visitedLocationInformation.locationRequestType=locationType
-            visitedLocationInformation.vicinity=vicinity
-            visitedLocationInformation.placeId=placeId
-            visitedLocationInformation.photoUrl=photoUrl
-            visitedLocationInformation.nearByPlacesIds=nearByPlaces
-            visitedLocationInformation.isAddressSet=isAddressSet
-            visitedLocationInformation.accuracy=currentLocation.accuracy
+            var visitedLocationInformation = VisitedLocationInformation("NA")
+            visitedLocationInformation.userId = 1
+            visitedLocationInformation.latitude = LATITUDE
+            visitedLocationInformation.longitude = LONGITUDE
+            visitedLocationInformation.address = address
+            visitedLocationInformation.city = city
+            visitedLocationInformation.state = state
+            visitedLocationInformation.country = country
+            visitedLocationInformation.postalCode = postalCode
+            visitedLocationInformation.knownName = knownName
+            visitedLocationInformation.toTime = toTime
+            visitedLocationInformation.fromTime = fromTime
+            visitedLocationInformation.locationProvider = locationProvider
+            visitedLocationInformation.rowID = 0
+            visitedLocationInformation.locationRequestType = locationType
+            visitedLocationInformation.vicinity = vicinity
+            visitedLocationInformation.placeId = placeId
+            visitedLocationInformation.photoUrl = photoUrl
+            visitedLocationInformation.nearByPlacesIds = nearByPlaces
+            visitedLocationInformation.isAddressSet = isAddressSet
+            visitedLocationInformation.accuracy = currentLocation.accuracy
             //
             if (lastDBLocation == null) fromTime = pref.getLong(AppConstant.SP_KEY_FIRST_TIME)
 
             if (lastDBLocation != null && currentLocation.distanceTo(dbLastLocation) < AppConstant.MIN_DISTANCE_RANGE) {
 
-                val updatedRow= mDataBaseController.updateVisitedLocation(
-                      visitedLocationInformation, lastDBLocation.rowID)
+                val updatedRow = mDataBaseController.updateVisitedLocation(
+                        visitedLocationInformation, lastDBLocation.rowID)
                 Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Updating address")
             } else {
                 result = mDataBaseController.insertVisitedLocation(
@@ -475,7 +483,7 @@ class LocationHelper {
     internal inner class Handleupdate : RetroCallIneractor {
 
         override fun updatePlacesWithId(places: List<Result>, location: Location, locationType: String, rowId: Long) {
-                      try {
+            try {
                 var result: Result? = null;
 
                 /* if (places != null && places.size > 1)
@@ -518,7 +526,7 @@ class LocationHelper {
                     }
                 }
                 //Add address into data base
-                addAddressIntoDataBase(result!!, location, locationType, places,rowId)
+                addAddressIntoDataBase(result!!, location, locationType, places, rowId)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -528,6 +536,7 @@ class LocationHelper {
         override fun updatePlaces(places: MutableList<Result>?, location: Location?, locationType: String?) {
 
         }
+
         override fun updatePlaceDetails(place: Result) {
 
         }
@@ -573,26 +582,26 @@ class LocationHelper {
                     val locationType = "NA";
                     val toTime: Long = System.currentTimeMillis();
                     // set values for visited location information
-                    var visitedLocationInformation=VisitedLocationInformation("NA")
-                    visitedLocationInformation.userId=1
-                    visitedLocationInformation.latitude=LATITUDE
-                    visitedLocationInformation.longitude=LONGITUDE
-                    visitedLocationInformation.address=address
-                    visitedLocationInformation.city=city
-                    visitedLocationInformation.state=state
-                    visitedLocationInformation.country=country
-                    visitedLocationInformation.postalCode=postalCode
-                    visitedLocationInformation.knownName=knownName
-                    visitedLocationInformation.toTime=toTime
-                    visitedLocationInformation.fromTime=fromTime
-                    visitedLocationInformation.locationProvider=locationProvider
-                    visitedLocationInformation.rowID=0
-                    visitedLocationInformation.locationRequestType=locationType
-                    visitedLocationInformation.vicinity=vicinity
-                    visitedLocationInformation.placeId=placeId
-                    visitedLocationInformation.photoUrl=photoUrl
-                    visitedLocationInformation.nearByPlacesIds=nearPlaces
-                    visitedLocationInformation.isAddressSet=isAddressSet
+                    var visitedLocationInformation = VisitedLocationInformation("NA")
+                    visitedLocationInformation.userId = 1
+                    visitedLocationInformation.latitude = LATITUDE
+                    visitedLocationInformation.longitude = LONGITUDE
+                    visitedLocationInformation.address = address
+                    visitedLocationInformation.city = city
+                    visitedLocationInformation.state = state
+                    visitedLocationInformation.country = country
+                    visitedLocationInformation.postalCode = postalCode
+                    visitedLocationInformation.knownName = knownName
+                    visitedLocationInformation.toTime = toTime
+                    visitedLocationInformation.fromTime = fromTime
+                    visitedLocationInformation.locationProvider = locationProvider
+                    visitedLocationInformation.rowID = 0
+                    visitedLocationInformation.locationRequestType = locationType
+                    visitedLocationInformation.vicinity = vicinity
+                    visitedLocationInformation.placeId = placeId
+                    visitedLocationInformation.photoUrl = photoUrl
+                    visitedLocationInformation.nearByPlacesIds = nearPlaces
+                    visitedLocationInformation.isAddressSet = isAddressSet
 
                     mList.add(visitedLocationInformation);
 
