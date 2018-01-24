@@ -236,7 +236,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
      */
     fun getListOfNotUpdatedVisitedLocation(): ArrayList<VisitedLocationInformation>? {
 
-        val query = SELECT_FROM + DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION
+        val query = SELECT_FROM + DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION+
         WHERE + DBContract.VisitedLocationData.COLUMN_IS_ADDRESS_SET + EQUALS_TO + 0;
 
 
@@ -246,7 +246,6 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         try {
             cursor = db.rawQuery(query, null)
         } catch (e: SQLiteException) {
-            createTables(db)
             return ArrayList()
         }
         //

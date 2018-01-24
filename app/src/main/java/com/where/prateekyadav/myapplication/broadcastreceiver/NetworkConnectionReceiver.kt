@@ -77,7 +77,8 @@ class NetworkConnectionReceiver : BroadcastReceiver() {
             val handler = Handler()
             handler.postDelayed({
                 //Do something after 100ms
-                startAddressUpdateService(context)
+                if (context != null)
+                    startAddressUpdateService(context)
             }, 1500)
         } catch (e: Exception) {
             e.printStackTrace()
