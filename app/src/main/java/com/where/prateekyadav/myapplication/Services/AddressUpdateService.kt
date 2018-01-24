@@ -32,8 +32,8 @@ class AddressUpdateService : IntentService("ADDRESS UPDATE"), UpdateLocation {
 
     private var mContext: Context? = null
     private var handler: AddressUpdateService.Handleupdate? = null
-    private var updateLocation:UpdateLocation?=null;
-    private lateinit var mConnectionDetector:ConnectionDetector
+    private var updateLocation: UpdateLocation? = null;
+    private lateinit var mConnectionDetector: ConnectionDetector
 
     private val testHandler = object : Handler() {
         override fun handleMessage(msg: Message) {
@@ -46,9 +46,9 @@ class AddressUpdateService : IntentService("ADDRESS UPDATE"), UpdateLocation {
         super.onCreate()
         Log.d("service", "oncreate service")
         mContext = this
-        handler=Handleupdate()
-        updateLocation=this;
-        mConnectionDetector= ConnectionDetector.getInstance(this)
+        handler = Handleupdate()
+        updateLocation = this;
+        mConnectionDetector = ConnectionDetector.getInstance(this)
 
 
     }
@@ -72,24 +72,34 @@ class AddressUpdateService : IntentService("ADDRESS UPDATE"), UpdateLocation {
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         Log.d("service", "onStartCommand")
-        val mList=DataBaseController(mContext).getListOfNotUpdatedVisitedLocation();
-        mList!!.forEach {
-            if (mConnectionDetector.isNetworkAvailable()) {
-                // Add address code here
-                val retroCallImplementor = RetroCallImplementor()
-                // var retroCallImplementor = RetroCallImplementor()
-                val latitude = it.latitude
-                val longitude = it.longitude
-                val location: Location = Location(it.locationProvider)
-                location.latitude = latitude
-                location.longitude = longitude
-                retroCallImplementor!!.getAllPlaces(latitude.toString() + "," + longitude.toString(),
-                        handler, location, location.provider, it.rowID)
-            }
-
-        }
+        callGetPlacesAPI()
         //
         return Service.START_STICKY
+    }
+
+    fun callGetPlacesAPI() {
+        try {
+            val mList = DataBaseController(mContext).getListOfNotUpdatedVisitedLocation();
+            if (mList != null && mList.size > 0) {
+                val it = mList.get(0)
+                if (mConnectionDetector.isNetworkAvailable()) {
+                    // Add address code here
+                    val retroCallImplementor = RetroCallImplementor()
+                    // var retroCallImplementor = RetroCallImplementor()
+                    val latitude = it.latitude
+                    val longitude = it.longitude
+                    val location: Location = Location(it.locationProvider)
+                    location.latitude = latitude
+                    location.longitude = longitude
+                    retroCallImplementor!!.getAllPlaces(latitude.toString() + "," + longitude.toString(),
+                            handler, location, location.provider, it.rowID)
+                }
+
+
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
 
@@ -104,7 +114,6 @@ class AddressUpdateService : IntentService("ADDRESS UPDATE"), UpdateLocation {
     }
 
 
-
     /*
    This will handle the response from the API
    we are setting the adapter here and update the recycler view.
@@ -112,7 +121,7 @@ class AddressUpdateService : IntentService("ADDRESS UPDATE"), UpdateLocation {
     internal inner class Handleupdate : RetroCallIneractor {
 
 
-        override fun updatePlacesWithId(places: List<Result>, location: Location, locationType: String,rowId:Long) {
+        override fun updatePlacesWithId(places: List<Result>, location: Location, locationType: String, rowId: Long) {
 
             try {
                 var result: Result? = null;
@@ -143,18 +152,21 @@ class AddressUpdateService : IntentService("ADDRESS UPDATE"), UpdateLocation {
                     }
                 }
                 //
-                var locationHelper= LocationHelper.getInstance(mContext,updateLocation!!)
-                locationHelper.addAddressIntoDataBase(result!!, location, locationType, places,rowId)
+                var locationHelper = LocationHelper.getInstance(mContext, updateLocation!!)
+                locationHelper.addAddressIntoDataBase(result!!, location, locationType, places, rowId)
 
+                callGetPlacesAPI()
             } catch (e: Exception) {
                 e.printStackTrace()
             }
 
         }
+
         //
         override fun updatePlaces(places: MutableList<Result>?, location: Location?, locationType: String?) {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
+
         override fun updatePlaceDetails(place: Result) {
 
         }
@@ -202,34 +214,34 @@ class AddressUpdateService : IntentService("ADDRESS UPDATE"), UpdateLocation {
             val toTime: Long = System.currentTimeMillis()
             //
             // set values for visited location information
-            var visitedLocationInformation=VisitedLocationInformation("NA")
-            visitedLocationInformation.userId=1
-            visitedLocationInformation.latitude=LATITUDE
-            visitedLocationInformation.longitude=LONGITUDE
-            visitedLocationInformation.address=address
-            visitedLocationInformation.city=city
-            visitedLocationInformation.state=state
-            visitedLocationInformation.country=country
-            visitedLocationInformation.postalCode=postalCode
-            visitedLocationInformation.knownName=knownName
-            visitedLocationInformation.toTime=toTime
-            visitedLocationInformation.fromTime=fromTime
-            visitedLocationInformation.locationProvider=locationProvider
-            visitedLocationInformation.rowID=0
-            visitedLocationInformation.locationRequestType=locationType
-            visitedLocationInformation.vicinity=vicinity
-            visitedLocationInformation.placeId=placeId
-            visitedLocationInformation.photoUrl=photoUrl
-            visitedLocationInformation.nearByPlacesIds=""
-            visitedLocationInformation.isAddressSet=isAddressSet
+            var visitedLocationInformation = VisitedLocationInformation("NA")
+            visitedLocationInformation.userId = 1
+            visitedLocationInformation.latitude = LATITUDE
+            visitedLocationInformation.longitude = LONGITUDE
+            visitedLocationInformation.address = address
+            visitedLocationInformation.city = city
+            visitedLocationInformation.state = state
+            visitedLocationInformation.country = country
+            visitedLocationInformation.postalCode = postalCode
+            visitedLocationInformation.knownName = knownName
+            visitedLocationInformation.toTime = toTime
+            visitedLocationInformation.fromTime = fromTime
+            visitedLocationInformation.locationProvider = locationProvider
+            visitedLocationInformation.rowID = 0
+            visitedLocationInformation.locationRequestType = locationType
+            visitedLocationInformation.vicinity = vicinity
+            visitedLocationInformation.placeId = placeId
+            visitedLocationInformation.photoUrl = photoUrl
+            visitedLocationInformation.nearByPlacesIds = ""
+            visitedLocationInformation.isAddressSet = isAddressSet
             result = DataBaseController(mContext).updateVisitedLocation(
-                   visitedLocationInformation,1)
+                    visitedLocationInformation, 1)
             //
             pref.setLong(System.currentTimeMillis(), AppConstant.SP_KEY_SPENT_TIME)
-            Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,"Address updated")
+            Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Address updated")
 
-            var locationHelper= LocationHelper.getInstance(mContext,this)
-            locationHelper.addNearByPlaces(mPlacesList,placeId,addresses)
+            var locationHelper = LocationHelper.getInstance(mContext, this)
+            locationHelper.addNearByPlaces(mPlacesList, placeId, addresses)
         } catch (e: Exception) {
             e.printStackTrace()
         }
