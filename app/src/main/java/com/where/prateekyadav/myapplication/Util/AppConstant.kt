@@ -34,6 +34,7 @@ open class AppConstant {
         val LOCATION_UPDATE_TYPE_CURRENT: String = "current";
         val latArray = arrayOf(24.585445, 24.602968, 15.557049)
         val lngArray = arrayOf(73.712479, 73.685511, 73.754851)
+        var ISONLINE: Int = 0;
 
 
     }

@@ -9,19 +9,27 @@ import android.os.Handler
 
 import com.where.prateekyadav.myapplication.Services.AddressUpdateService
 import com.where.prateekyadav.myapplication.Util.AppConstant
+import com.where.prateekyadav.myapplication.Util.AppConstant.Companion.ISONLINE
 import com.where.prateekyadav.myapplication.Util.AppUtility
+import android.app.ActivityManager
+
+
 
 
 /**
  * Created by Infobeans on 12/10/2015.
  */
 class NetworkConnectionReceiver : BroadcastReceiver() {
-    override fun onReceive(context: Context, intent: Intent) {
+    lateinit var handler:Handler;
+    lateinit var mContext: Context;
 
+    override fun onReceive(context: Context, intent: Intent) {
+        mContext=context
         val info = intent.getParcelableExtra<NetworkInfo>(WifiManager.EXTRA_NETWORK_INFO)
         AppUtility.showToast(context, info.state.toString())
         if (info != null && info.isConnected) {
             if (info.state == NetworkInfo.State.CONNECTED && ISONLINE != 1) {
+                handler = Handler()
                 updateNetworkConnection(context, info.isConnected)
                 ISONLINE = 1
                 // Start  service for form sync
@@ -74,10 +82,12 @@ class NetworkConnectionReceiver : BroadcastReceiver() {
      */
     private fun runCodeAfterSomeDelay(context: Context) {
         try {
-            val handler = Handler()
+
             handler.postDelayed({
                 //Do something after 100ms
-                startAddressUpdateService(context)
+                if (isMyServiceRunning(AddressUpdateService::class.java)) {
+                    startAddressUpdateService(context)
+                }
             }, 1500)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -96,8 +106,6 @@ class NetworkConnectionReceiver : BroadcastReceiver() {
     }
 
     companion object {
-        internal var ISONLINE = 0
-        //
         // This function will create an intent. This intent must take as parameter the "unique_name" that you registered your activity with
         internal fun updateNetworkConnection(context: Context, isConnected: Boolean?) {
             val intent = Intent(AppConstant.INTENT_FILTER_INTERNET_CONNECTION);
@@ -107,6 +115,16 @@ class NetworkConnectionReceiver : BroadcastReceiver() {
             context.sendBroadcast(intent);
             //
         }
+    }
+
+    private fun isMyServiceRunning(serviceClass: Class<*>): Boolean {
+        val manager = mContext.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        for (service in manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.name == service.service.className) {
+                return true
+            }
+        }
+        return false
     }
 }
 
