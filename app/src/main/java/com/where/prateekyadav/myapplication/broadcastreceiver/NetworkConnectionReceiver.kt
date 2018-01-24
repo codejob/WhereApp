@@ -85,9 +85,9 @@ class NetworkConnectionReceiver : BroadcastReceiver() {
 
             handler.postDelayed({
                 //Do something after 100ms
-                if (isMyServiceRunning(AddressUpdateService::class.java)) {
+                //if (isMyServiceRunning(AddressUpdateService::class.java)) {
                     startAddressUpdateService(context)
-                }
+                //}
             }, 1500)
         } catch (e: Exception) {
             e.printStackTrace()
