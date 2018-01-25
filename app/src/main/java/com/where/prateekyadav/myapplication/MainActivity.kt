@@ -24,6 +24,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.*
+import com.where.prateekyadav.myapplication.Services.AddressUpdateService
 import com.where.prateekyadav.myapplication.database.DBContract
 import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
 import com.where.prateekyadav.myapplication.view.NearByActivity
@@ -46,6 +47,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
         mListView = findViewById(R.id.lv_address)
         mAdapter = LocationsAdapter(this, mSearchResultsList)
         mListView!!.adapter = mAdapter
+        mListView!!.emptyView = findViewById(R.id.tv_no_records) as TextView
         mLocationHelper = LocationHelper.getInstance(applicationContext, this);
         if (PermissionCheckHandler.checkNetWorkPermissions(this)) {
             checkLocationPermission()
@@ -56,6 +58,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
         DataBaseController(this).copyDataBaseToSDCard()
         setSearchListener()
         setClickListener()
+        //AppUtility().startTimerAlarm(this,true);
     }
 
     fun setClickListener() {
@@ -64,15 +67,6 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
 
             override fun onItemClick(parent: AdapterView<*>, view: View, position: Int, id: Long) {
 
-
-                // Delete a visited place code/////
-                /*
-                 val listItem = mListView!!.getItemAtPosition(position) as SearchResult
-                 val visit = listItem!!.visitResults.visitedLocationInformation
-                 val visitList = ArrayList<VisitedLocationInformation>()
-                 visitList.add(visit)
-                 DataBaseController(this@MainActivity).deleteVisitedPlaceAndUniqueNearByForIt(visitList)
-                 setLocationResults(DataBaseController(this@MainActivity).readAllVisitedLocation())*/
 
             }
         }
@@ -93,7 +87,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
                 if (s.length > 2)
                     search(s.toString())
                 else if (s.length == 0) {
-                    setLocationResults(DataBaseController(this@MainActivity).readAllVisitedLocation())
+                    setLocationResults(DataBaseController(this@MainActivity).readRecentVisitedLocation())
                 }
             }
         })
@@ -152,7 +146,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
                         //
                         PermissionCheckHandler.verifyNetWorkPermissions(this@MainActivity)
                         AppUtility().validateAutoStartTimer(this)
-                        AppUtility().startTimerAlarm(applicationContext)
+                        AppUtility().startTimerAlarm(applicationContext,true)
                         //startService(Intent(this, TimerService::class.java));
                     }
 
@@ -192,7 +186,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
              if (clear != null &&
                      clear.text.isBlank()) {
              }*/
-            setLocationResults(DataBaseController(this).readAllVisitedLocation())
+            setLocationResults(DataBaseController(this).readRecentVisitedLocation())
 
             //mLocationHelper?.getLocation()
             /*if (!AppUtility().checkAlarmAlreadySet(this)) {
@@ -202,9 +196,6 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
 
         }
         AppUtility().validateAutoStartTimer(this)
-        if (!AppUtility().checkAlarmAlreadySet(this)) {
-            AppUtility().startTimerAlarm(this)
-        }
         //registerReceiver()
         //AppUtility().inssertDemoLocation(this)
         //LocationHelper.getInstance(this, this).setLocationListener();
@@ -224,11 +215,14 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
 
     fun setLocationResults(address: List<SearchResult>) {
         try {
-            mSearchResultsList = address as ArrayList<SearchResult>
-            mAdapter = LocationsAdapter(this, mSearchResultsList)
-            mListView!!.adapter = mAdapter
-            // mAdapter!!.notifyDataSetChanged()
+            mSearchResultsList.clear()
+            mSearchResultsList.addAll(address as ArrayList<SearchResult>)
+           // mSearchResultsList=address as ArrayList<SearchResult>
+            // mAdapter = LocationsAdapter(this, mSearchResultsList)
+            //mListView!!.adapter = mAdapter
+
             //mAdapter!!.notifyDataSetInvalidated()
+            mAdapter!!.notifyDataSetChanged()
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -246,7 +240,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
             if (isUpdated) {
                 runOnUiThread({
                     setLocationResults(
-                            DataBaseController(this@MainActivity).readAllVisitedLocation())
+                            DataBaseController(this@MainActivity).readRecentVisitedLocation())
 
                 });
 
@@ -346,5 +340,13 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
     override fun updateLocationAddressList(addressList: List<SearchResult>) {
         setLocationResults(addressList)
     }
-
+    /**
+     * Method to start service to synced the draft forms
+     *
+     * @param context
+     */
+    private fun startAddressUpdateServiceToUpdateAnyRemainingAddresss(context: Context) {
+        val serviceIntent = Intent(context, AddressUpdateService::class.java)
+        context.startService(serviceIntent)
+    }
 }

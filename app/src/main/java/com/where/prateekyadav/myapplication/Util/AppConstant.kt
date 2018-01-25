@@ -14,15 +14,17 @@ open class AppConstant {
         var SP_KEY_FIRST_TIME: String = "sp_key_first_time"
         var SP_KEY_ACCURACY: String = "sp_key_accuracy";
         var SP_KEY_LAST_TIMER_TIME: String = "sp_key_last_timer_time";
+        var SP_KEY_COUNTER_AUTO_START: String = "sp_key_counter_auto_start";
         val FOLDER_PATH = Environment.getExternalStorageDirectory().path + "/WhereApp/"
         val TAG_KOTLIN_DEMO_APP = "KotlinDemoApp"
         // Seconds
 
-        val LOCATION_SYNC_INSTERVAL: Long = 1 * 30 * 1000;
-        val LOCATION_SYNC_TIMEOUT: Long = 30 * 1000;
+        val LOCATION_SYNC_INSTERVAL: Long = 30 * 1000;
+        val LOCATION_SYNC_TIMEOUT: Long = 20 * 1000;
         val RECEIVER_ACTION: String = "LOCATION";
         var MIN_DISTANCE_RANGE: Int = 200;
         var RADIUS_NEARBY_SEARCH: Int = 50;
+        var RECENT_COUNT: Int = 10;
         val alarmID: Int = 1001;
         //
         val INTENT_FILTER_UPDATE_LOCATION: String = "update_location";

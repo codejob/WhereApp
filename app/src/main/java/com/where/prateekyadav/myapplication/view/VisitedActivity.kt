@@ -80,7 +80,7 @@ class VisitedActivity : AppCompatActivity() {
 
                  Req Type:=> ${mLocationList!!.get(position).locationRequestType}
                  Provider :=> ${mLocationList!!.get(position).locationProvider}
-                 Last accuracy :=> ${pref!!.getFloat(AppConstant.SP_KEY_ACCURACY)}
+                 Last accuracy :=> ${mLocationList!!.get(position).accuracy}
                  Lat:=> ${mLocationList!!.get(position).latitude}
                  Long:=> ${mLocationList!!.get(position).longitude} """
 

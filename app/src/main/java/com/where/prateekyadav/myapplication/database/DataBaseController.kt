@@ -41,6 +41,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         // Gets the data repository in write mode
         val db = getWritableDB()
         var values = getContentValuesForVisitedLocation(infoLocation)
+        /// Removing this as it may reset the
         val rowId = infoLocation.rowID
         var newRowId: Long = 0
         if (rowId == 0L) {
@@ -48,10 +49,14 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
             newRowId = db.insert(DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION, null, values)
             var visitedLocationInformation = readLastVisitedLocation();
             newRowId = visitedLocationInformation!!.rowID;
+            Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "inserting location data")
 
         } else {
-            updateVisitedLocation(infoLocation, rowId)
+            /// updating  only location data lat lng extra no address///
+            updateVisitedLocationOnlyData(infoLocation, rowId)
             newRowId = rowId;
+            Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "updating location data")
+
 
         }
         closeDataBase(sqLiteDatabase)
@@ -65,6 +70,21 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         var values = getContentValuesForVisitedLocation(infoLocation)
         values.remove(DBContract.VisitedLocationData.COLUMN_TO_TIME)
         values.remove(DBContract.VisitedLocationData.COLUMN_FROM_TIME)
+
+        // Update the new row, returning the primary key value of the new row
+        val whereClause = "id = ?"
+        val whereArgs = arrayOf(rowID.toString())
+
+        val newRowId = db.update(DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION
+                , values, whereClause, whereArgs)
+        closeDataBase(sqLiteDatabase)
+        return newRowId
+    }
+
+    fun updateVisitedLocationOnlyData(infoLocation: VisitedLocationInformation, rowID: Long): Int {
+        // Gets the data repository in write mode
+        val db = getWritableDB()
+        var values = getContentValuesForUpdateVisitedLocationOnly(infoLocation)
 
         // Update the new row, returning the primary key value of the new row
         val whereClause = "id = ?"
@@ -98,6 +118,19 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         values.put(DBContract.VisitedLocationData.COLUMN_PHOTO_URL, infoLocation.locationRequestType)
         values.put(DBContract.VisitedLocationData.COLUMN_IS_ADDRESS_SET, infoLocation.isAddressSet)
         values.put(DBContract.VisitedLocationData.COLUMN_ACCURACY, infoLocation.accuracy)
+        values.put(DBContract.VisitedLocationData.COLUMN_ISPREFERRED, infoLocation.isPreferred)
+
+        return values
+    }
+
+    private fun getContentValuesForUpdateVisitedLocationOnly(infoLocation: VisitedLocationInformation): ContentValues {
+        // Create a new map of values, where column names are the keys
+        val values = ContentValues()
+        values.put(DBContract.UserEntry.COLUMN_USER_ID, infoLocation.userId)
+        values.put(DBContract.VisitedLocationData.COLUMN_LATITUDE, infoLocation.latitude)
+        values.put(DBContract.VisitedLocationData.COLUMN_LONGITUDE, infoLocation.longitude)
+        values.put(DBContract.VisitedLocationData.COLUMN_LOCATION_PROVIDER, infoLocation.locationProvider)
+        values.put(DBContract.VisitedLocationData.COLUMN_LOCATION_REQUEST_TYPE, infoLocation.locationRequestType)
         values.put(DBContract.VisitedLocationData.COLUMN_ACCURACY, infoLocation.accuracy)
         values.put(DBContract.VisitedLocationData.COLUMN_ISPREFERRED, infoLocation.isPreferred)
 
@@ -172,8 +205,8 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         val db = getWritableDB()
         var cursor: Cursor? = null
         try {
-            var query = SELECT_FROM+ DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION+
-                        WHERE+DBContract.VisitedLocationData.COLUMN_IS_ADDRESS_SET+ EQUALS_TO+1
+            var query = SELECT_FROM + DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION +
+                    WHERE + DBContract.VisitedLocationData.COLUMN_IS_ADDRESS_SET + EQUALS_TO + 1
             cursor = db.rawQuery(query, null)
         } catch (e: SQLiteException) {
             createTables(db)
@@ -193,6 +226,49 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
                 var visitResults = VisitResults(visit!!)
                 visitResults.noOfVisits = count.toInt()
                 visitResultsList.add(visitResults)
+
+                cursor.moveToPrevious()
+            }
+            cursor.close()
+        }
+        closeDataBase(sqLiteDatabase)
+        //
+        return parseSearchResult(visitResultsList) as ArrayList<SearchResult>
+    }
+
+
+    /**
+     * Read all visited location from data base
+     */
+    fun readRecentVisitedLocation(): ArrayList<SearchResult> {
+        val visitResultsList = ArrayList<VisitResults>()
+        val db = getWritableDB()
+        var cursor: Cursor? = null
+        try {
+            var query = SELECT_FROM + DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION +
+                    WHERE + DBContract.VisitedLocationData.COLUMN_IS_ADDRESS_SET + EQUALS_TO + 1
+            cursor = db.rawQuery(query, null)
+        } catch (e: SQLiteException) {
+            createTables(db)
+            return ArrayList()
+        }
+        //
+        if (cursor != null && cursor!!.moveToLast()) {
+            while (!cursor.isBeforeFirst) {
+                val visit = prepareVisitedLocationObject(cursor)
+                // get visited location object here through prepareVisitedLocationObject function
+                val QueryCount = "select count(*) from " + DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION +
+                        WHERE + DBContract.VisitedLocationData.COLUMN_PLACE_ID +
+                        EQUALS_TO_STRING + visit!!.placeId + "'" +
+                        " Group BY " + DBContract.VisitedLocationData.COLUMN_PLACE_ID
+                val s = sqLiteDatabase.compileStatement(QueryCount)
+                val count = s.simpleQueryForLong()
+                var visitResults = VisitResults(visit!!)
+                visitResults.noOfVisits = count.toInt()
+                visitResultsList.add(visitResults)
+                if (visitResultsList.size === AppConstant.RECENT_COUNT) {
+                    break;
+                }
 
                 cursor.moveToPrevious()
             }
@@ -236,8 +312,8 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
      */
     fun getListOfNotUpdatedVisitedLocation(): ArrayList<VisitedLocationInformation>? {
 
-        val query = SELECT_FROM + DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION+
-        WHERE + DBContract.VisitedLocationData.COLUMN_IS_ADDRESS_SET + EQUALS_TO + 0;
+        val query = SELECT_FROM + DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION +
+                WHERE + DBContract.VisitedLocationData.COLUMN_IS_ADDRESS_SET + EQUALS_TO + 0;
 
 
         val visitedLocationInfoList = ArrayList<VisitedLocationInformation>()
@@ -286,6 +362,8 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         var photoUrl: String
         var nearByPlacesIds: String
         var isAddressSet: Int
+        var isPreferred: Int
+        var accuracy:Float
 
         rowID = cursor.getLong(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_ROW_ID))
         userId = cursor.getInt(cursor.getColumnIndex(DBContract.UserEntry.COLUMN_USER_ID))
@@ -306,6 +384,8 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         photoUrl = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_PHOTO_URL))
         nearByPlacesIds = cursor.getString(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_NEARBY_PLACES_IDS))
         isAddressSet = cursor.getInt(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_IS_ADDRESS_SET))
+        isPreferred = cursor.getInt(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_ISPREFERRED))
+        accuracy = cursor.getFloat(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_ACCURACY))
 
         // set values for visited location information
         var visitedLocationInformation = VisitedLocationInformation("NA")
@@ -328,6 +408,8 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         visitedLocationInformation.photoUrl = photoUrl
         visitedLocationInformation.nearByPlacesIds = nearByPlacesIds
         visitedLocationInformation.isAddressSet = isAddressSet
+        visitedLocationInformation.isPreferred = isPreferred
+        visitedLocationInformation.accuracy=accuracy
         // return visited location information object
         return visitedLocationInformation;
     }
@@ -574,7 +656,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         return searchResultList
     }
 
-     fun getVisitedLocationsFromPlaceid(placeID: String): List<VisitedLocationInformation>? {
+    fun getVisitedLocationsFromPlaceid(placeID: String): List<VisitedLocationInformation>? {
         val visitedLocationInfoList = ArrayList<VisitedLocationInformation>()
 
         val sqLiteDatabase = getWritableDB()
@@ -862,8 +944,8 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         visit.latitude = nearByPlace.latitude
         visit.longitude = nearByPlace.longitude
         visit.placeId = nearByPlace.placeId
-        visit.nearByPlacesIds=visit.nearByPlacesIds.replace(nearByPlace.placeId,placeID)
-        visit.isPreferred=1
+        visit.nearByPlacesIds = visit.nearByPlacesIds.replace(nearByPlace.placeId, placeID)
+        visit.isPreferred = 1
 
         updateVisitedLocation(visit, visit.rowID)
 
@@ -875,7 +957,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         nearByPlace.placeId = placeID
         updateNearByPlace(placeIDNearBy, prepareContentValuesForNeaby(nearByPlace))
 
-        val  search = readAllVisitedLocation()
+        val search = readAllVisitedLocation()
 
         closeDataBase(sqLiteDatabase)
     }

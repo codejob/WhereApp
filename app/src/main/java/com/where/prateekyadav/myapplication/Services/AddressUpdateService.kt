@@ -45,11 +45,6 @@ class AddressUpdateService : IntentService("ADDRESS UPDATE"), UpdateLocation {
     override fun onCreate() {
         super.onCreate()
         Log.d("service", "oncreate service")
-        mContext = this
-        handler = Handleupdate()
-        updateLocation = this;
-        mConnectionDetector = ConnectionDetector.getInstance(this)
-
 
     }
 
@@ -67,15 +62,19 @@ class AddressUpdateService : IntentService("ADDRESS UPDATE"), UpdateLocation {
     }
 
     override fun onHandleIntent(intent: Intent?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        mContext = this
+        handler = Handleupdate()
+        updateLocation = this;
+        mConnectionDetector = ConnectionDetector.getInstance(this)
+        callGetPlacesAPI()
     }
 
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+    /*override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         Log.d("service", "onStartCommand")
         callGetPlacesAPI()
         //
         return Service.START_STICKY
-    }
+    }*/
 
     fun callGetPlacesAPI() {
         try {
@@ -91,6 +90,7 @@ class AddressUpdateService : IntentService("ADDRESS UPDATE"), UpdateLocation {
                     val location: Location = Location(it.locationProvider)
                     location.latitude = latitude
                     location.longitude = longitude
+                    location.accuracy = it.accuracy
                     retroCallImplementor!!.getAllPlaces(latitude.toString() + "," + longitude.toString(),
                             handler, location, location.provider, it.rowID)
                 }
