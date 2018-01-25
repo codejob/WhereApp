@@ -12,4 +12,5 @@
     <string name="str_location_permission_alert_message">Without this permission the app is unable to track your visited place.Are you sure you want to deny this permission?</string>
     <string name="str_i_am_sure">I\'M SURE</string>
     <string name="str_re_try">RE-TRY</string>
+    <string name="update_from_nearby_locations">Update from nearby locations</string>
 </resources>

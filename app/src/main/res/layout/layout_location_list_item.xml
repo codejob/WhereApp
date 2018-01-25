@@ -7,14 +7,25 @@
         android:id="@+id/card_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:layout_margin="10dp"
         android:background="#f0f0f0"
-        android:layout_gravity="center"
         card_view:cardCornerRadius="4dp">
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+
+            <ImageButton
+                android:padding="5dp"
+                android:id="@+id/btn_delete"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_margin="10dp"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:src="@android:drawable/ic_delete"
+                android:textColor="#ffffff" />
 
             <TextView
                 android:id="@+id/tvTitle"
@@ -43,7 +54,7 @@
                 android:layout_below="@+id/btn_all_visits"
                 android:layout_margin="10dp"
                 android:background="#4d90e2"
-                android:text="@string/choose_from_nearby_locations"
+                android:text="@string/update_from_nearby_locations"
                 android:textColor="#ffffff" />
         </RelativeLayout>
     </android.support.v7.widget.CardView>

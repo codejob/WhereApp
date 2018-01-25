@@ -24,6 +24,7 @@ class NetworkConnectionReceiver : BroadcastReceiver() {
     lateinit var mContext: Context;
 
     override fun onReceive(context: Context, intent: Intent) {
+        AppUtility().validateAutoStartTimer(context)
         mContext=context
         val info = intent.getParcelableExtra<NetworkInfo>(WifiManager.EXTRA_NETWORK_INFO)
         AppUtility.showToast(context, info.state.toString())
@@ -82,7 +83,7 @@ class NetworkConnectionReceiver : BroadcastReceiver() {
      */
     private fun runCodeAfterSomeDelay(context: Context) {
         try {
-
+            handler.removeCallbacks { this }
             handler.postDelayed({
                 //Do something after 100ms
                 //if (isMyServiceRunning(AddressUpdateService::class.java)) {

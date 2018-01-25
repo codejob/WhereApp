@@ -8,10 +8,13 @@ import android.widget.BaseAdapter
 import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
 import android.view.LayoutInflater
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import com.where.prateekyadav.myapplication.Util.AppConstant
+import com.where.prateekyadav.myapplication.Util.AppUtility
 import com.where.prateekyadav.myapplication.Util.MySharedPref
 import com.where.prateekyadav.myapplication.database.DBContract
+import com.where.prateekyadav.myapplication.database.DataBaseController
 import com.where.prateekyadav.myapplication.modal.SearchResult
 import com.where.prateekyadav.myapplication.view.NearByActivity
 import com.where.prateekyadav.myapplication.view.VisitedActivity
@@ -24,11 +27,11 @@ import java.util.*
  */
 class LocationsAdapter() : BaseAdapter() {
     var mContext: Context? = null;
-    var mLocationList: List<SearchResult>? = null;
+    var mLocationList: MutableList<SearchResult>? = null;
     var inflater: LayoutInflater? = null
     var pref: MySharedPref? = null
 
-    constructor(context: Context, locationList: List<SearchResult>) : this() {
+    constructor(context: Context, locationList: MutableList<SearchResult>) : this() {
         mContext = context;
         mLocationList = locationList;
         inflater = LayoutInflater.from(context);
@@ -59,22 +62,36 @@ class LocationsAdapter() : BaseAdapter() {
 
         mViewHolder.btnAllVisits.setOnClickListener(object : View.OnClickListener {
             override fun onClick(p0: View?) {
-                 val listItem = getItem(position) as SearchResult
-                 val visit = listItem!!.visitResults.visitedLocationInformation
-                 var intent = Intent(mContext, VisitedActivity::class.java)
-                 intent.putExtra(DBContract.VisitedLocationData.COLUMN_PLACE_ID,visit.placeId)
-                 mContext!!.startActivity(intent)
+                val listItem = getItem(position) as SearchResult
+                val visit = listItem!!.visitResults.visitedLocationInformation
+                var intent = Intent(mContext, VisitedActivity::class.java)
+                intent.putExtra(DBContract.VisitedLocationData.COLUMN_PLACE_ID, visit.placeId)
+                mContext!!.startActivity(intent)
             }
 
         })
 
         mViewHolder.btnChooseNearBy.setOnClickListener(object : View.OnClickListener {
             override fun onClick(p0: View?) {
-                val listItem =getItem(position) as SearchResult
+                val listItem = getItem(position) as SearchResult
                 val visit = listItem!!.listNearByPlace as Serializable
                 var intent = Intent(mContext, NearByActivity::class.java)
                 intent.putExtra("SearchResult", listItem)
                 mContext!!.startActivity(intent)
+            }
+
+        })
+
+        mViewHolder.btnDelete.setOnClickListener(object : View.OnClickListener {
+            override fun onClick(p0: View?) {
+                // Delete a visited place code/////
+                val listItem = getItem(position) as SearchResult
+                val visit = listItem!!.visitResults.visitedLocationInformation
+                val visitList = ArrayList<VisitedLocationInformation>()
+                visitList.add(visit)
+                DataBaseController(mContext).deleteVisitedPlaceAndUniqueNearByForIt(visitList)
+                this@LocationsAdapter.mLocationList!!.removeAt(position)
+                this@LocationsAdapter.notifyDataSetChanged()
             }
 
         })
@@ -90,17 +107,17 @@ class LocationsAdapter() : BaseAdapter() {
 
                  Visinity:   ${mLocationList!!.get(position).visitResults.visitedLocationInformation.vicinity}
 
-                 No of visits:   ${mLocationList!!.get(position).visitResults.noOfVisits}
+                  No of visits:   ${mLocationList!!.get(position).visitResults.noOfVisits}
 
-                 FROM time:=> ${calFromTime.time}
+              ${AppUtility().decorateFromAndToTime(mLocationList!!.get(position).visitResults.visitedLocationInformation.fromTime,
+                        mLocationList!!.get(position).visitResults.visitedLocationInformation.toTime)}
+                 """
 
-                 TO time:=> ${calToTime.time}
-
-                 Req Type:=> ${mLocationList!!.get(position).visitResults.visitedLocationInformation.locationRequestType}
-                 Provider :=> ${mLocationList!!.get(position).visitResults.visitedLocationInformation.locationProvider}
-                 Last accuracy :=> ${pref!!.getFloat(AppConstant.SP_KEY_ACCURACY)}
-                 Lat:=> ${mLocationList!!.get(position).visitResults.visitedLocationInformation.latitude}
-                 Long:=> ${mLocationList!!.get(position).visitResults.visitedLocationInformation.longitude} """
+        /*  Req Type:=> ${mLocationList!!.get(position).visitResults.visitedLocationInformation.locationRequestType}
+          Provider :=> ${mLocationList!!.get(position).visitResults.visitedLocationInformation.locationProvider}
+          Last accuracy :=> ${pref!!.getFloat(AppConstant.SP_KEY_ACCURACY)}
+          Lat:=> ${mLocationList!!.get(position).visitResults.visitedLocationInformation.latitude}
+          Long:=> ${mLocationList!!.get(position).visitResults.visitedLocationInformation.longitude} """*/
 
 
 
@@ -126,11 +143,14 @@ class LocationsAdapter() : BaseAdapter() {
         internal var tvTitle: TextView
         internal var btnAllVisits: Button
         internal var btnChooseNearBy: Button
+        internal var btnDelete: ImageButton
 
         init {
             tvTitle = item.findViewById(R.id.tvTitle) as TextView
             btnAllVisits = item.findViewById(R.id.btn_all_visits) as Button
             btnChooseNearBy = item.findViewById(R.id.btn_choose_nearby) as Button
+            btnDelete = item.findViewById(R.id.btn_delete) as ImageButton
+
         }
     }
 

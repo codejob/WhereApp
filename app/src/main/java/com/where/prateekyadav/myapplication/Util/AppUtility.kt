@@ -18,12 +18,14 @@ import android.location.LocationManager
 import android.os.Build
 import android.widget.Toast
 import com.where.prateekyadav.myapplication.LocationHelper
+import com.where.prateekyadav.myapplication.R
 import com.where.prateekyadav.myapplication.UpdateLocation
 import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
 import com.where.prateekyadav.myapplication.modal.SearchResult
 import com.where.prateekyadav.myapplication.search.model.placesdetails.Result
 import com.where.prateekyadav.myapplication.search.network.RetroCallImplementor
 import com.where.prateekyadav.myapplication.search.network.RetroCallIneractor
+import java.text.SimpleDateFormat
 import kotlin.collections.ArrayList
 
 
@@ -61,11 +63,11 @@ class AppUtility {
         }
     }
 
-    fun startTimerAlarm(applicationContext: Context?) {
-        if (!checkAlarmAlreadySet(applicationContext)) {
+    fun startTimerAlarm(applicationContext: Context?, forceUpdate: Boolean) {
+        if (!checkAlarmAlreadySet(applicationContext) || forceUpdate) {
 
-            var pref:MySharedPref = MySharedPref.getinstance(applicationContext);
-            pref.setLong(System.currentTimeMillis(),AppConstant.SP_KEY_LAST_TIMER_TIME)
+            var pref: MySharedPref = MySharedPref.getinstance(applicationContext);
+            pref.setLong(System.currentTimeMillis(), AppConstant.SP_KEY_LAST_TIMER_TIME)
             //10 seconds later
             val cal = Calendar.getInstance()
             cal.add(Calendar.SECOND, 5)
@@ -116,7 +118,7 @@ class AppUtility {
                 //LocationHelper.getInstance(context, DemoUpdate()).getCompleteAddressString(location!!, AppConstant.LOCATION_UPDATE_TYPE_LAST_KNOWN)
                 //LocationHelper.getInstance(context, DemoUpdate()).getCompleteAddressString(location!!, AppConstant.LOCATION_UPDATE_TYPE_LAST_KNOWN)
                 var retroCallImplementor = RetroCallImplementor()
-                retroCallImplementor!!.getAllPlaces(location.latitude.toString() + "," + location.longitude.toString(), hanlder, location, location.provider,0)
+                retroCallImplementor!!.getAllPlaces(location.latitude.toString() + "," + location.longitude.toString(), hanlder, location, location.provider, 0)
 
             }
         } catch (e: Exception) {
@@ -155,15 +157,63 @@ class AppUtility {
         try {
             var pref: MySharedPref = MySharedPref.getinstance(context);
             val lastTimeStamp = pref.getLong(AppConstant.SP_KEY_LAST_TIMER_TIME)
-            val diff = (System.currentTimeMillis() - lastTimeStamp) / (1000 * 60)
-            if (diff > 20) {
-                if (Build.BRAND.equals("xiaomi")) {
+            val diff = (System.currentTimeMillis() - lastTimeStamp)
+            Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Last timer " + diff / 1000 + " seconds ago")
+            if (diff > (AppConstant.LOCATION_SYNC_INSTERVAL * 2)) {
+                startTimerAlarm(context, true)
+                if (Build.BRAND.equals("xiaomi") && pref.getLong(AppConstant.SP_KEY_COUNTER_AUTO_START) < 3) {
                     val intent = Intent()
                     intent.setComponent(ComponentName("com.miui.securitycenter", "com.miui.permcenter.autostart.AutoStartManagementActivity"));
                     context!!.startActivity(intent);
+                    showToast(context, "Please enable Auto Start permission for " + context.getString(R.string.app_name))
+                    pref.setLong(pref.getLong(AppConstant.SP_KEY_COUNTER_AUTO_START) + 1, AppConstant.SP_KEY_COUNTER_AUTO_START)
                 }
             }
         } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            var pref: MySharedPref = MySharedPref.getinstance(context);
+            pref.setLong(System.currentTimeMillis(), AppConstant.SP_KEY_LAST_TIMER_TIME)
+
+
         }
+    }
+
+    fun decorateFromAndToTime(from: Long, to: Long): String {
+        var result = ""
+        val calToTime = Calendar.getInstance();
+        val calFromTime = Calendar.getInstance();
+        calToTime.timeInMillis = to
+        calFromTime.timeInMillis = from
+
+        val fromSecond = calFromTime.get(Calendar.DAY_OF_MONTH)
+        val fromMinute = calFromTime.get(Calendar.MINUTE)
+        val fromHour = calFromTime.get(Calendar.HOUR_OF_DAY)
+        val fromDay = calFromTime.get(Calendar.DAY_OF_MONTH)
+        val fromMonth = calFromTime.get(Calendar.MONTH)
+        val fromYear = calFromTime.get(Calendar.YEAR)
+
+        val toSecond = calToTime.get(Calendar.DAY_OF_MONTH)
+        val toMinute = calToTime.get(Calendar.MINUTE)
+        val toHour = calToTime.get(Calendar.HOUR_OF_DAY)
+        val toDay = calToTime.get(Calendar.DAY_OF_MONTH)
+        val toMonth = calToTime.get(Calendar.MONTH)
+        val toYear = calToTime.get(Calendar.YEAR)
+
+        val formatter: SimpleDateFormat = SimpleDateFormat("dd/MM/yyyy");
+        val fromString = formatter.format(from);
+
+        val formatterTIme: SimpleDateFormat = SimpleDateFormat("hh:mm a");
+        val fromTimeString = formatterTIme.format(from)
+        val toTimeString = formatterTIme.format(to)
+
+
+        result = """ From ${fromTimeString} To ${toTimeString}
+                     Date: ${fromString}
+                     """.trimMargin()
+
+
+        return result
+
     }
 }
