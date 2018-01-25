@@ -3,4 +3,13 @@
     <string name="no_records_found">No Records Found!</string>
     <string name="str_see_all_visits">See All Visits</string>
     <string name="choose_from_nearby_locations">Choose from nearby locations</string>
+    <string name="str_never_ask_title">Never ask Title</string>
+    <string name="str_never_ask_message">Never Ask Message</string>
+    <string name="str_permission_enable">Please enable the permission</string>
+    <string name="str_go_to_settings">go to Settings</string>
+    <string name="str_cancel">Cancel</string>
+    <string name="str_title_permission_denied">Permission Denied</string>
+    <string name="str_location_permission_alert_message">Without this permission the app is unable to track your visited place.Are you sure you want to deny this permission?</string>
+    <string name="str_i_am_sure">I\'M SURE</string>
+    <string name="str_re_try">RE-TRY</string>
 </resources>

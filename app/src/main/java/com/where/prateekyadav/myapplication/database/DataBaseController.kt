@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteConstraintException
+import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
 import android.util.Log
 import com.google.android.gms.location.places.Place
@@ -22,6 +23,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import android.database.sqlite.SQLiteStatement
 import com.where.prateekyadav.myapplication.database.DBContract.EQUALS_TO_STRING
+import com.where.prateekyadav.myapplication.database.DBContract.SELECT_COUNT_FROM
 
 
 /**
@@ -172,8 +174,8 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         val db = getWritableDB()
         var cursor: Cursor? = null
         try {
-            var query = SELECT_FROM+ DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION+
-                        WHERE+DBContract.VisitedLocationData.COLUMN_IS_ADDRESS_SET+ EQUALS_TO+1
+            var query = SELECT_FROM + DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION +
+                    WHERE + DBContract.VisitedLocationData.COLUMN_IS_ADDRESS_SET + EQUALS_TO + 1
             cursor = db.rawQuery(query, null)
         } catch (e: SQLiteException) {
             createTables(db)
@@ -236,8 +238,8 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
      */
     fun getListOfNotUpdatedVisitedLocation(): ArrayList<VisitedLocationInformation>? {
 
-        val query = SELECT_FROM + DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION+
-        WHERE + DBContract.VisitedLocationData.COLUMN_IS_ADDRESS_SET + EQUALS_TO + 0;
+        val query = SELECT_FROM + DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION +
+                WHERE + DBContract.VisitedLocationData.COLUMN_IS_ADDRESS_SET + EQUALS_TO + 0;
 
 
         val visitedLocationInfoList = ArrayList<VisitedLocationInformation>()
@@ -574,7 +576,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         return searchResultList
     }
 
-     fun getVisitedLocationsFromPlaceid(placeID: String): List<VisitedLocationInformation>? {
+    fun getVisitedLocationsFromPlaceid(placeID: String): List<VisitedLocationInformation>? {
         val visitedLocationInfoList = ArrayList<VisitedLocationInformation>()
 
         val sqLiteDatabase = getWritableDB()
@@ -862,8 +864,8 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         visit.latitude = nearByPlace.latitude
         visit.longitude = nearByPlace.longitude
         visit.placeId = nearByPlace.placeId
-        visit.nearByPlacesIds=visit.nearByPlacesIds.replace(nearByPlace.placeId,placeID)
-        visit.isPreferred=1
+        visit.nearByPlacesIds = visit.nearByPlacesIds.replace(nearByPlace.placeId, placeID)
+        visit.isPreferred = 1
 
         updateVisitedLocation(visit, visit.rowID)
 
@@ -875,9 +877,23 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         nearByPlace.placeId = placeID
         updateNearByPlace(placeIDNearBy, prepareContentValuesForNeaby(nearByPlace))
 
-        val  search = readAllVisitedLocation()
+        val search = readAllVisitedLocation()
 
         closeDataBase(sqLiteDatabase)
+    }
+
+    /**
+     * Method to check table has data
+     */
+    fun isTableHasData(tableName: String): Boolean {
+        var db = getWritableDB()
+        val query = SELECT_COUNT_FROM + tableName
+        var mcursor = db.rawQuery(query, null);
+        mcursor.moveToFirst();
+        val count = mcursor.getInt(0);
+        //
+        return count > 0
+
     }
 
 }

@@ -43,15 +43,10 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        mListView = findViewById(R.id.lv_address)
+        mListView = findViewById(R.id.lv_address) as ListView
         mAdapter = LocationsAdapter(this, mSearchResultsList)
         mListView!!.adapter = mAdapter
         mLocationHelper = LocationHelper.getInstance(applicationContext, this);
-        if (PermissionCheckHandler.checkNetWorkPermissions(this)) {
-            checkLocationPermission()
-        } else {
-            PermissionCheckHandler.verifyLocationPermissions(this)
-        }
         //
         DataBaseController(this).copyDataBaseToSDCard()
         setSearchListener()
@@ -100,65 +95,33 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
     }
 
 
-    val MY_PERMISSIONS_REQUEST_LOCATION = 99
 
-    fun checkLocationPermission(): Boolean {
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.ACCESS_FINE_LOCATION)) {
-
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-                AlertDialog.Builder(this)
-                        .setTitle("Title")
-                        .setMessage("Location")
-                        .setPositiveButton("ok", DialogInterface.OnClickListener { dialogInterface, i ->
-                            //Prompt the user once explanation has been shown
-                            ActivityCompat.requestPermissions(this@MainActivity,
-                                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                                    MY_PERMISSIONS_REQUEST_LOCATION)
-                        })
-                        .create()
-                        .show()
-            } else {
-                // No explanation needed, we can request the permission.
-                ActivityCompat.requestPermissions(this,
-                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                        MY_PERMISSIONS_REQUEST_LOCATION)
-            }
-            return false
-        } else {
-            return true
-        }
-    }
 
     override fun onRequestPermissionsResult(requestCode: Int,
                                             permissions: Array<String>, grantResults: IntArray) {
         when (requestCode) {
-            MY_PERMISSIONS_REQUEST_LOCATION -> {
+        //
+            PermissionCheckHandler.REQUEST_LOCATION_PERMISSION -> {
                 // If request is cancelled, the result arrays are empty.
-                if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // If request is cancelled, the result arrays are empty.
+                val hasSth = grantResults.size > 0
+                if (hasSth) {
+                    if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                        //user accepted,
+                        Log.d(AppConstant.TAG_KOTLIN_DEMO_APP,"Permission granted")
 
-                    // permission was granted, yay! Do the
-                    // location-related task you need to do.
-                    if (ContextCompat.checkSelfPermission(this,
-                            Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                        //Request location updates:
-                        //mLocationHelper?.getLocation();
-                        //
-                        PermissionCheckHandler.verifyNetWorkPermissions(this@MainActivity)
                         AppUtility().validateAutoStartTimer(this)
                         AppUtility().startTimerAlarm(applicationContext)
-                        //startService(Intent(this, TimerService::class.java));
-                    }
 
-                } else {
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
+                    } else if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
+                        val should = PermissionCheckHandler.shouldShowRequestPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                        if (should) {
+                            PermissionCheckHandler.openDialogForPermissionAlert(this,getString(R.string.str_location_permission_alert_message))
+                        } else {
+                            //user has denied with `Never Ask Again`, go to settings
+                            PermissionCheckHandler.promptSettings(this,getString(R.string.str_never_ask_title),getString(R.string.str_never_ask_message))
+                        }
+                    }
                 }
                 return
             }
@@ -270,7 +233,11 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
     override fun onStart() {
         super.onStart()
         registerReceiver()
-
+        // Permission
+        val permission = PermissionCheckHandler.checkLocationPermissions(this)
+        if (!permission) {
+            PermissionCheckHandler.verifyLocationPermissions(this)
+        }
     }
 
     override fun onRestart() {

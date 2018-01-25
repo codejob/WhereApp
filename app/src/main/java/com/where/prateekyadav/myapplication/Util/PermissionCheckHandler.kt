@@ -3,9 +3,16 @@ package com.where.prateekyadav.myapplication.Util
 import android.Manifest
 import android.app.Activity
 import android.content.Context
+import android.content.DialogInterface
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.provider.Settings
 import android.support.v4.app.ActivityCompat
+import android.support.v4.content.ContextCompat
+import android.support.v7.app.AlertDialog
 import android.util.Log
+import com.where.prateekyadav.myapplication.R
 
 /**
  * Created by Infobeans on 13-Jun-16.
@@ -60,18 +67,25 @@ object PermissionCheckHandler {
                 ALL_PERMISSIONS_STORAGE,
                 REQUEST_ALL_PERMISSIONS
         )
-        /* // Check if we have write permission
-        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            // We don't have permission so prompt the user
-            ActivityCompat.requestPermissions(
-                    activity,
-                    ALL_PERMISSIONS_STORAGE,
-                    REQUEST_EXTERNAL_STORAGE_LOCATION
-            );*//*
-        }*/
     }
+
+    /**
+     *
+     *
+     */
+    fun verifyLocationPermissions(activity: Activity) {
+        // Check if we have write permission
+        val permission = checkLocationPermissions(activity)
+        //
+        if (!permission) {
+                // We don't have permission so prompt the user
+                ActivityCompat.requestPermissions(
+                        activity,
+                        PERMISSIONS_LOCATION,
+                        REQUEST_LOCATION_PERMISSION)
+            }
+        }
 
     /**
      * Checks if the app has permission to write to device storage
@@ -85,33 +99,22 @@ object PermissionCheckHandler {
         val permission = checkStoragePermissions(activity)
 
         if (!permission) {
-            // We don't have permission so prompt the user
-            ActivityCompat.requestPermissions(
-                    activity,
-                    PERMISSIONS_STORAGE,
-                    REQUEST_EXTERNAL_STORAGE_LOCATION
-            )
+            if (ActivityCompat.shouldShowRequestPermissionRationale(activity,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+
+            }else {
+                // We don't have permission so prompt the user
+                ActivityCompat.requestPermissions(
+                        activity,
+                        PERMISSIONS_STORAGE,
+                        REQUEST_EXTERNAL_STORAGE_LOCATION)
+            }
         }
     }
-
-    /**
-     *
-     *
-     */
-    fun verifyLocationPermissions(activity: Activity) {
-        // Check if we have write permission
-        val permission = checkLocationPermissions(activity)
-
-        if (!permission) {
-            // We don't have permission so prompt the user
-            ActivityCompat.requestPermissions(
-                    activity,
-                    PERMISSIONS_LOCATION,
-                    REQUEST_LOCATION_PERMISSION
-            )
-        }
-    }
-
     /**
      * Checks if the app has permission to write to device storage
      *
@@ -120,28 +123,23 @@ object PermissionCheckHandler {
      * @param activity
      */
     fun verifyContactPermissions(activity: Activity) {
-        // We don't have permission so prompt the user
-        ActivityCompat.requestPermissions(
-                activity,
-                PERMISSIONS_CALL_AND_CONTACT,
-                REQUEST_CONTACT_CALL_LOGS
-        )
-        /*  // Check if we have write permission
-        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
-        if (permission != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(activity,
+                        Manifest.permission.READ_PHONE_STATE)) {
+
+            // Show an explanation to the user *asynchronously* -- don't block
+            // this thread waiting for the user's response! After the user
+            // sees the explanation, try again to request the permission.
+
+        }else {
             // We don't have permission so prompt the user
             ActivityCompat.requestPermissions(
                     activity,
                     PERMISSIONS_CALL_AND_CONTACT,
-                    REQUEST_CONTACT_CALL_LOGS
-            );
-        }*/
+                    REQUEST_CONTACT_CALL_LOGS)
+        }
     }
-
-
     //
-
     /**
      * Checks if the app has permission to write to device storage
      *
@@ -150,12 +148,20 @@ object PermissionCheckHandler {
      * @param activity
      */
     fun verifyContactReadPermissions(activity: Activity) {
-        // We don't have permission so prompt the user
-        ActivityCompat.requestPermissions(
-                activity,
-                PERMISSIONS_CONTACT_PROCESS,
-                REQUEST_CONTACT
-        )
+        if (ActivityCompat.shouldShowRequestPermissionRationale(activity,
+                        Manifest.permission.READ_CONTACTS)) {
+
+            // Show an explanation to the user *asynchronously* -- don't block
+            // this thread waiting for the user's response! After the user
+            // sees the explanation, try again to request the permission.
+
+        }else {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    activity,
+                    PERMISSIONS_CONTACT_PROCESS,
+                    REQUEST_CONTACT)
+        }
     }
 
     /**
@@ -166,12 +172,20 @@ object PermissionCheckHandler {
      * @param activity
      */
     fun verifyRecordPermissions(activity: Activity) {
-        // We don't have permission so prompt the user
-        ActivityCompat.requestPermissions(
-                activity,
-                PERMISSIONS_AUDIO_RECORD,
-                REQUEST_AUDIO_PERMISSION
-        )
+        if (ActivityCompat.shouldShowRequestPermissionRationale(activity,
+                        Manifest.permission.RECORD_AUDIO)) {
+
+            // Show an explanation to the user *asynchronously* -- don't block
+            // this thread waiting for the user's response! After the user
+            // sees the explanation, try again to request the permission.
+
+        }else {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    activity,
+                    PERMISSIONS_AUDIO_RECORD,
+                    REQUEST_AUDIO_PERMISSION)
+        }
     }
 
     /**
@@ -182,12 +196,43 @@ object PermissionCheckHandler {
      * @param activity
      */
     fun verifyCameraPermissions(activity: Activity) {
-        // We don't have permission so prompt the user
-        ActivityCompat.requestPermissions(
-                activity,
-                PERMISSIONS_CAMERA,
-                REQUEST_CAMERA_PERMISSION
-        )
+        if (ActivityCompat.shouldShowRequestPermissionRationale(activity,
+                        Manifest.permission.CAMERA)) {
+
+            // Show an explanation to the user *asynchronously* -- don't block
+            // this thread waiting for the user's response! After the user
+            // sees the explanation, try again to request the permission.
+
+        }else {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    activity,
+                    PERMISSIONS_CAMERA,
+                    REQUEST_CAMERA_PERMISSION)
+        }
+    }
+
+
+    /**
+     *
+     */
+    fun checkLocationPermissions(context: Context): Boolean {
+        Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Checking permissions.")
+
+        val permissionCheck =ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION)
+        val permission=ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+        val grant=PackageManager.PERMISSION_GRANTED;
+        // Verify that all required contact permissions have been granted.
+        if (permissionCheck != grant|| permission  != grant) {
+            // Contacts permissions have not been granted.
+            Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "permissions NOT been granted. Requesting permissions.")
+            return false
+        } else {
+            // Contact permissions have been granted. Show the contacts fragment.
+            Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
+                    "permissions have already been granted")
+            return true
+        }
     }
 
     /**
@@ -197,7 +242,8 @@ object PermissionCheckHandler {
         Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Checking permissions.")
 
         // Verify that all required Storage permissions have been granted.
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             // Storage permissions have not been granted.
             Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "permissions has NOT been granted. Requesting permissions.")
             return false
@@ -216,7 +262,7 @@ object PermissionCheckHandler {
         Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Checking permissions.")
 
         // Verify that all required Storage permissions have been granted.
-        if (ActivityCompat.checkSelfPermission(context,
+        if (ContextCompat.checkSelfPermission(context,
                 Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             // Storage permissions have not been granted.
             Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "permissions has NOT been granted. Requesting permissions.")
@@ -236,7 +282,7 @@ object PermissionCheckHandler {
         Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Checking permissions.")
 
         // Verify that all required Storage permissions have been granted.
-        if (ActivityCompat.checkSelfPermission(context,
+        if (ContextCompat.checkSelfPermission(context,
                 Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             // Storage permissions have not been granted.
             Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "permissions has NOT been granted. Requesting permissions.")
@@ -256,7 +302,8 @@ object PermissionCheckHandler {
         Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Checking permissions.")
 
         // Verify that all required contact permissions have been granted.
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(context, Manifest.permission.PROCESS_OUTGOING_CALLS) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(context, Manifest.permission.PROCESS_OUTGOING_CALLS) != PackageManager.PERMISSION_GRANTED) {
             // Contacts permissions have not been granted.
             Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "permissions has NOT been granted. Requesting permissions.")
             return false
@@ -271,29 +318,12 @@ object PermissionCheckHandler {
     /**
      *
      */
-    fun checkLocationPermissions(context: Context): Boolean {
-        Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Checking permissions.")
-        // Verify that all required contact permissions have been granted.
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // Contacts permissions have not been granted.
-            Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "permissions NOT been granted. Requesting permissions.")
-            return false
-        } else {
-            // Contact permissions have been granted. Show the contacts fragment.
-            Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
-                    "permissions have already been granted")
-            return true
-        }
-    }
-
-    /**
-     *
-     */
     fun contactReadWritePermissions(context: Context): Boolean {
         Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Checking permissions.")
 
         // Verify that all required contact permissions have been granted.
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
             // Contacts permissions have not been granted.
             Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "permissions has NOT been granted. Requesting permissions.")
             return false
@@ -315,14 +345,14 @@ object PermissionCheckHandler {
         Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Checking permissions.")
 
         // Verify that all required  permissions have been granted.
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED
-                || ActivityCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED
-                || ActivityCompat.checkSelfPermission(context, Manifest.permission.PROCESS_OUTGOING_CALLS) != PackageManager.PERMISSION_GRANTED
-                || ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                || ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                || ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-                || ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-                || ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(context, Manifest.permission.PROCESS_OUTGOING_CALLS) != PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(context, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
             //permissions have not been granted.
             Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "permissions has NOT been granted. Requesting permissions.")
             return false
@@ -372,5 +402,45 @@ object PermissionCheckHandler {
                     "permissions have already been granted. Displaying  details.")
             return true
         }
+    }
+
+
+    fun shouldShowRequestPermission(activity: Activity,requestedPermission:String):Boolean{
+       val shouldShow=ActivityCompat.shouldShowRequestPermissionRationale(activity,
+                        requestedPermission);
+        return shouldShow
+    }
+
+    fun openDialogForPermissionAlert(mActivity:Activity,alertMessage:String){
+        //user denied without Never ask again, just show rationale explanation
+        val builder = AlertDialog.Builder(mActivity)
+        builder.setTitle(mActivity.getString(R.string.str_title_permission_denied))
+        builder.setMessage(mActivity.getString(R.string.str_location_permission_alert_message))
+        builder.setPositiveButton(mActivity.getString(R.string.str_i_am_sure), DialogInterface.OnClickListener { dialog, which -> dialog.dismiss() })
+        builder.setNegativeButton(mActivity.getString(R.string.str_re_try), DialogInterface.OnClickListener { dialog, which ->
+            dialog.dismiss()
+            verifyLocationPermissions(mActivity)
+        })
+        builder.show()
+    }
+
+     fun promptSettings(mActivity: Activity,mDeniedNeverAskTitle:String,mDeniedNeverAskMsg:String) {
+        val builder = AlertDialog.Builder(mActivity)
+        builder.setTitle(mDeniedNeverAskTitle)
+        builder.setMessage(mDeniedNeverAskMsg)
+        builder.setPositiveButton(mActivity.getString(R.string.str_go_to_settings), DialogInterface.OnClickListener { dialog, which ->
+            dialog.dismiss()
+            goToSettings(mActivity)
+        })
+        builder.setNegativeButton(mActivity.getString(R.string.str_cancel), null)
+        builder.show()
+    }
+
+     fun goToSettings(mActivity: Activity) {
+         AppUtility.showToast(mActivity,mActivity.getString(R.string.str_permission_enable))
+        val myAppSettings = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + mActivity.getPackageName()))
+        myAppSettings.addCategory(Intent.CATEGORY_DEFAULT)
+        myAppSettings.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        mActivity.startActivity(myAppSettings)
     }
 }

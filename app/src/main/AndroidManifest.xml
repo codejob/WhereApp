@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.where.prateekyadav.myapplication">
+
     <!-- [ InterNet and Network Permission ] -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -13,6 +14,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <uses-feature android:name="android.hardware.location.gps" />
+
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
 
     <application
@@ -23,7 +25,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity"
+        <!-- Splash screen -->
+        <activity android:name=".SplashActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden">
             <intent-filter>
@@ -32,49 +35,58 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".view.NearByActivity">
+        <!-- Main activity -->
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden">
 
         </activity>
-        <activity android:name=".view.VisitedActivity">
+        <activity android:name=".view.NearByActivity"></activity>
+        <activity android:name=".view.VisitedActivity"></activity>
 
-        </activity>
+        <!-- [ RECEIVERS ] -->
 
-        <!--  [ RECEIVERS ] -->
 
-        <!--  [ ALARM RECEIVER ] -->
+        <!-- [ ALARM RECEIVER ] -->
         <receiver
             android:name=".AlarmReceiverLocation"
             android:enabled="true"
-            android:exported="true"
-            />
-        <!--  [ ALARM RECEIVER ] -->
+            android:exported="true" />
+        <!-- [ ALARM RECEIVER ] -->
 
-        <!--  [ NETWORK RECEIVER ] -->
 
-        <receiver android:name=".broadcastreceiver.NetworkConnectionReceiver"
-            android:enabled="true" >
-            <intent-filter >
+        <!-- [ NETWORK RECEIVER ] -->
+
+        <receiver
+            android:name=".broadcastreceiver.NetworkConnectionReceiver"
+            android:enabled="true">
+            <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
                 <action android:name="android.net.wifi.STATE_CHANGE" />
             </intent-filter>
         </receiver>
 
+        <!-- [ NETWORK RECEIVER ] -->
 
-        <!--  [ NETWORK RECEIVER ] -->
 
-        <!--  [ RECEIVERS ] -->
+        <!-- [ RECEIVERS ] -->
 
-        <!--  [ SERVICES ] -->
 
-        <!--  [ ADDRESS UPDATE SERVICE ] -->
+        <!-- [ SERVICES ] -->
+
+
+        <!-- [ ADDRESS UPDATE SERVICE ] -->
         <service android:name=".Services.AddressUpdateService" />
-        <!--  [ ADDRESS UPDATE SERVICE ] -->
+        <!-- [ ADDRESS UPDATE SERVICE ] -->
 
-        <!--  [ SERVICES ] -->
+
+        <!-- [ SERVICES ] -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
-    </application>
 
+
+    </application>
 
 </manifest>
