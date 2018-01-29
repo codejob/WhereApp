@@ -18,7 +18,6 @@ open class AppConstant {
         val FOLDER_PATH = Environment.getExternalStorageDirectory().path + "/WhereApp/"
         val TAG_KOTLIN_DEMO_APP = "KotlinDemoApp"
         // Seconds
-
         val LOCATION_SYNC_INSTERVAL: Long = 10* 60 * 1000;
         val LOCATION_SYNC_TIMEOUT: Long = 60 * 1000;
         val RECEIVER_ACTION: String = "LOCATION";
@@ -37,6 +36,10 @@ open class AppConstant {
         val latArray = arrayOf(24.585445, 24.602968, 15.557049)
         val lngArray = arrayOf(73.712479, 73.685511, 73.754851)
         var ISONLINE: Int = 0;
+        //
+        val REQUEST_CODE_DELETE=11;
+        val REQUEST_CODE_REPLACE=12;
+        val REQUEST_CODE_UPDATE=13;
 
 
     }

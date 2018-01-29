@@ -9,6 +9,9 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
+import android.content.*
+import android.graphics.drawable.Drawable
+import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.text.Editable
 import android.text.TextWatcher
@@ -24,6 +27,8 @@ import com.where.prateekyadav.myapplication.Util.AppUtility
 import com.where.prateekyadav.myapplication.Util.PermissionCheckHandler
 import com.where.prateekyadav.myapplication.database.DataBaseController
 import com.where.prateekyadav.myapplication.modal.SearchResult
+import android.view.MotionEvent
+import kotlinx.android.synthetic.main.activity_main.*
 
 
 class MainActivity : AppCompatActivity(), UpdateLocation {
@@ -33,6 +38,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation {
     var mListView: ListView? = null
     var mAdapter: LocationsAdapter? = null
     var mSearchResultsList = ArrayList<SearchResult>();
+    lateinit var mDrawableClear:Drawable;
     var mSearchEdittext: EditText? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,9 +48,10 @@ class MainActivity : AppCompatActivity(), UpdateLocation {
         mListView!!.adapter = mAdapter
         mListView!!.emptyView = findViewById(R.id.tv_no_records) as TextView
         mLocationHelper = LocationHelper.getInstance(applicationContext, this);
+        mDrawableClear=getClearDrawable(this);
         //
-        DataBaseController(this).copyDataBaseToSDCard()
         setSearchListener()
+        setOnTouchListener()
         setClickListener()
         startAddressUpdateServiceToUpdateAnyRemainingAddresss()
        // AppUtility().startTimerAlarm(this,true);
@@ -61,11 +68,33 @@ class MainActivity : AppCompatActivity(), UpdateLocation {
         }
     }
 
+    /**
+     *
+     */
+    fun setOnTouchListener(){
+        edt_search.setOnTouchListener(object : View.OnTouchListener {
+            override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+            //
+            clearSearchTextAndSetMessage(v!!)
+            return false
+            }
+
+        })
+    }
+
     fun setSearchListener() {
         mSearchEdittext = findViewById<EditText>(R.id.edt_search)
         mSearchEdittext!!.addTextChangedListener(object : TextWatcher {
 
-            override fun afterTextChanged(s: Editable) {}
+            override fun afterTextChanged(s: Editable) {
+
+                if (edt_search.getText().toString().length > 0) {
+                    edt_search.setCompoundDrawables(null, null, mDrawableClear, null)
+                } else {
+                    edt_search.setCompoundDrawables(null, null, null, null)
+
+                }
+            }
 
             override fun beforeTextChanged(s: CharSequence, start: Int,
                                            count: Int, after: Int) {
@@ -285,5 +314,49 @@ class MainActivity : AppCompatActivity(), UpdateLocation {
             val serviceIntent = Intent(this, AddressUpdateService::class.java)
             startService(serviceIntent)
         }
+    }
+
+
+
+    fun getClearDrawable(context: Context): Drawable {
+        var mDrawableClear: Drawable? = null
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            mDrawableClear = context.resources.getDrawable(R.drawable.btn_clear, null)
+        } else {
+            mDrawableClear = context.resources.getDrawable(R.drawable.btn_clear)
+        }
+        mDrawableClear!!.setBounds(0, 0, mDrawableClear.intrinsicWidth, mDrawableClear.intrinsicHeight)
+        return mDrawableClear
+    }
+
+    /**
+     *
+     */
+    private fun handleEditTextTouchEvent(view: View, motionEvent: MotionEvent): Boolean {
+        //
+        val editText = view as EditText
+        if (motionEvent.action != MotionEvent.ACTION_UP)
+            return false
+
+        if (motionEvent.x > editText.width - mDrawableClear.intrinsicWidth) {
+            //
+            clearSearchTextAndSetMessage(view)
+            //
+            return true
+        }
+
+        return false
+        //
+    }
+
+    /**
+     *
+     */
+    private fun clearSearchTextAndSetMessage(view: View) {
+        var mSearchText = ""
+        val editText = view as EditText
+        editText.setText("")
+        editText.setCompoundDrawables(null, null, null, null)
+
     }
 }

@@ -13,8 +13,10 @@ import android.widget.TextView
 import com.where.prateekyadav.myapplication.Util.AppConstant
 import com.where.prateekyadav.myapplication.Util.AppUtility
 import com.where.prateekyadav.myapplication.Util.MySharedPref
+import com.where.prateekyadav.myapplication.appinterface.ConfirmationListener
 import com.where.prateekyadav.myapplication.database.DBContract
 import com.where.prateekyadav.myapplication.database.DataBaseController
+import com.where.prateekyadav.myapplication.dialog.DialogConfirmationAlert
 import com.where.prateekyadav.myapplication.modal.SearchResult
 import com.where.prateekyadav.myapplication.view.NearByActivity
 import com.where.prateekyadav.myapplication.view.VisitedActivity
@@ -25,7 +27,8 @@ import java.util.*
 /**
  * Created by Infobeans on 1/11/2018.
  */
-class LocationsAdapter() : BaseAdapter() {
+class LocationsAdapter() : BaseAdapter(),ConfirmationListener {
+
     var mContext: Context? = null;
     var mLocationList: MutableList<SearchResult>? = null;
     var inflater: LayoutInflater? = null
@@ -85,13 +88,12 @@ class LocationsAdapter() : BaseAdapter() {
         mViewHolder.btnDelete.setOnClickListener(object : View.OnClickListener {
             override fun onClick(p0: View?) {
                 // Delete a visited place code/////
-                val listItem = getItem(position) as SearchResult
-                val visit = listItem!!.visitResults.visitedLocationInformation
-                val visitList = ArrayList<VisitedLocationInformation>()
-                visitList.add(visit)
-                DataBaseController(mContext).deleteVisitedPlaceAndUniqueNearByForIt(visitList)
-                this@LocationsAdapter.mLocationList!!.removeAt(position)
-                this@LocationsAdapter.notifyDataSetChanged()
+
+                val confirmationDialog= DialogConfirmationAlert(mContext!!,this@LocationsAdapter)
+                confirmationDialog.showConfirmationDialog(mContext!!.getString(R.string.str_alert_message_update_location),
+                        position,AppConstant.REQUEST_CODE_DELETE);
+
+
             }
 
         })
@@ -127,6 +129,16 @@ class LocationsAdapter() : BaseAdapter() {
         return convertView!!
     }
 
+    private fun deleteLocationFromDatabase(position: Int) {
+        val listItem = getItem(position) as SearchResult
+        val visit = listItem!!.visitResults.visitedLocationInformation
+        val visitList = ArrayList<VisitedLocationInformation>()
+        visitList.add(visit)
+        DataBaseController(mContext).deleteVisitedPlaceAndUniqueNearByForIt(visitList)
+        this@LocationsAdapter.mLocationList!!.removeAt(position)
+        this@LocationsAdapter.notifyDataSetChanged()
+    }
+
     override fun getItem(p0: Int): Any {
         return mLocationList!!.get(p0)
     }
@@ -154,6 +166,22 @@ class LocationsAdapter() : BaseAdapter() {
         }
     }
 
+
+    override fun onYes(index: Int) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onNo() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onYes(index: Int, requestType: Int) {
+
+        if (requestType==AppConstant.REQUEST_CODE_DELETE){
+            deleteLocationFromDatabase(index)
+        }
+
+    }
 
 }
 

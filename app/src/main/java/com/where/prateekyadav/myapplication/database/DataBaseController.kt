@@ -983,6 +983,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
 
     }
 
+
     fun isPreferredLocation(placeID: String): Boolean {
 
         val sqLiteDatabase = getWritableDB()

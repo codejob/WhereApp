@@ -14,7 +14,9 @@ import android.widget.TextView
 import com.where.prateekyadav.myapplication.R
 import com.where.prateekyadav.myapplication.Util.AppConstant
 import com.where.prateekyadav.myapplication.Util.MySharedPref
+import com.where.prateekyadav.myapplication.appinterface.ConfirmationListener
 import com.where.prateekyadav.myapplication.database.DataBaseController
+import com.where.prateekyadav.myapplication.dialog.DialogConfirmationAlert
 import com.where.prateekyadav.myapplication.modal.NearByPlace
 import com.where.prateekyadav.myapplication.modal.SearchResult
 import java.util.*
@@ -23,7 +25,9 @@ import java.util.*
 /**
  * Created by Infobeans on 1/23/2018.
  */
-class NearByActivity : AppCompatActivity() {
+class NearByActivity : AppCompatActivity(),ConfirmationListener {
+
+
     var mNearByList = ArrayList<NearByPlace>()
     var mSearchResult: SearchResult? = null
     var listView: ListView? = null
@@ -44,8 +48,12 @@ class NearByActivity : AppCompatActivity() {
             override fun onItemClick(parent: AdapterView<*>, view: View, position: Int, id: Long) {
 
                 try {
-                    DataBaseController(this@NearByActivity).updateVisitedLocationWithNearBy(mSearchResult!!.visitResults.visitedLocationInformation,
-                            parent.getItemAtPosition(position) as NearByPlace)
+
+                    val confirmationDialog= DialogConfirmationAlert(this@NearByActivity!!,this@NearByActivity)
+                    confirmationDialog.showConfirmationDialog(this@NearByActivity!!.getString(R.string.str_alert_message_delete_location),
+                            position,AppConstant.REQUEST_CODE_REPLACE);
+
+
                 } catch (e: Exception) {
                     e.printStackTrace()
                 } finally {
@@ -119,6 +127,22 @@ class NearByActivity : AppCompatActivity() {
             init {
                 tvTitle = item.findViewById(R.id.tvTitle) as TextView
             }
+        }
+    }
+
+    override fun onYes(index: Int) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onNo() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onYes(index: Int, requestType: Int) {
+
+        if (requestType==AppConstant.REQUEST_CODE_REPLACE) {
+            DataBaseController(this@NearByActivity).updateVisitedLocationWithNearBy(mSearchResult!!.visitResults.visitedLocationInformation,
+                    mNearByList.get(index))
         }
 
     }
