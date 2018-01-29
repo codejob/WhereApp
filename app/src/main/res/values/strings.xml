@@ -26,4 +26,5 @@
     <string name="time">Time:</string>
     <string name="from">From:</string>
     <string name="to">To:</string>
+    <string name="no_net_avail">No Network Available!</string>
 </resources>
