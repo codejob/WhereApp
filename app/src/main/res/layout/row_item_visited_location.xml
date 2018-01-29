@@ -111,7 +111,7 @@
                 </RelativeLayout>
 
                 <TextView
-                    android:id="@+id/tv_nearby_visit_date"
+                    android:id="@+id/tv_visit_date"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentLeft="true"
@@ -124,12 +124,12 @@
                     android:visibility="visible" />
 
                 <TextView
-                    android:id="@+id/tv_nearby_visits"
+                    android:id="@+id/tv_visits"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:layout_below="@id/lyt_nearby_location"
-                    android:layout_toRightOf="@id/tv_nearby_visit_date"
+                    android:layout_toRightOf="@id/tv_visit_date"
                     android:fontFamily="@font/roboto_light"
                     android:gravity="right"
                     android:text="@string/str_visits"
@@ -142,8 +142,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentLeft="true"
-                    android:layout_below="@id/tv_nearby_visit_date"
                     android:fontFamily="@font/roboto_light"
+                    android:layout_below="@id/tv_visit_date"
                     android:gravity="center"
                     android:text="@string/time"
                     android:textColor="@color/color_location_details"

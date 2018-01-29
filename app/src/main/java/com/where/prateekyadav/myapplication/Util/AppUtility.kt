@@ -214,8 +214,9 @@ class AppUtility {
         val toTimeString = formatterTIme.format(to)
 
 
-        result = """ From ${fromTimeString} To ${toTimeString}
-                     Date: ${fromString}
+        result = """
+            Date: ${fromString}
+            From ${fromTimeString} To ${toTimeString}
                      """.trimMargin()
 
 
