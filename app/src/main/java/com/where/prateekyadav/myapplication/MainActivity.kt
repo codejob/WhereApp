@@ -39,6 +39,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation {
     var mAdapter: LocationsAdapter? = null
     var mSearchResultsList = ArrayList<SearchResult>();
     lateinit var mDrawableClear:Drawable;
+    lateinit var mDrawableSearch:Drawable;
     var mSearchEdittext: EditText? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,9 +90,9 @@ class MainActivity : AppCompatActivity(), UpdateLocation {
             override fun afterTextChanged(s: Editable) {
 
                 if (edt_search.getText().toString().length > 0) {
-                    edt_search.setCompoundDrawables(null, null, mDrawableClear, null)
+                    edt_search.setCompoundDrawables(mDrawableSearch, null, mDrawableClear, null)
                 } else {
-                    edt_search.setCompoundDrawables(null, null, null, null)
+                    edt_search.setCompoundDrawables(mDrawableSearch, null, null, null)
 
                 }
             }
@@ -263,6 +264,15 @@ class MainActivity : AppCompatActivity(), UpdateLocation {
         super.onRestart()
     }
 
+    override fun onBackPressed() {
+        super.onBackPressed()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            finishAffinity()
+        }else{
+            finish()
+        }
+    }
+
     private fun registerReceiver() {
         try {
             registerReceiver(
@@ -322,33 +332,17 @@ class MainActivity : AppCompatActivity(), UpdateLocation {
         var mDrawableClear: Drawable? = null
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             mDrawableClear = context.resources.getDrawable(R.drawable.btn_clear, null)
+            mDrawableSearch=context.resources.getDrawable(R.drawable.icn_search, null)
+
         } else {
             mDrawableClear = context.resources.getDrawable(R.drawable.btn_clear)
+            mDrawableSearch = context.resources.getDrawable(R.drawable.icn_search)
         }
+        //
         mDrawableClear!!.setBounds(0, 0, mDrawableClear.intrinsicWidth, mDrawableClear.intrinsicHeight)
+        mDrawableSearch!!.setBounds(0, 0, mDrawableSearch.intrinsicWidth, mDrawableSearch.intrinsicHeight)
         return mDrawableClear
     }
-
-    /**
-     *
-     */
-    private fun handleEditTextTouchEvent(view: View, motionEvent: MotionEvent): Boolean {
-        //
-        val editText = view as EditText
-        if (motionEvent.action != MotionEvent.ACTION_UP)
-            return false
-
-        if (motionEvent.x > editText.width - mDrawableClear.intrinsicWidth) {
-            //
-            clearSearchTextAndSetMessage(view)
-            //
-            return true
-        }
-
-        return false
-        //
-    }
-
     /**
      *
      */
@@ -356,7 +350,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation {
         var mSearchText = ""
         val editText = view as EditText
         editText.setText("")
-        editText.setCompoundDrawables(null, null, null, null)
+        editText.setCompoundDrawables(mDrawableSearch, null, null, null)
 
     }
 }

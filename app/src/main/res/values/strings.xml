@@ -18,4 +18,9 @@
     <string name="str_alert_message_delete_location">Are you sure you want to delete this location</string>
     <string name="str_alert_message_update_location">Are you sure you want to update this location</string>
     <string name="str_confirmation">NA</string>
+    <string name="str_na">NA</string>
+    <string name="str_original_location">Original Location</string>
+    <string name="str_nearby_location">Nearby Location</string>
+    <string name="str_date">Date</string>
+    <string name="str_visits">Visits</string>
 </resources>

@@ -129,11 +129,9 @@ class NearByActivity : AppCompatActivity(),ConfirmationListener {
     }
 
     override fun onYes(index: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun onNo() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun onYes(index: Int, requestType: Int) {

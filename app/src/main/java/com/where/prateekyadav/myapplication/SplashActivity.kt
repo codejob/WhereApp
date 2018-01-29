@@ -11,6 +11,7 @@ import com.where.prateekyadav.myapplication.database.DBContract
 import com.where.prateekyadav.myapplication.database.DataBaseController
 import android.util.Log
 import com.where.prateekyadav.myapplication.Util.AppConstant
+import com.where.prateekyadav.myapplication.Util.AppUtility
 
 
 class SplashActivity : AppCompatActivity() {
@@ -72,6 +73,7 @@ class SplashActivity : AppCompatActivity() {
     private fun startMainActivity() {
         val i = Intent(this@SplashActivity, MainActivity::class.java)
         startActivity(i)
+        finish()
     }
 
     /**
@@ -90,6 +92,9 @@ class SplashActivity : AppCompatActivity() {
                     if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                         //user accepted
                         Log.d(AppConstant.TAG_KOTLIN_DEMO_APP,"Permission granted")
+                        AppUtility().validateAutoStartTimer(this)
+                        AppUtility().startTimerAlarm(applicationContext, true)
+                        //
                         startMainActivity()
                     } else if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
                         val should = PermissionCheckHandler.shouldShowRequestPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
