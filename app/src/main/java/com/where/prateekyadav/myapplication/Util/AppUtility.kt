@@ -159,7 +159,7 @@ class AppUtility {
             val lastTimeStamp = pref.getLong(AppConstant.SP_KEY_LAST_TIMER_TIME)
             val diff = (System.currentTimeMillis() - lastTimeStamp)
             Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Last timer " + diff / 1000 + " seconds ago")
-            if (diff > (AppConstant.LOCATION_SYNC_INSTERVAL * 2)) {
+            if (diff > (AppConstant.LOCATION_SYNC_INSTERVAL * 3)) {
                 startTimerAlarm(context, true)
                 if (Build.BRAND.equals("xiaomi") && pref.getLong(AppConstant.SP_KEY_COUNTER_AUTO_START) < 3) {
                     val intent = Intent()

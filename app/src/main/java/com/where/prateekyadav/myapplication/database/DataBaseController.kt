@@ -22,6 +22,7 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
 import android.database.sqlite.SQLiteStatement
+import com.where.prateekyadav.myapplication.database.DBContract.AND
 import com.where.prateekyadav.myapplication.database.DBContract.EQUALS_TO_STRING
 import com.where.prateekyadav.myapplication.database.DBContract.SELECT_COUNT_FROM
 
@@ -366,7 +367,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         var nearByPlacesIds: String
         var isAddressSet: Int
         var isPreferred: Int
-        var accuracy:Float
+        var accuracy: Float
 
         rowID = cursor.getLong(cursor.getColumnIndex(DBContract.VisitedLocationData.COLUMN_ROW_ID))
         userId = cursor.getInt(cursor.getColumnIndex(DBContract.UserEntry.COLUMN_USER_ID))
@@ -412,7 +413,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         visitedLocationInformation.nearByPlacesIds = nearByPlacesIds
         visitedLocationInformation.isAddressSet = isAddressSet
         visitedLocationInformation.isPreferred = isPreferred
-        visitedLocationInformation.accuracy=accuracy
+        visitedLocationInformation.accuracy = accuracy
         // return visited location information object
         return visitedLocationInformation;
     }
@@ -928,6 +929,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
             //
             db.update(DBContract.NearByLocationData.TABLE_NAME_NEARBY_LOCATION
                     , values, whereClause, whereArgs)
+            closeDataBase(sqLiteDatabase)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -975,7 +977,32 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         mcursor.moveToFirst();
         val count = mcursor.getInt(0);
         //
+        closeDataBase(sqLiteDatabase)
         return count > 0
 
     }
+
+
+    fun isPreferredLocation(placeID: String): Boolean {
+
+        val sqLiteDatabase = getWritableDB()
+
+        try {
+            val Query = SELECT_FROM + DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION +
+                    WHERE + DBContract.VisitedLocationData.COLUMN_PLACE_ID + " =?" +
+                    AND + DBContract.VisitedLocationData.COLUMN_ISPREFERRED + " =?"
+            val cursor = sqLiteDatabase.rawQuery(Query, arrayOf(placeID, "1"))
+            //
+            if (cursor != null && cursor!!.count > 0) {
+                cursor.close()
+                closeDataBase(sqLiteDatabase)
+                return true
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        return false
     }
+
+}

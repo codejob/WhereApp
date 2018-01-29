@@ -2,44 +2,44 @@ package com.where.prateekyadav.myapplication
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.support.v7.app.AppCompatActivity
-import android.os.Bundle
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.content.*
 import android.graphics.drawable.Drawable
 import android.os.Build
+import android.support.v7.app.AppCompatActivity
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
-import com.google.android.gms.common.ConnectionResult
-import com.google.android.gms.common.api.Status
-import com.where.prateekyadav.myapplication.Util.AppUtility
+import android.view.View
+import android.widget.AdapterView
+import android.widget.EditText
+import android.widget.ListView
+import android.widget.TextView
+import com.where.prateekyadav.myapplication.Services.AddressUpdateService
 import com.where.prateekyadav.myapplication.Util.AppConstant
-import com.google.android.gms.location.places.Place
-import com.google.android.gms.location.places.ui.PlaceSelectionListener
-import com.google.android.gms.common.api.GoogleApiClient
+import com.where.prateekyadav.myapplication.Util.AppUtility
 import com.where.prateekyadav.myapplication.Util.PermissionCheckHandler
 import com.where.prateekyadav.myapplication.database.DataBaseController
 import com.where.prateekyadav.myapplication.modal.SearchResult
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.MotionEvent
-import android.view.View
-import android.widget.*
-import com.where.prateekyadav.myapplication.Services.AddressUpdateService
 import kotlinx.android.synthetic.main.activity_main.*
 
 
-class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConnectionFailedListener, PlaceSelectionListener {
+class MainActivity : AppCompatActivity(), UpdateLocation {
 
 
-    val RQS_1 = 1
     var mLocationHelper: LocationHelper? = null;
     var mListView: ListView? = null
     var mAdapter: LocationsAdapter? = null
     var mSearchResultsList = ArrayList<SearchResult>();
     lateinit var mDrawableClear:Drawable;
-
-
+    var mSearchEdittext: EditText? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -53,7 +53,8 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
         setSearchListener()
         setOnTouchListener()
         setClickListener()
-        //AppUtility().startTimerAlarm(this,true);
+        startAddressUpdateServiceToUpdateAnyRemainingAddresss()
+       // AppUtility().startTimerAlarm(this,true);
     }
 
     fun setClickListener() {
@@ -82,8 +83,8 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
     }
 
     fun setSearchListener() {
-        val searchEdittext = findViewById<EditText>(R.id.edt_search)
-        searchEdittext.addTextChangedListener(object : TextWatcher {
+        mSearchEdittext = findViewById<EditText>(R.id.edt_search)
+        mSearchEdittext!!.addTextChangedListener(object : TextWatcher {
 
             override fun afterTextChanged(s: Editable) {
 
@@ -104,13 +105,11 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
                 if (s.length > 2)
                     search(s.toString())
                 else if (s.length == 0) {
-                    setLocationResults(DataBaseController(this@MainActivity).readRecentVisitedLocation())
+                    setLocationResults(DataBaseController(this@MainActivity).readRecentVisitedLocation(),true)
                 }
             }
         })
     }
-
-
 
 
     override fun onRequestPermissionsResult(requestCode: Int,
@@ -124,20 +123,20 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
                 if (hasSth) {
                     if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                         //user accepted,
-                        Log.d(AppConstant.TAG_KOTLIN_DEMO_APP,"Permission granted")
+                        Log.d(AppConstant.TAG_KOTLIN_DEMO_APP, "Permission granted")
 
                         AppUtility().validateAutoStartTimer(this)
 
-                        AppUtility().startTimerAlarm(applicationContext,true)
+                        AppUtility().startTimerAlarm(applicationContext, true)
                         //startService(Intent(this, TimerService::class.java));
 
                     } else if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
                         val should = PermissionCheckHandler.shouldShowRequestPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                         if (should) {
-                            PermissionCheckHandler.openDialogForPermissionAlert(this,getString(R.string.str_location_permission_alert_message))
+                            PermissionCheckHandler.openDialogForPermissionAlert(this, getString(R.string.str_location_permission_alert_message))
                         } else {
                             //user has denied with `Never Ask Again`, go to settings
-                            PermissionCheckHandler.promptSettings(this,getString(R.string.str_never_ask_title),getString(R.string.str_never_ask_message))
+                            PermissionCheckHandler.promptSettings(this, getString(R.string.str_never_ask_title), getString(R.string.str_never_ask_message))
                         }
                     }
                 }
@@ -151,7 +150,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
                     // permission was granted, yay! Do the
                     // location-related task you need to do.
                     if (ContextCompat.checkSelfPermission(this,
-                            Manifest.permission.ACCESS_NETWORK_STATE) == PackageManager.PERMISSION_GRANTED) {
+                                    Manifest.permission.ACCESS_NETWORK_STATE) == PackageManager.PERMISSION_GRANTED) {
 
                     }
 
@@ -168,12 +167,12 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
     override fun onResume() {
         super.onResume()
         if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                        Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             /* var clear: EditText = autocompleteFragment!!.getView().findViewById(R.id.place_autocomplete_search_input)
              if (clear != null &&
                      clear.text.isBlank()) {
              }*/
-            setLocationResults(DataBaseController(this).readRecentVisitedLocation())
+            setLocationResults(DataBaseController(this).readRecentVisitedLocation(),false)
 
             //mLocationHelper?.getLocation()
             /*if (!AppUtility().checkAlarmAlreadySet(this)) {
@@ -193,23 +192,25 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
     override fun onPause() {
         super.onPause()
         if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                        Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
             //locationManager!!.removeUpdates()
         }
     }
 
 
-    fun setLocationResults(address: List<SearchResult>) {
+    fun setLocationResults(address: List<SearchResult>, fromSearch: Boolean) {
         try {
-            mSearchResultsList.clear()
-            mSearchResultsList.addAll(address as ArrayList<SearchResult>)
-           // mSearchResultsList=address as ArrayList<SearchResult>
-            // mAdapter = LocationsAdapter(this, mSearchResultsList)
-            //mListView!!.adapter = mAdapter
+            if (mSearchEdittext!!.text.length == 0 || fromSearch) {
+                mSearchResultsList.clear()
+                mSearchResultsList.addAll(address as ArrayList<SearchResult>)
+                // mSearchResultsList=address as ArrayList<SearchResult>
+                // mAdapter = LocationsAdapter(this, mSearchResultsList)
+                //mListView!!.adapter = mAdapter
 
-            //mAdapter!!.notifyDataSetInvalidated()
-            mAdapter!!.notifyDataSetChanged()
+                //mAdapter!!.notifyDataSetInvalidated()
+                mAdapter!!.notifyDataSetChanged()
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -227,7 +228,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
             if (isUpdated) {
                 runOnUiThread({
                     setLocationResults(
-                            DataBaseController(this@MainActivity).readRecentVisitedLocation())
+                            DataBaseController(this@MainActivity).readRecentVisitedLocation(),false)
 
                 });
 
@@ -271,29 +272,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
         }
     }
 
-    override fun onPlaceSelected(place: Place) {
-        try {
-            // var searchResultsList = DataBaseController(this).searchLocationOnline(place)
-            var searchResultsList = DataBaseController(this).searchLocationOffline(place.name.toString())
 
-            if (searchResultsList != null && searchResultsList.size > 0) {
-                searchResultsList.forEach {
-                    //Toast.makeText(this, it.visitedLocationInformation.address, Toast.LENGTH_SHORT).show()
-                    Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Place: " + it.visitResults.visitedLocationInformation.vicinity)
-
-                }
-                setLocationResults(searchResultsList)
-            } else {
-                //setLocation(DataBaseController(this).readAllVisitedLocation())
-
-                Toast.makeText(this, "No result found", Toast.LENGTH_SHORT).show()
-
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
-    }
 
     fun search(place: String) {
         try {
@@ -303,14 +282,14 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
             if (searchResultsList != null) {
                 searchResultsList.forEach {
                     //Toast.makeText(this, it.visitedLocationInformation.address, Toast.LENGTH_SHORT).show()
-                    Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Place: " + it.visitResults.visitedLocationInformation.vicinity)
+                    Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Search results: " + it.visitResults.visitedLocationInformation.vicinity)
 
                 }
-                setLocationResults(searchResultsList)
+                setLocationResults(searchResultsList,true)
             } else {
                 //setLocation(DataBaseController(this).readAllVisitedLocation())
 
-                Toast.makeText(this, "No result found", Toast.LENGTH_SHORT).show()
+                // Toast.makeText(this, "No result found", Toast.LENGTH_SHORT).show()
 
             }
         } catch (e: Exception) {
@@ -319,26 +298,22 @@ class MainActivity : AppCompatActivity(), UpdateLocation, GoogleApiClient.OnConn
 
     }
 
-    override fun onError(status: Status) {
-        Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "An error occurred: " + status)
-    }
-
-    override fun onConnectionFailed(p0: ConnectionResult) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
 
 
     override fun updateLocationAddressList(addressList: List<SearchResult>) {
-        setLocationResults(addressList)
+        setLocationResults(addressList,false)
     }
+
     /**
      * Method to start service to synced the draft forms
      *
      * @param context
      */
-    private fun startAddressUpdateServiceToUpdateAnyRemainingAddresss(context: Context) {
-        val serviceIntent = Intent(context, AddressUpdateService::class.java)
-        context.startService(serviceIntent)
+    private fun startAddressUpdateServiceToUpdateAnyRemainingAddresss() {
+        if (!AddressUpdateService.RUNNING) {
+            val serviceIntent = Intent(this, AddressUpdateService::class.java)
+            startService(serviceIntent)
+        }
     }
 
 
