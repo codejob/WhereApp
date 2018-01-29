@@ -12,27 +12,27 @@ import com.where.prateekyadav.myapplication.Util.AppConstant
 import com.where.prateekyadav.myapplication.Util.AppConstant.Companion.ISONLINE
 import com.where.prateekyadav.myapplication.Util.AppUtility
 import android.app.ActivityManager
-
-
+import android.util.Log
 
 
 /**
  * Created by Infobeans on 12/10/2015.
  */
 class NetworkConnectionReceiver : BroadcastReceiver() {
-    lateinit var handler:Handler;
+    lateinit var handler: Handler;
     lateinit var mContext: Context;
 
     override fun onReceive(context: Context, intent: Intent) {
         AppUtility().validateAutoStartTimer(context)
-        mContext=context
+        mContext = context
         val info = intent.getParcelableExtra<NetworkInfo>(WifiManager.EXTRA_NETWORK_INFO)
-        AppUtility.showToast(context, info.state.toString())
+
         if (info != null && info.isConnected) {
             if (info.state == NetworkInfo.State.CONNECTED && ISONLINE != 1) {
                 handler = Handler()
                 updateNetworkConnection(context, info.isConnected)
                 ISONLINE = 1
+                AppUtility.showToast(context, info.state.toString())
                 // Start  service for form sync
                 runCodeAfterSomeDelay(context)
             }
@@ -87,7 +87,10 @@ class NetworkConnectionReceiver : BroadcastReceiver() {
             handler.postDelayed({
                 //Do something after 100ms
                 //if (isMyServiceRunning(AddressUpdateService::class.java)) {
+                if (!AddressUpdateService.RUNNING)
                     startAddressUpdateService(context)
+                else
+                    Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Serive already running")
                 //}
             }, 1500)
         } catch (e: Exception) {

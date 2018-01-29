@@ -15,7 +15,7 @@ import com.where.prateekyadav.myapplication.Util.AppConstant
 
 class SplashActivity : AppCompatActivity() {
     // Splash screen timer
-    private val SPLASH_TIME_OUT: Long = 3000
+    private val SPLASH_TIME_OUT: Long = 2000
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

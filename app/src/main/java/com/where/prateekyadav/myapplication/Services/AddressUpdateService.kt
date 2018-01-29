@@ -35,21 +35,20 @@ class AddressUpdateService : IntentService("ADDRESS UPDATE"), UpdateLocation {
     private var updateLocation: UpdateLocation? = null;
     private lateinit var mConnectionDetector: ConnectionDetector
 
-    private val testHandler = object : Handler() {
-        override fun handleMessage(msg: Message) {
-
-        }
+    companion object {
+        var RUNNING: Boolean = false
     }
-
 
     override fun onCreate() {
         super.onCreate()
+        RUNNING = true
         Log.d("service", "oncreate service")
 
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        RUNNING=false
         Log.d("service", "onDestroy service")
     }
 
@@ -62,11 +61,13 @@ class AddressUpdateService : IntentService("ADDRESS UPDATE"), UpdateLocation {
     }
 
     override fun onHandleIntent(intent: Intent?) {
+        RUNNING = true
         mContext = this
         handler = Handleupdate()
         updateLocation = this;
         mConnectionDetector = ConnectionDetector.getInstance(this)
         callGetPlacesAPI()
+        Log.d("service", "onHandleIntent service")
     }
 
     /*override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
@@ -105,6 +106,8 @@ class AddressUpdateService : IntentService("ADDRESS UPDATE"), UpdateLocation {
 
     override fun onTaskRemoved(rootIntent: Intent) {
         super.onTaskRemoved(rootIntent)
+        RUNNING=false
+        Log.d("service", "onTaskRemoved service")
         try {
             //deleteExtractedFileFolder(mExtractedFolderPath);
         } catch (e: Exception) {
@@ -127,20 +130,27 @@ class AddressUpdateService : IntentService("ADDRESS UPDATE"), UpdateLocation {
                 var result: Result? = null;
 
                 var minDistance: Float = 0.0F;
-                var pos: Int = 0;
-                places.forEach {
+                var selected: Int = 0;
+                val isPreferred = 0
+                for(it in places) {
                     //Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, it.name);
                     var tempLoc = Location(LocationManager.GPS_PROVIDER);
                     tempLoc.latitude = it.geometry.location.lat.toDouble()
                     tempLoc.longitude = it.geometry.location.lng.toDouble()
                     val distance = location.distanceTo(tempLoc)
                     // Just to pick first prominent place within 10 metre
-                    if (distance < location.accuracy && pos == 0) {
+                    if (distance < AppConstant.RADIUS_NEARBY_SEARCH && selected == 0) {
                         minDistance = distance
                         result = it
-                        pos += 1
+                        selected += 1
                     }
-
+                    if(DataBaseController(mContext).isPreferredLocation(it.placeId)){
+                        minDistance = distance
+                        result = it
+                        selected += 1
+                        break
+                        isPreferred=1
+                    }
                     Log.i("Distance bt curr & res", it.name + "  " + location.distanceTo(tempLoc).toString());
 
                 }
@@ -153,7 +163,7 @@ class AddressUpdateService : IntentService("ADDRESS UPDATE"), UpdateLocation {
                 }
                 //
                 var locationHelper = LocationHelper.getInstance(mContext, updateLocation!!)
-                locationHelper.addAddressIntoDataBase(result!!, location, locationType, places, rowId)
+                locationHelper.addAddressIntoDataBase(result!!, location, locationType, places, rowId,isPreferred)
 
                 callGetPlacesAPI()
             } catch (e: Exception) {
@@ -177,77 +187,6 @@ class AddressUpdateService : IntentService("ADDRESS UPDATE"), UpdateLocation {
         }
     }
 
-    /**
-     *
-     */
-    private fun updateAddressOnLocation(resultPlace: Result, currentLocation: Location, locationType: String, mPlacesList: List<Result>) {
-        //
-        var result: Int = 0;
-        try {
-            var pref = MySharedPref.getinstance(mContext);
-            var geocoder = Geocoder(mContext, Locale.getDefault())
-            val address = resultPlace.name;
-
-            val vicinity = resultPlace.vicinity
-            val placeId = resultPlace.placeId
-            val photoUrl = resultPlace.photos.toString()
-            val nearByPlaces = "";
-            val isAddressSet = 1;
-            var LATITUDE: Double = currentLocation.latitude
-            var LONGITUDE: Double = currentLocation.longitude
-            val addresses: List<Address>
-            geocoder = Geocoder(mContext, Locale.getDefault())
-
-            addresses = geocoder.getFromLocation(LATITUDE, LONGITUDE, 1) // Here 1 represent max location result to returned, by documents it recommended 1 to 5
-            if (addresses == null || addresses.size == 0) {
-                return null!!;
-            }
-            // val address = addresses[0].getAddressLine(0) // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
-            //val address = addresses
-            val city = addresses[0].getLocality()
-            val state = addresses[0].getAdminArea()
-            val country = addresses[0].getCountryName()
-            val postalCode = addresses[0].getPostalCode()
-            val knownName = addresses[0].getFeatureName() // Only if available else return NULL
-            val fromTime = System.currentTimeMillis()
-            val locationProvider = currentLocation.provider;
-            val toTime: Long = System.currentTimeMillis()
-            //
-            // set values for visited location information
-            var visitedLocationInformation = VisitedLocationInformation("NA")
-            visitedLocationInformation.userId = 1
-            visitedLocationInformation.latitude = LATITUDE
-            visitedLocationInformation.longitude = LONGITUDE
-            visitedLocationInformation.address = address
-            visitedLocationInformation.city = city
-            visitedLocationInformation.state = state
-            visitedLocationInformation.country = country
-            visitedLocationInformation.postalCode = postalCode
-            visitedLocationInformation.knownName = knownName
-            visitedLocationInformation.toTime = toTime
-            visitedLocationInformation.fromTime = fromTime
-            visitedLocationInformation.locationProvider = locationProvider
-            visitedLocationInformation.rowID = 0
-            visitedLocationInformation.locationRequestType = locationType
-            visitedLocationInformation.vicinity = vicinity
-            visitedLocationInformation.placeId = placeId
-            visitedLocationInformation.photoUrl = photoUrl
-            visitedLocationInformation.nearByPlacesIds = ""
-            visitedLocationInformation.isAddressSet = isAddressSet
-            result = DataBaseController(mContext).updateVisitedLocation(
-                    visitedLocationInformation, 1)
-            //
-            pref.setLong(System.currentTimeMillis(), AppConstant.SP_KEY_SPENT_TIME)
-            Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Address updated")
-
-            var locationHelper = LocationHelper.getInstance(mContext, this)
-            locationHelper.addNearByPlaces(mPlacesList, placeId, addresses)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        println(result)
-
-    }
 
     override fun updateLocationAddressList(addressList: List<SearchResult>) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.

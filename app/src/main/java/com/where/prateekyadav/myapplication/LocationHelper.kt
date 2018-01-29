@@ -98,14 +98,13 @@ class LocationHelper {
         var finalLoc: Location? = null
         // Check Location permission here
         if (PermissionCheckHandler.checkLocationPermissions(mContext!!)) {
-
-            if (gps_enabled)
-                gps_loc = locationManager!!.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+            // Commenting last visited gps as it would give bad location
+            // if (gps_enabled)
+            //   gps_loc = locationManager!!.getLastKnownLocation(LocationManager.GPS_PROVIDER)
             if (network_enabled)
                 net_loc = locationManager!!.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
             else {
                 passive_loc = locationManager!!.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER)
-
             }
             if (gps_loc != null || net_loc != null) {
 
@@ -374,6 +373,7 @@ class LocationHelper {
             }
             visitedLocationInformation.toTime = toTime
             visitedLocationInformation.fromTime = fromTime
+            visitedLocationInformation.locationRequestType=locationType
             //
             val insertedId = DataBaseController(mContext).insertVisitedLocation(visitedLocationInformation);
             //
@@ -402,7 +402,7 @@ class LocationHelper {
      * Method to add address into database
      */
     fun addAddressIntoDataBase(resultPlace: Result, currentLocation: Location, locationType: String,
-                               mPlacesList: List<Result>, rowId: Long) {
+                               mPlacesList: List<Result>, rowId: Long, isPreferred: Int) {
         //
         var result: Long = 0
         try {
@@ -454,6 +454,7 @@ class LocationHelper {
             visitedLocationInformation.nearByPlacesIds = nearByPlaces
             visitedLocationInformation.isAddressSet = isAddressSet
             visitedLocationInformation.accuracy = currentLocation.accuracy
+            visitedLocationInformation.isPreferred = isPreferred
 
             val updatedRow = mDataBaseController.updateVisitedLocation(
                     visitedLocationInformation, rowId)
@@ -477,36 +478,29 @@ class LocationHelper {
             try {
                 var result: Result? = null;
 
-                /* if (places != null && places.size > 1)
-                     result = places.get(1)
-                 else
-                     result = places.get(0)
-                */
                 var minDistance: Float = 0.0F;
-                var pos: Int = 0;
-                places.forEach {
+                var selected: Int = 0;
+                var isPreferred = 0
+                for (it in places) {
                     //Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, it.name);
                     var tempLoc = Location(LocationManager.GPS_PROVIDER);
                     tempLoc.latitude = it.geometry.location.lat.toDouble()
                     tempLoc.longitude = it.geometry.location.lng.toDouble()
                     val distance = location.distanceTo(tempLoc)
                     // Just to pick first prominent place within 10 metre
-                    if (distance < AppConstant.RADIUS_NEARBY_SEARCH && pos == 0) {
+                    if (distance < AppConstant.RADIUS_NEARBY_SEARCH && selected == 0) {
                         minDistance = distance
                         result = it
-                        pos += 1
+                        selected += 1
                     }
-                    // Code to pick nearest places
-                    /* if (pos == 0) {
-                         minDistance = distance
-                         result = it
+                    if (DataBaseController(mContext).isPreferredLocation(it.placeId)) {
+                        minDistance = distance
+                        result = it
+                        selected += 1
+                        isPreferred = 1
+                        break
+                    }
 
-                     } else if (minDistance > distance) {
-                         minDistance = distance
-                         result = it
-                     }
-                     pos += 1
-                     */
                     Log.i("Distance bt curr & res", it.name + "  " + location.distanceTo(tempLoc).toString());
                 }
                 if (result == null) {
@@ -517,7 +511,7 @@ class LocationHelper {
                     }
                 }
                 //Add address into data base
-                addAddressIntoDataBase(result!!, location, locationType, places, rowId)
+                addAddressIntoDataBase(result!!, location, locationType, places, rowId, isPreferred)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -622,6 +616,5 @@ class LocationHelper {
         }
 
     }
-
 
 }
