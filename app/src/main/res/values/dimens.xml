@@ -2,12 +2,15 @@
 <resources>
     <dimen name="add_text_notes_dialog_width">250dp</dimen>
     <dimen name="margin_25dp">25dp</dimen>
+    <dimen name="margin_20dp">20dp</dimen>
     <dimen name="margin_10dp">10dp</dimen>
     <dimen name="btn_cancel_save_note">12sp</dimen>
     <dimen name="margin_5dp">5dp</dimen>
     <dimen name="confirmation_alert_msg_title_text_size">14sp</dimen>
     <dimen name="confirmation_alert_msg_text_size">12sp</dimen>
     <dimen name="ts_search">16sp</dimen>
-    <dimen name="ts_location_title">18sp</dimen>
-    <dimen name="margin_20dp">20dp</dimen>
+    <dimen name="ts_location_info">14sp</dimen>
+    <dimen name="ts_location_title">16sp</dimen>
+    <dimen name="ts_button_location_screen">16sp</dimen>
+    <dimen name="location_screen_btn_height">40dp</dimen>
 </resources>

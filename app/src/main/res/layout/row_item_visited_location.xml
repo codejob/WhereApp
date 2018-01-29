@@ -29,37 +29,36 @@
                     android:layout_height="wrap_content"
                     android:layout_centerHorizontal="true"
                     android:background="@color/color_location_title_bg"
+                    android:fontFamily="@font/roboto"
                     android:gravity="center"
-                    android:padding="@dimen/margin_5dp"
                     android:text="@string/str_original_location"
                     android:textColor="@color/color_location_title"
                     android:textSize="@dimen/ts_location_title"
                     android:visibility="visible" />
-
                 <TextView
                     android:id="@+id/tv_address"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/tv_your_location"
-                    android:layout_centerHorizontal="true"
+                    android:layout_below="@+id/tv_your_location"
+                    android:fontFamily="@font/roboto_light"
                     android:gravity="center"
-                    android:padding="@dimen/margin_5dp"
                     android:text="@string/str_na"
                     android:textColor="@color/color_location_details"
-                    android:textSize="@dimen/ts_location_title"
+                    android:textSize="@dimen/ts_location_info"
                     android:visibility="visible" />
 
                 <TextView
                     android:id="@+id/tv_location_vicinity"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/tv_address"
-                    android:layout_centerHorizontal="true"
+                    android:layout_alignLeft="@+id/tv_address"
+                    android:layout_alignStart="@+id/tv_address"
+                    android:layout_below="@+id/tv_address"
+                    android:fontFamily="@font/roboto_light"
                     android:gravity="center"
-                    android:padding="@dimen/margin_5dp"
                     android:text="@string/str_na"
                     android:textColor="@color/color_location_details"
-                    android:textSize="@dimen/ts_location_title"
+                    android:textSize="@dimen/ts_location_info"
                     android:visibility="visible" />
 
                 <RelativeLayout
@@ -67,7 +66,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/tv_location_vicinity"
-                    android:layout_marginTop="@dimen/margin_20dp">
+                    android:layout_marginTop="@dimen/margin_10dp">
 
                     <TextView
                         android:id="@+id/tv_nearby_your_location"
@@ -75,8 +74,8 @@
                         android:layout_height="wrap_content"
                         android:layout_centerHorizontal="true"
                         android:background="@color/color_location_title_nearby_bg"
+                        android:fontFamily="@font/roboto"
                         android:gravity="center"
-                        android:padding="@dimen/margin_5dp"
                         android:text="@string/str_nearby_location"
                         android:textColor="@color/color_location_title"
                         android:textSize="@dimen/ts_location_title"
@@ -88,11 +87,11 @@
                         android:layout_height="wrap_content"
                         android:layout_below="@id/tv_nearby_your_location"
                         android:layout_centerHorizontal="true"
+                        android:fontFamily="@font/roboto_light"
                         android:gravity="center"
-                        android:padding="@dimen/margin_5dp"
                         android:text="@string/str_na"
                         android:textColor="@color/color_location_details"
-                        android:textSize="@dimen/ts_location_title"
+                        android:textSize="@dimen/ts_location_info"
                         android:visibility="visible" />
 
                     <TextView
@@ -101,11 +100,11 @@
                         android:layout_height="wrap_content"
                         android:layout_below="@id/tv_nearby_address"
                         android:layout_centerHorizontal="true"
+                        android:fontFamily="@font/roboto_light"
                         android:gravity="center"
-                        android:padding="@dimen/margin_5dp"
                         android:text="@string/str_na"
                         android:textColor="@color/color_location_details"
-                        android:textSize="@dimen/ts_location_title"
+                        android:textSize="@dimen/ts_location_info"
                         android:visibility="visible" />
 
 
@@ -117,11 +116,11 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentLeft="true"
                     android:layout_below="@id/lyt_nearby_location"
+                    android:fontFamily="@font/roboto_light"
                     android:gravity="center"
-                    android:padding="@dimen/margin_5dp"
                     android:text="@string/str_date"
                     android:textColor="@color/color_location_details"
-                    android:textSize="@dimen/ts_location_title"
+                    android:textSize="@dimen/ts_location_info"
                     android:visibility="visible" />
 
                 <TextView
@@ -131,42 +130,47 @@
                     android:layout_alignParentRight="true"
                     android:layout_below="@id/lyt_nearby_location"
                     android:layout_toRightOf="@id/tv_visit_date"
+                    android:fontFamily="@font/roboto_light"
                     android:gravity="right"
-                    android:padding="@dimen/margin_5dp"
                     android:text="@string/str_visits"
                     android:textColor="@color/color_location_details"
-                    android:textSize="@dimen/ts_location_title"
+                    android:textSize="@dimen/ts_location_info"
                     android:visibility="visible" />
+
                 <TextView
                     android:id="@+id/tv_time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentLeft="true"
+                    android:fontFamily="@font/roboto_light"
                     android:layout_below="@id/tv_visit_date"
                     android:gravity="center"
-                    android:padding="@dimen/margin_5dp"
                     android:text="@string/time"
                     android:textColor="@color/color_location_details"
-                    android:textSize="@dimen/ts_location_title"
+                    android:textSize="@dimen/ts_location_info"
                     android:visibility="visible" />
+
                 <Button
                     android:id="@+id/btn_all_visits"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="@dimen/location_screen_btn_height"
                     android:layout_below="@+id/tv_time"
                     android:layout_marginTop="@dimen/margin_10dp"
                     android:background="@color/color_btn_background"
+                    android:fontFamily="@font/roboto"
+                    android:textSize="@dimen/ts_button_location_screen"
                     android:text="@string/str_see_all_visits"
                     android:textColor="#ffffff" />
 
                 <Button
                     android:id="@+id/btn_choose_nearby"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="@dimen/location_screen_btn_height"
                     android:layout_below="@+id/btn_all_visits"
                     android:layout_marginTop="@dimen/margin_10dp"
-                    android:layout_toLeftOf="@id/btn_delete"
                     android:background="@color/color_btn_background"
+                    android:fontFamily="@font/roboto"
+                    android:textSize="@dimen/ts_button_location_screen"
                     android:text="@string/update_from_nearby_locations"
                     android:textColor="#ffffff" />
 
@@ -174,10 +178,11 @@
                     android:id="@+id/btn_delete"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignBottom="@id/btn_choose_nearby"
-                    android:layout_alignParentRight="true"
-                    android:layout_alignTop="@id/btn_choose_nearby"
+                    android:layout_below="@id/btn_choose_nearby"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="5dp"
                     android:padding="5dp"
+                    android:background="@android:color/transparent"
                     android:src="@drawable/btn_trash_list_item" />
 
             </RelativeLayout>

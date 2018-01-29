@@ -21,4 +21,16 @@
         <item name="android:singleLine">true</item>
     </style>
 
+    <style name="textViewStyle">
+        <item name="android:textColor">@color/color_black</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:textSize">@dimen/ts_search</item>
+        <item name="android:textCursorDrawable" tools:targetApi="honeycomb_mr1">
+            @drawable/logn_cursor_drawable
+        </item>
+        <item name="android:textColorHint">@color/color_hint</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
 </resources>
