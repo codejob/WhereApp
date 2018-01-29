@@ -7,11 +7,11 @@
     <color name="color_black">#000</color>
     <color name="color_hint">#a0a0a0</color>
     <color name="color_bg_search_tint">#00FFFFFF</color>
-    <color name="colorSplashBackground">#2e92f7</color>
+    <color name="colorSplashBackground">#4d90e2</color>
     <color name="colorWhite">#FFFFFF</color>
-    <color name="color_cancel_btn">#fcfcfc</color>
-    <color name="color_cancel_btn_text">#000</color>
-    <color name="color_save_btn">#a0a0a0</color>
+    <color name="color_cancel_btn">#8388A4</color>
+    <color name="color_cancel_btn_text">#000000</color>
+    <color name="color_save_btn">#ED5E68</color>
     <color name="color_save_btn_text">#FFFFFF</color>
     <color name="color_confirmation_msg_text">#000000</color>
     <color name="edittext_hintcolor">#7e7e7e</color>
@@ -23,4 +23,5 @@
     <color name="color_location_title_bg">#ffdb58</color>
     <color name="color_location_title_nearby_bg">#1e8701</color>
     <color name="color_location_title">#ffffff</color>
+
 </resources>
