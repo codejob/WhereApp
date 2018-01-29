@@ -1,24 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
-    </style>
-
 
     <style name="search_edit_text">
         <item name="android:textColor">@color/color_black</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:textSize">@dimen/ts_search</item>
+        <item name="android:backgroundTint">@color/color_bg_search_tint</item>
         <item name="android:textCursorDrawable" tools:targetApi="honeycomb_mr1">
             @drawable/logn_cursor_drawable
         </item>
         <item name="android:textColorHint">@color/color_hint</item>
         <item name="android:singleLine">true</item>
     </style>
-
 </resources>
