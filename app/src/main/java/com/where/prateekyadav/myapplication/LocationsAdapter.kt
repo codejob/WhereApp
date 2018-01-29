@@ -47,7 +47,7 @@ class LocationsAdapter() : BaseAdapter(), ConfirmationListener {
         val mViewHolder: MyViewHolder
         var convertView = view
         if (convertView == null) {
-            convertView = inflater!!.inflate(R.layout.layout_location_list_item, parent, false)
+            convertView = inflater!!.inflate(R.layout.row_item_visited_location, parent, false)
             mViewHolder = MyViewHolder(convertView)
             convertView.setTag(mViewHolder)
         } else {
