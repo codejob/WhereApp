@@ -185,14 +185,14 @@ class AppUtility {
         }
     }
 
-    fun decorateFromAndToTime(from: Long, to: Long): String {
+    fun decorateFromAndToTime(from: Long, to: Long, context: Context?): String {
         var result = ""
         val calToTime = Calendar.getInstance();
         val calFromTime = Calendar.getInstance();
         calToTime.timeInMillis = to
         calFromTime.timeInMillis = from
 
-        val fromSecond = calFromTime.get(Calendar.DAY_OF_MONTH)
+        /*val fromSecond = calFromTime.get(Calendar.DAY_OF_MONTH)
         val fromMinute = calFromTime.get(Calendar.MINUTE)
         val fromHour = calFromTime.get(Calendar.HOUR_OF_DAY)
         val fromDay = calFromTime.get(Calendar.DAY_OF_MONTH)
@@ -204,7 +204,7 @@ class AppUtility {
         val toHour = calToTime.get(Calendar.HOUR_OF_DAY)
         val toDay = calToTime.get(Calendar.DAY_OF_MONTH)
         val toMonth = calToTime.get(Calendar.MONTH)
-        val toYear = calToTime.get(Calendar.YEAR)
+        val toYear = calToTime.get(Calendar.YEAR)*/
 
         val formatter: SimpleDateFormat = SimpleDateFormat("dd/MM/yyyy");
         val fromString = formatter.format(from);
@@ -214,12 +214,18 @@ class AppUtility {
         val toTimeString = formatterTIme.format(to)
 
 
-        result = """
-            Date: ${fromString}
-            From ${fromTimeString} To ${toTimeString}
-                     """.trimMargin()
+        result =
+                context!!.getString(R.string.from) + " " + fromTimeString + " " + context!!.getString(R.string.from) + " " +
+                toTimeString
+        return result
 
+    }
 
+    fun getDecoratedDate(from: Long, context: Context?): String? {
+        var result = ""
+        val formatter: SimpleDateFormat = SimpleDateFormat("dd/MM/yyyy");
+        val fromString = formatter.format(from);
+        result = context!!.getString(R.string.str_date) + " " + fromString
         return result
 
     }
