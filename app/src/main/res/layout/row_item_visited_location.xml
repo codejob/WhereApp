@@ -169,13 +169,13 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/margin_10dp"
                 android:layout_below="@+id/btn_all_visits"
-                android:layout_toLeftOf="@id/btn_delete_"
+                android:layout_toLeftOf="@id/btn_delete"
                 android:background="@color/color_btn_background"
                 android:text="@string/update_from_nearby_locations"
                 android:textColor="#ffffff" />
             <ImageButton
                 android:padding="5dp"
-                android:id="@+id/btn_delete_"
+                android:id="@+id/btn_delete"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignTop="@id/btn_choose_nearby"
