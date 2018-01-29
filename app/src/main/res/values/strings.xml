@@ -21,7 +21,9 @@
     <string name="str_na">NA</string>
     <string name="str_original_location">Original Location</string>
     <string name="str_nearby_location">Nearby Location</string>
-    <string name="str_date">Date</string>
-    <string name="str_visits">Visits</string>
+    <string name="str_date">Date:</string>
+    <string name="str_visits">Visits:</string>
     <string name="time">Time:</string>
+    <string name="from">From:</string>
+    <string name="to">To:</string>
 </resources>

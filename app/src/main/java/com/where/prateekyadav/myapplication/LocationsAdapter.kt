@@ -50,15 +50,15 @@ class LocationsAdapter() : BaseAdapter(), ConfirmationListener {
         } else {
             mViewHolder = convertView.getTag() as MyViewHolder
         }
-       /* if (mLocationList!!.get(position).visitResults.showFromNearBy) {
-            val nearAddress = mLocationList!!.get(position).visitResults.nearByPlaceIDToShow!!.address
-            val nearVisinity = mLocationList!!.get(position).visitResults.nearByPlaceIDToShow!!.vicinity
-            mLocationList!!.get(position).visitResults.visitedLocationInformation.address = nearAddress
-            mLocationList!!.get(position).visitResults.visitedLocationInformation.vicinity = nearVisinity
+        /* if (mLocationList!!.get(position).visitResults.showFromNearBy) {
+             val nearAddress = mLocationList!!.get(position).visitResults.nearByPlaceIDToShow!!.address
+             val nearVisinity = mLocationList!!.get(position).visitResults.nearByPlaceIDToShow!!.vicinity
+             mLocationList!!.get(position).visitResults.visitedLocationInformation.address = nearAddress
+             mLocationList!!.get(position).visitResults.visitedLocationInformation.vicinity = nearVisinity
 
-        } else {
+         } else {
 
-        }*/
+         }*/
 
         mViewHolder.btnAllVisits.setOnClickListener(object : View.OnClickListener {
             override fun onClick(p0: View?) {
@@ -121,10 +121,11 @@ class LocationsAdapter() : BaseAdapter(), ConfirmationListener {
 
         }
 
-        mViewHolder.tvVisits.text = mLocationList!!.get(position).visitResults.noOfVisits.toString()
-        mViewHolder.tvDate.text = AppUtility().decorateFromAndToTime(mLocationList!!.get(position).visitResults.visitedLocationInformation.fromTime,
-                mLocationList!!.get(position).visitResults.visitedLocationInformation.toTime)
-
+        mViewHolder.tvVisits.text = mContext!!.getString(R.string.str_visits)+" "+mLocationList!!.get(position).visitResults.noOfVisits.toString()
+        mViewHolder.tvTime.text = AppUtility().decorateFromAndToTime(mLocationList!!.get(position).visitResults.visitedLocationInformation.fromTime,
+                mLocationList!!.get(position).visitResults.visitedLocationInformation.toTime, mContext)
+        mViewHolder.tvDate.text = AppUtility().getDecoratedDate(mLocationList!!.get(position).visitResults.visitedLocationInformation.fromTime,
+                mContext)
         /////////////////// Nearby data////////////////////
         if (mLocationList!!.get(position).visitResults.showFromNearBy) {
             mViewHolder.rlyLytNB.visibility = View.VISIBLE
