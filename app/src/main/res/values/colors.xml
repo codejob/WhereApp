@@ -3,6 +3,13 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
-    <color name="colorSplashBackground">#360f0f</color>
+    <color name="colorSplashBackground">#2e92f7</color>
     <color name="colorWhite">#FFFFFF</color>
+    <color name="color_cancel_btn">#000000</color>
+    <color name="color_cancel_btn_text">#FF00FF</color>
+    <color name="color_save_btn">#FF00FF</color>
+    <color name="color_save_btn_text">#000000</color>
+    <color name="color_confirmation_msg_text">#000000</color>
+    <color name="edittext_hintcolor">#7e7e7e</color>
+    <color name="edittext_fontcolor">#000</color>
 </resources>

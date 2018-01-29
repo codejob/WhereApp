@@ -978,5 +978,4 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         return count > 0
 
     }
-
-}
+    }

@@ -13,4 +13,9 @@
     <string name="str_i_am_sure">I\'M SURE</string>
     <string name="str_re_try">RE-TRY</string>
     <string name="update_from_nearby_locations">Update from nearby locations</string>
+    <string name="str_no">No</string>
+    <string name="str_yes">Yes</string>
+    <string name="str_alert_message_delete_location">Are you sure you want to delete this location</string>
+    <string name="str_alert_message_update_location">Are you sure you want to update this location</string>
+    <string name="str_confirmation">NA</string>
 </resources>
