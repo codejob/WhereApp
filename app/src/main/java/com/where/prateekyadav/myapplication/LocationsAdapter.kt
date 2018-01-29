@@ -4,12 +4,9 @@ import android.content.Context
 import android.content.Intent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.BaseAdapter
 import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
 import android.view.LayoutInflater
-import android.widget.Button
-import android.widget.ImageButton
-import android.widget.TextView
+import android.widget.*
 import com.where.prateekyadav.myapplication.Util.AppConstant
 import com.where.prateekyadav.myapplication.Util.AppUtility
 import com.where.prateekyadav.myapplication.Util.MySharedPref
@@ -53,7 +50,7 @@ class LocationsAdapter() : BaseAdapter(), ConfirmationListener {
         } else {
             mViewHolder = convertView.getTag() as MyViewHolder
         }
-        if (mLocationList!!.get(position).visitResults.showFromNearBy) {
+       /* if (mLocationList!!.get(position).visitResults.showFromNearBy) {
             val nearAddress = mLocationList!!.get(position).visitResults.nearByPlaceIDToShow!!.address
             val nearVisinity = mLocationList!!.get(position).visitResults.nearByPlaceIDToShow!!.vicinity
             mLocationList!!.get(position).visitResults.visitedLocationInformation.address = nearAddress
@@ -61,7 +58,7 @@ class LocationsAdapter() : BaseAdapter(), ConfirmationListener {
 
         } else {
 
-        }
+        }*/
 
         mViewHolder.btnAllVisits.setOnClickListener(object : View.OnClickListener {
             override fun onClick(p0: View?) {
@@ -103,20 +100,6 @@ class LocationsAdapter() : BaseAdapter(), ConfirmationListener {
         calToTime.timeInMillis = mLocationList!!.get(position).visitResults.visitedLocationInformation.toTime
         calFromTime.timeInMillis = mLocationList!!.get(position).visitResults.visitedLocationInformation.fromTime
 
-        var addresss =
-
-                """   Name:  ${mLocationList!!.get(position).visitResults.visitedLocationInformation.address}
-
-                 Visinity:   ${
-                mLocationList!!.get(position).visitResults.visitedLocationInformation.vicinity
-
-                }
-
-                  No of visits:   ${mLocationList!!.get(position).visitResults.noOfVisits}
-
-              ${AppUtility().decorateFromAndToTime(mLocationList!!.get(position).visitResults.visitedLocationInformation.fromTime,
-                        mLocationList!!.get(position).visitResults.visitedLocationInformation.toTime)}
-                 """
 
         /*  Req Type:=> ${mLocationList!!.get(position).visitResults.visitedLocationInformation.locationRequestType}
           Provider :=> ${mLocationList!!.get(position).visitResults.visitedLocationInformation.locationProvider}
@@ -125,18 +108,43 @@ class LocationsAdapter() : BaseAdapter(), ConfirmationListener {
           Long:=> ${mLocationList!!.get(position).visitResults.visitedLocationInformation.longitude} """*/
 
 
-
-
-        mViewHolder.tvTitle.text = addresss
-
         //// use  for making search text bold
-        /* if (mLocationList!!.get(position).visitResults.searchString != null) {
-             mViewHolder.tvTitle.text = AppUtility().makeSectionOfTextBold(mLocationList!!.get(position).visitResults.visitedLocationInformation.vicinity,
-                     mLocationList!!.get(position).visitResults.searchString!!)
-         } else {
-             mViewHolder.tvTitle.text = addresss
+        if (mLocationList!!.get(position).visitResults.searchString != null) {
+            mViewHolder.tvOrgAddress.text = AppUtility().makeSectionOfTextBold(mLocationList!!.get(position).visitResults.visitedLocationInformation.address,
+                    mLocationList!!.get(position).visitResults.searchString!!)
+            mViewHolder.tvOrgVicinity.text = AppUtility().makeSectionOfTextBold(mLocationList!!.get(position).visitResults.visitedLocationInformation.vicinity,
+                    mLocationList!!.get(position).visitResults.searchString!!)
 
-         }*/
+        } else {
+            mViewHolder.tvOrgAddress.text = mLocationList!!.get(position).visitResults.visitedLocationInformation.address
+            mViewHolder.tvOrgVicinity.text = mLocationList!!.get(position).visitResults.visitedLocationInformation.vicinity
+
+        }
+
+        mViewHolder.tvVisits.text = mLocationList!!.get(position).visitResults.noOfVisits.toString()
+        mViewHolder.tvDate.text = AppUtility().decorateFromAndToTime(mLocationList!!.get(position).visitResults.visitedLocationInformation.fromTime,
+                mLocationList!!.get(position).visitResults.visitedLocationInformation.toTime)
+
+        /////////////////// Nearby data////////////////////
+        if (mLocationList!!.get(position).visitResults.showFromNearBy) {
+            mViewHolder.rlyLytNB.visibility = View.VISIBLE
+
+            if (mLocationList!!.get(position).visitResults.searchString != null) {
+                mViewHolder.tvNBAddress.text = AppUtility().makeSectionOfTextBold(mLocationList!!.get(position).visitResults.nearByPlaceIDToShow!!.address,
+                        mLocationList!!.get(position).visitResults.searchString!!)
+                mViewHolder.tvNBVicinity.text = AppUtility().makeSectionOfTextBold(mLocationList!!.get(position).visitResults.nearByPlaceIDToShow!!.vicinity,
+                        mLocationList!!.get(position).visitResults.searchString!!)
+
+            } else {
+                mViewHolder.tvNBAddress.text = mLocationList!!.get(position).visitResults.nearByPlaceIDToShow!!.address
+                mViewHolder.tvNBVicinity.text = mLocationList!!.get(position).visitResults.nearByPlaceIDToShow!!.vicinity
+
+            }
+
+
+        } else {
+            mViewHolder.rlyLytNB.visibility = View.GONE
+        }
 
         return convertView!!
     }
@@ -164,13 +172,28 @@ class LocationsAdapter() : BaseAdapter(), ConfirmationListener {
     }
 
     private inner class MyViewHolder(item: View) {
-        internal var tvTitle: TextView
+        internal var tvOrgAddress: TextView
+        internal var tvOrgVicinity: TextView
+        internal var tvNBAddress: TextView
+        internal var tvNBVicinity: TextView
+        internal var tvDate: TextView
+        internal var tvTime: TextView
+        internal var tvVisits: TextView
         internal var btnAllVisits: Button
         internal var btnChooseNearBy: Button
         internal var btnDelete: ImageButton
+        internal var rlyLytNB: RelativeLayout
 
         init {
-            tvTitle = item.findViewById(R.id.tvTitle) as TextView
+            tvOrgAddress = item.findViewById(R.id.tv_address) as TextView
+            tvOrgVicinity = item.findViewById(R.id.tv_location_vicinity) as TextView
+            tvNBAddress = item.findViewById(R.id.tv_nearby_address) as TextView
+            tvNBVicinity = item.findViewById(R.id.tv_nearby_location_vicinity) as TextView
+            tvDate = item.findViewById(R.id.tv_visit_date) as TextView
+            tvTime = item.findViewById(R.id.tv_time) as TextView
+            tvVisits = item.findViewById(R.id.tv_visits) as TextView
+            rlyLytNB = item.findViewById(R.id.lyt_nearby_location) as RelativeLayout
+
             btnAllVisits = item.findViewById(R.id.btn_all_visits) as Button
             btnChooseNearBy = item.findViewById(R.id.btn_choose_nearby) as Button
             btnDelete = item.findViewById(R.id.btn_delete) as ImageButton
