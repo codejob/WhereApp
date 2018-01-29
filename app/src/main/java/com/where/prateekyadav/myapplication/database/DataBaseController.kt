@@ -73,6 +73,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         var values = getContentValuesForVisitedLocation(infoLocation)
         values.remove(DBContract.VisitedLocationData.COLUMN_TO_TIME)
         values.remove(DBContract.VisitedLocationData.COLUMN_FROM_TIME)
+        values.remove(DBContract.VisitedLocationData.COLUMN_LOCATION_REQUEST_TYPE)
 
         // Update the new row, returning the primary key value of the new row
         val whereClause = "id = ?"

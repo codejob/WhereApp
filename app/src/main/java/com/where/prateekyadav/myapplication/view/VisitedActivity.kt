@@ -35,6 +35,8 @@ class VisitedActivity : AppCompatActivity() {
             mLocationList = DataBaseController(this).getVisitedLocationsFromPlaceid(placeID)
             val listView:ListView = findViewById<ListView>(R.id.lv_visited)
             listView.adapter = LocationsAdapter(mLocationList!!)
+            listView!!.emptyView = findViewById(R.id.tv_no_records) as TextView
+
         }
 
     }

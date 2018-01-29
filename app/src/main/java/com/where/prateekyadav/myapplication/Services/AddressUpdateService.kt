@@ -95,8 +95,6 @@ class AddressUpdateService : IntentService("ADDRESS UPDATE"), UpdateLocation {
                     retroCallImplementor!!.getAllPlaces(latitude.toString() + "," + longitude.toString(),
                             handler, location, location.provider, it.rowID)
                 }
-
-
             }
         } catch (e: Exception) {
             e.printStackTrace()

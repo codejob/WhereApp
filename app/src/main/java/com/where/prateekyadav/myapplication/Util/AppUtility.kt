@@ -103,7 +103,7 @@ class AppUtility {
     }
 
     ///////////////////////////// Need to delete/////////////////////////
-    fun inssertDemoLocation(context: Context?) {
+    fun insertDemoLocation(context: Context?) {
         try {
             val latArr = AppConstant.latArray;
             val lngArr = AppConstant.lngArray;

@@ -32,11 +32,13 @@ class NearByActivity : AppCompatActivity() {
         setContentView(R.layout.activity_nearby)
         mSearchResult = intent.getSerializableExtra("SearchResult") as SearchResult
         mNearByList = mSearchResult!!.listNearByPlace as ArrayList<NearByPlace>
+        listView = findViewById<ListView>(R.id.lv_nearby)
         if (mNearByList != null) {
-            listView = findViewById<ListView>(R.id.lv_nearby)
-            listView!!.adapter = NearByAdapter(mNearByList)
-        }
 
+            listView!!.adapter = NearByAdapter(mNearByList)
+
+        }
+        listView!!.emptyView = findViewById(R.id.tv_no_records) as TextView
         listView!!.onItemClickListener = object : AdapterView.OnItemClickListener {
 
             override fun onItemClick(parent: AdapterView<*>, view: View, position: Int, id: Long) {
@@ -46,7 +48,7 @@ class NearByActivity : AppCompatActivity() {
                             parent.getItemAtPosition(position) as NearByPlace)
                 } catch (e: Exception) {
                     e.printStackTrace()
-                }finally {
+                } finally {
                     finish()
                 }
 
