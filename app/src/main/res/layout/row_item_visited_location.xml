@@ -16,36 +16,18 @@
         <RelativeLayout
             android:id="@+id/lyt_original_location"
             android:layout_width="match_parent"
+            android:padding="@dimen/margin_10dp"
             android:layout_height="wrap_content">
-            <ImageButton
-                android:padding="5dp"
-                android:id="@+id/btn_delete"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentTop="true"
-                android:src="@drawable/btn_trash_list_item"
-                 />
-            <ImageButton
-                android:id="@+id/img_btn_temp"
-                android:padding="5dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentTop="true"
-                android:visibility="invisible"
-                android:src="@drawable/btn_trash_list_item"
-                 />
+
 
             <TextView
                 android:id="@+id/tv_your_location"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:layout_toLeftOf="@id/btn_delete"
-                android:layout_toRightOf="@id/img_btn_temp"
+
                 android:background="@color/color_location_title_bg"
-                android:textColor="@color/color_location_details"
+                android:textColor="@color/color_location_title"
                 android:padding="@dimen/margin_5dp"
                 android:layout_centerHorizontal="true"
                 android:textSize="@dimen/ts_location_title"
@@ -113,7 +95,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:background="@color/color_location_title_nearby_bg"
-                    android:textColor="@color/color_location_details"
+                    android:textColor="@color/color_location_title"
                     android:padding="@dimen/margin_5dp"
                     android:layout_centerHorizontal="true"
                     android:textSize="@dimen/ts_location_title"
@@ -175,8 +157,8 @@
                 android:id="@+id/btn_all_visits"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_10dp"
                 android:layout_below="@+id/lyt_nearby_location"
-                android:layout_margin="10dp"
                 android:background="@color/color_btn_background"
                 android:text="@string/str_see_all_visits"
                 android:textColor="#ffffff" />
@@ -185,11 +167,21 @@
                 android:id="@+id/btn_choose_nearby"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_10dp"
                 android:layout_below="@+id/btn_all_visits"
-                android:layout_margin="10dp"
+                android:layout_toLeftOf="@id/btn_delete_"
                 android:background="@color/color_btn_background"
                 android:text="@string/update_from_nearby_locations"
                 android:textColor="#ffffff" />
+            <ImageButton
+                android:padding="5dp"
+                android:id="@+id/btn_delete_"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/btn_choose_nearby"
+                android:layout_alignBottom="@id/btn_choose_nearby"
+                android:layout_alignParentRight="true"
+                android:src="@drawable/btn_trash_list_item"/>
 
         </RelativeLayout>
 
