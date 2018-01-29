@@ -10,4 +10,5 @@ import java.io.Serializable
 class SearchResult(var visitResults: VisitResults,
                    var listNearByPlace: List<NearByPlace>):Serializable {
 
+
 }

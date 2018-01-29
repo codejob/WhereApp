@@ -13,6 +13,7 @@ import com.where.prateekyadav.myapplication.AlarmReceiverLocation
 import java.io.File
 import java.util.*
 import android.content.ContentValues.TAG
+import android.graphics.Typeface
 import android.location.Location
 import android.location.LocationManager
 import android.os.Build
@@ -27,6 +28,11 @@ import com.where.prateekyadav.myapplication.search.network.RetroCallImplementor
 import com.where.prateekyadav.myapplication.search.network.RetroCallIneractor
 import java.text.SimpleDateFormat
 import kotlin.collections.ArrayList
+import android.support.design.widget.Snackbar
+import android.text.Layout
+import android.text.SpannableStringBuilder
+import android.text.style.StyleSpan
+import android.view.View
 
 
 /**
@@ -215,5 +221,29 @@ class AppUtility {
 
         return result
 
+    }
+
+    fun showSnackBar(message: String, layout: View) {
+        val snackbar = Snackbar
+                .make(layout, message, Snackbar.LENGTH_LONG)
+
+        snackbar.show()
+    }
+
+    fun makeSectionOfTextBold(text: String, textToBold: String): SpannableStringBuilder {
+        val builder = SpannableStringBuilder(text);
+        if (textToBold.length > 0 && !textToBold.trim().equals("")) {
+            //for counting start/end indexes
+            val testText: String = text.toLowerCase(Locale.US);
+            val testTextToBold = textToBold.toLowerCase(Locale.US);
+            val startingIndex = testText.indexOf(testTextToBold);
+            val endingIndex = startingIndex + testTextToBold.length;
+
+            if (startingIndex >= 0 && endingIndex >= 0) {
+                builder.setSpan(StyleSpan(Typeface.BOLD), startingIndex, endingIndex, 0);
+            }
+        }
+
+        return builder;
     }
 }

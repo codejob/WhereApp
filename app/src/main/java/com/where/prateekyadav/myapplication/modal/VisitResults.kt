@@ -12,4 +12,5 @@ class VisitResults(var visitedLocationInformation: VisitedLocationInformation):S
     var noOfVisits: Int = 0
     var showFromNearBy: Boolean = false;
     var nearByPlaceIDToShow: NearByPlace? = null;
+    var searchString:String?=null
 }

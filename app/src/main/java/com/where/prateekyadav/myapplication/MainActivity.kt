@@ -17,10 +17,6 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
-import android.widget.AdapterView
-import android.widget.EditText
-import android.widget.ListView
-import android.widget.TextView
 import com.where.prateekyadav.myapplication.Services.AddressUpdateService
 import com.where.prateekyadav.myapplication.Util.AppConstant
 import com.where.prateekyadav.myapplication.Util.AppUtility
@@ -28,6 +24,8 @@ import com.where.prateekyadav.myapplication.Util.PermissionCheckHandler
 import com.where.prateekyadav.myapplication.database.DataBaseController
 import com.where.prateekyadav.myapplication.modal.SearchResult
 import android.view.MotionEvent
+import android.widget.*
+import com.where.prateekyadav.myapplication.Util.ConnectionDetector
 import kotlinx.android.synthetic.main.activity_main.*
 
 
@@ -38,23 +36,25 @@ class MainActivity : AppCompatActivity(), UpdateLocation {
     var mListView: ListView? = null
     var mAdapter: LocationsAdapter? = null
     var mSearchResultsList = ArrayList<SearchResult>();
-    lateinit var mDrawableClear:Drawable;
+    lateinit var mDrawableClear: Drawable;
     var mSearchEdittext: EditText? = null
+    var mRelativeLayout: RelativeLayout? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        mRelativeLayout = findViewById(R.id.ryt_lyt_main)
         mListView = findViewById(R.id.lv_address) as ListView
         mAdapter = LocationsAdapter(this, mSearchResultsList)
         mListView!!.adapter = mAdapter
         mListView!!.emptyView = findViewById(R.id.tv_no_records) as TextView
         mLocationHelper = LocationHelper.getInstance(applicationContext, this);
-        mDrawableClear=getClearDrawable(this);
+        mDrawableClear = getClearDrawable(this);
         //
         setSearchListener()
         setOnTouchListener()
         setClickListener()
         startAddressUpdateServiceToUpdateAnyRemainingAddresss()
-       // AppUtility().startTimerAlarm(this,true);
+        // AppUtility().startTimerAlarm(this,true);
     }
 
     fun setClickListener() {
@@ -71,12 +71,12 @@ class MainActivity : AppCompatActivity(), UpdateLocation {
     /**
      *
      */
-    fun setOnTouchListener(){
+    fun setOnTouchListener() {
         edt_search.setOnTouchListener(object : View.OnTouchListener {
             override fun onTouch(v: View?, event: MotionEvent?): Boolean {
-            //
-            clearSearchTextAndSetMessage(v!!)
-            return false
+                //
+                clearSearchTextAndSetMessage(v!!)
+                return false
             }
 
         })
@@ -105,7 +105,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation {
                 if (s.length > 2)
                     search(s.toString())
                 else if (s.length == 0) {
-                    setLocationResults(DataBaseController(this@MainActivity).readRecentVisitedLocation(),true)
+                    setLocationResults(DataBaseController(this@MainActivity).readRecentVisitedLocation(), true)
                 }
             }
         })
@@ -172,7 +172,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation {
              if (clear != null &&
                      clear.text.isBlank()) {
              }*/
-            setLocationResults(DataBaseController(this).readRecentVisitedLocation(),false)
+            setLocationResults(DataBaseController(this).readRecentVisitedLocation(), false)
 
             //mLocationHelper?.getLocation()
             /*if (!AppUtility().checkAlarmAlreadySet(this)) {
@@ -185,7 +185,9 @@ class MainActivity : AppCompatActivity(), UpdateLocation {
         //registerReceiver()
         //AppUtility().inssertDemoLocation(this)
         //LocationHelper.getInstance(this, this).setLocationListener();
-
+        if (!ConnectionDetector.getInstance(this).isNetworkAvailable()) {
+            AppUtility().showSnackBar(getString(R.string.str_no_internet_conn), mRelativeLayout as View)
+        }
 
     }
 
@@ -228,7 +230,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation {
             if (isUpdated) {
                 runOnUiThread({
                     setLocationResults(
-                            DataBaseController(this@MainActivity).readRecentVisitedLocation(),false)
+                            DataBaseController(this@MainActivity).readRecentVisitedLocation(), false)
 
                 });
 
@@ -273,7 +275,6 @@ class MainActivity : AppCompatActivity(), UpdateLocation {
     }
 
 
-
     fun search(place: String) {
         try {
             // var searchResultsList = DataBaseController(this).searchLocationOnline(place)
@@ -285,7 +286,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation {
                     Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Search results: " + it.visitResults.visitedLocationInformation.vicinity)
 
                 }
-                setLocationResults(searchResultsList,true)
+                setLocationResults(searchResultsList, true)
             } else {
                 //setLocation(DataBaseController(this).readAllVisitedLocation())
 
@@ -299,9 +300,8 @@ class MainActivity : AppCompatActivity(), UpdateLocation {
     }
 
 
-
     override fun updateLocationAddressList(addressList: List<SearchResult>) {
-        setLocationResults(addressList,false)
+        setLocationResults(addressList, false)
     }
 
     /**
@@ -315,7 +315,6 @@ class MainActivity : AppCompatActivity(), UpdateLocation {
             startService(serviceIntent)
         }
     }
-
 
 
     fun getClearDrawable(context: Context): Drawable {

@@ -50,7 +50,7 @@ class NearByActivity : AppCompatActivity(),ConfirmationListener {
                 try {
 
                     val confirmationDialog= DialogConfirmationAlert(this@NearByActivity!!,this@NearByActivity)
-                    confirmationDialog.showConfirmationDialog(this@NearByActivity!!.getString(R.string.str_alert_message_delete_location),
+                    confirmationDialog.showConfirmationDialog(this@NearByActivity!!.getString(R.string.str_alert_message_update_location),
                             position,AppConstant.REQUEST_CODE_REPLACE);
 
 

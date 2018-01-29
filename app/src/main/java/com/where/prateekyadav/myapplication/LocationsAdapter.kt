@@ -27,7 +27,7 @@ import java.util.*
 /**
  * Created by Infobeans on 1/11/2018.
  */
-class LocationsAdapter() : BaseAdapter(),ConfirmationListener {
+class LocationsAdapter() : BaseAdapter(), ConfirmationListener {
 
     var mContext: Context? = null;
     var mLocationList: MutableList<SearchResult>? = null;
@@ -89,9 +89,9 @@ class LocationsAdapter() : BaseAdapter(),ConfirmationListener {
             override fun onClick(p0: View?) {
                 // Delete a visited place code/////
 
-                val confirmationDialog= DialogConfirmationAlert(mContext!!,this@LocationsAdapter)
-                confirmationDialog.showConfirmationDialog(mContext!!.getString(R.string.str_alert_message_update_location),
-                        position,AppConstant.REQUEST_CODE_DELETE);
+                val confirmationDialog = DialogConfirmationAlert(mContext!!, this@LocationsAdapter)
+                confirmationDialog.showConfirmationDialog(mContext!!.getString(R.string.str_alert_message_delete_location),
+                        position, AppConstant.REQUEST_CODE_DELETE);
 
 
             }
@@ -107,7 +107,10 @@ class LocationsAdapter() : BaseAdapter(),ConfirmationListener {
 
                 """   Name:  ${mLocationList!!.get(position).visitResults.visitedLocationInformation.address}
 
-                 Visinity:   ${mLocationList!!.get(position).visitResults.visitedLocationInformation.vicinity}
+                 Visinity:   ${
+                mLocationList!!.get(position).visitResults.visitedLocationInformation.vicinity
+
+                }
 
                   No of visits:   ${mLocationList!!.get(position).visitResults.noOfVisits}
 
@@ -124,7 +127,16 @@ class LocationsAdapter() : BaseAdapter(),ConfirmationListener {
 
 
 
-        mViewHolder.tvTitle.setText(addresss)
+        mViewHolder.tvTitle.text = addresss
+
+        //// use  for making search text bold
+        /* if (mLocationList!!.get(position).visitResults.searchString != null) {
+             mViewHolder.tvTitle.text = AppUtility().makeSectionOfTextBold(mLocationList!!.get(position).visitResults.visitedLocationInformation.vicinity,
+                     mLocationList!!.get(position).visitResults.searchString!!)
+         } else {
+             mViewHolder.tvTitle.text = addresss
+
+         }*/
 
         return convertView!!
     }
@@ -168,16 +180,15 @@ class LocationsAdapter() : BaseAdapter(),ConfirmationListener {
 
 
     override fun onYes(index: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun onNo() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
     }
 
     override fun onYes(index: Int, requestType: Int) {
 
-        if (requestType==AppConstant.REQUEST_CODE_DELETE){
+        if (requestType == AppConstant.REQUEST_CODE_DELETE) {
             deleteLocationFromDatabase(index)
         }
 

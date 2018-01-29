@@ -632,7 +632,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
     /**
      * Prepare search result here
      */
-    public fun parseSearchResult(visitResultsList: List<VisitResults>): List<SearchResult>? {
+     fun parseSearchResult(visitResultsList: List<VisitResults>): List<SearchResult>? {
         var searchResultList = ArrayList<SearchResult>()
 
         try {
@@ -789,6 +789,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
                     val count = s.simpleQueryForLong()
                     var visitResults = VisitResults(visit)
                     visitResults.noOfVisits = count.toInt()
+                    visitResults.searchString=placeName
                     visitResultsList.add(visitResults)
                     cursor.moveToPrevious()
                 }
@@ -838,6 +839,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
                     visitResults.noOfVisits = count.toInt()
                     visitResults.showFromNearBy = true
                     visitResults.nearByPlaceIDToShow = nearbyPlace
+                    visitResults.searchString=placeName
                     visitResultsList.add(visitResults)
 
                     cursor.moveToPrevious()

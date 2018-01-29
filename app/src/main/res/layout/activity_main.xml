@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/ryt_lyt_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.where.prateekyadav.myapplication.MainActivity">
@@ -10,16 +11,16 @@
         android:id="@+id/lyt_lin_search_offline"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="3dp"
         android:layout_margin="5dp"
-        android:visibility="visible">
+        android:visibility="visible"
+        app:cardCornerRadius="3dp">
 
         <EditText
-            android:drawableLeft="@android:drawable/ic_search_category_default"
             android:id="@+id/edt_search"
-            android:hint="Search"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:drawableLeft="@android:drawable/ic_search_category_default"
+            android:hint="Search" />
 
     </android.support.v7.widget.CardView>
 
@@ -33,8 +34,8 @@
         android:id="@+id/tv_no_records"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
         android:layout_centerInParent="true"
+        android:gravity="center"
         android:text="@string/no_records_found"
         android:visibility="gone" />
 
