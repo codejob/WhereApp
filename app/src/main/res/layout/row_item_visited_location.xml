@@ -44,7 +44,7 @@
                     android:gravity="center"
                     android:text="@string/str_na"
                     android:textColor="@color/color_location_details"
-                    android:textSize="@dimen/ts_location_title"
+                    android:textSize="@dimen/ts_location_info"
                     android:visibility="visible" />
 
                 <TextView
@@ -58,7 +58,7 @@
                     android:gravity="center"
                     android:text="@string/str_na"
                     android:textColor="@color/color_location_details"
-                    android:textSize="@dimen/ts_location_title"
+                    android:textSize="@dimen/ts_location_info"
                     android:visibility="visible" />
 
                 <RelativeLayout
@@ -91,7 +91,7 @@
                         android:gravity="center"
                         android:text="@string/str_na"
                         android:textColor="@color/color_location_details"
-                        android:textSize="@dimen/ts_location_title"
+                        android:textSize="@dimen/ts_location_info"
                         android:visibility="visible" />
 
                     <TextView
@@ -104,7 +104,7 @@
                         android:gravity="center"
                         android:text="@string/str_na"
                         android:textColor="@color/color_location_details"
-                        android:textSize="@dimen/ts_location_title"
+                        android:textSize="@dimen/ts_location_info"
                         android:visibility="visible" />
 
 
@@ -120,7 +120,7 @@
                     android:gravity="center"
                     android:text="@string/str_date"
                     android:textColor="@color/color_location_details"
-                    android:textSize="@dimen/ts_location_title"
+                    android:textSize="@dimen/ts_location_info"
                     android:visibility="visible" />
 
                 <TextView
@@ -134,7 +134,7 @@
                     android:gravity="right"
                     android:text="@string/str_visits"
                     android:textColor="@color/color_location_details"
-                    android:textSize="@dimen/ts_location_title"
+                    android:textSize="@dimen/ts_location_info"
                     android:visibility="visible" />
 
                 <TextView
@@ -147,28 +147,30 @@
                     android:gravity="center"
                     android:text="@string/time"
                     android:textColor="@color/color_location_details"
-                    android:textSize="@dimen/ts_location_title"
+                    android:textSize="@dimen/ts_location_info"
                     android:visibility="visible" />
 
                 <Button
                     android:id="@+id/btn_all_visits"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="@dimen/location_screen_btn_height"
                     android:layout_below="@+id/tv_time"
                     android:layout_marginTop="@dimen/margin_10dp"
                     android:background="@color/color_btn_background"
                     android:fontFamily="@font/roboto"
+                    android:textSize="@dimen/ts_button_location_screen"
                     android:text="@string/str_see_all_visits"
                     android:textColor="#ffffff" />
 
                 <Button
                     android:id="@+id/btn_choose_nearby"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="@dimen/location_screen_btn_height"
                     android:layout_below="@+id/btn_all_visits"
                     android:layout_marginTop="@dimen/margin_10dp"
                     android:background="@color/color_btn_background"
                     android:fontFamily="@font/roboto"
+                    android:textSize="@dimen/ts_button_location_screen"
                     android:text="@string/update_from_nearby_locations"
                     android:textColor="#ffffff" />
 
@@ -178,8 +180,9 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@id/btn_choose_nearby"
                     android:layout_centerHorizontal="true"
-                    android:layout_marginTop="@dimen/margin_10dp"
+                    android:layout_marginTop="5dp"
                     android:padding="5dp"
+                    android:background="@android:color/transparent"
                     android:src="@drawable/btn_trash_list_item" />
 
             </RelativeLayout>
