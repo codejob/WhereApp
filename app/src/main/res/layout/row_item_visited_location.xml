@@ -136,14 +136,24 @@
                     android:textColor="@color/color_location_details"
                     android:textSize="@dimen/ts_location_info"
                     android:visibility="visible" />
+                <ImageButton
+                    android:id="@+id/btn_delete"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/tv_visit_date"
+                    android:layout_alignParentRight="true"
+                    android:padding="5dp"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/btn_trash_list_item" />
 
                 <TextView
                     android:id="@+id/tv_time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_below="@+id/tv_visit_date"
                     android:fontFamily="@font/roboto_light"
-                    android:layout_below="@id/tv_visit_date"
                     android:gravity="center"
                     android:text="@string/time"
                     android:textColor="@color/color_location_details"
@@ -154,10 +164,10 @@
                     android:id="@+id/btn_all_visits"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/location_screen_btn_height"
-                    android:layout_below="@+id/tv_time"
+                    android:layout_below="@+id/btn_delete"
                     android:layout_marginTop="@dimen/margin_10dp"
                     android:background="@color/color_btn_background"
-                    android:fontFamily="@font/roboto"
+                    android:fontFamily="@font/roboto_light"
                     android:textSize="@dimen/ts_button_location_screen"
                     android:text="@string/str_see_all_visits"
                     android:textColor="#ffffff" />
@@ -169,21 +179,12 @@
                     android:layout_below="@+id/btn_all_visits"
                     android:layout_marginTop="@dimen/margin_10dp"
                     android:background="@color/color_btn_background"
-                    android:fontFamily="@font/roboto"
+                    android:fontFamily="@font/roboto_light"
                     android:textSize="@dimen/ts_button_location_screen"
                     android:text="@string/update_from_nearby_locations"
                     android:textColor="#ffffff" />
 
-                <ImageButton
-                    android:id="@+id/btn_delete"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/btn_choose_nearby"
-                    android:layout_centerHorizontal="true"
-                    android:layout_marginTop="5dp"
-                    android:padding="5dp"
-                    android:background="@android:color/transparent"
-                    android:src="@drawable/btn_trash_list_item" />
+
 
             </RelativeLayout>
 
