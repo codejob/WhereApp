@@ -23,7 +23,7 @@ class NetworkConnectionReceiver : BroadcastReceiver() {
     lateinit var mContext: Context;
 
     override fun onReceive(context: Context, intent: Intent) {
-        AppUtility().validateAutoStartTimer(context)
+        AppUtility().validateAutoStartTimer(context,false)
         mContext = context
         val info = intent.getParcelableExtra<NetworkInfo>(WifiManager.EXTRA_NETWORK_INFO)
 
@@ -32,7 +32,7 @@ class NetworkConnectionReceiver : BroadcastReceiver() {
                 handler = Handler()
                 updateNetworkConnection(context, info.isConnected)
                 ISONLINE = 1
-                AppUtility.showToast(context, info.state.toString())
+                //AppUtility.showToast(context, info.state.toString())
                 // Start  service for form sync
                 runCodeAfterSomeDelay(context)
             }

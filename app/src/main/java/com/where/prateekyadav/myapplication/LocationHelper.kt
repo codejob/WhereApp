@@ -14,6 +14,7 @@ import android.os.Message
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.util.Log
+import com.google.android.gms.location.LocationSettingsResult
 import com.where.prateekyadav.myapplication.Util.*
 import com.where.prateekyadav.myapplication.database.DataBaseController
 import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
@@ -32,7 +33,6 @@ class LocationHelper {
     lateinit var mDataBaseController: DataBaseController
     var locationManager: LocationManager? = null;
     var mContext: Context? = null;
-    var mUpdateLocation: UpdateLocation? = null;
     var mLocationReceived: Boolean = false;
     //
     val ADDRESS_NOT_SET = 0
@@ -40,9 +40,9 @@ class LocationHelper {
 
     companion object {
         var mCurrentObject: LocationHelper? = null;
-        fun getInstance(context: Context?, updateLocation: UpdateLocation): LocationHelper {
+        fun getInstance(context: Context?): LocationHelper {
             if (mCurrentObject == null) {
-                mCurrentObject = LocationHelper(context, updateLocation)
+                mCurrentObject = LocationHelper(context)
             }
             return mCurrentObject as LocationHelper;
         }
@@ -52,9 +52,8 @@ class LocationHelper {
     private var retroCallImplementor: RetroCallImplementor? = null
     private lateinit var mConnectionDetector: ConnectionDetector;
 
-    private constructor(context: Context?, updateLocation: UpdateLocation) {
+    private constructor(context: Context?) {
         mContext = context
-        mUpdateLocation = updateLocation
         mDataBaseController = DataBaseController(mContext);
         handler = Handleupdate()
         retroCallImplementor = RetroCallImplementor()
@@ -62,7 +61,7 @@ class LocationHelper {
     }
 
 
-    fun setLocationListener() {
+    fun fetchLocation(): Boolean {
         var gps_enabled = false
         var network_enabled = false
 
@@ -74,12 +73,34 @@ class LocationHelper {
 
         if (gps_enabled) {
             getLocationFromListner(LocationManager.GPS_PROVIDER)
+            return true
         } else if (network_enabled) {
             getLocationFromListner(LocationManager.NETWORK_PROVIDER)
+            return true
         } else {
             getLocationFromListner(LocationManager.PASSIVE_PROVIDER)
         }
+        return false
 
+    }
+
+
+    fun checkLocationAvailable(): Boolean {
+        var gps_enabled = false
+        var network_enabled = false
+
+        locationManager = mContext?.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+        gps_enabled = locationManager!!.isProviderEnabled(LocationManager.GPS_PROVIDER)
+        network_enabled = locationManager!!.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+
+
+        if (gps_enabled) {
+            return true
+        } else if (network_enabled) {
+            return true
+        }
+        return false
 
     }
 
@@ -97,6 +118,7 @@ class LocationHelper {
         var passive_loc: Location? = null
         var finalLoc: Location? = null
         // Check Location permission here
+
         if (PermissionCheckHandler.checkLocationPermissions(mContext!!)) {
             // Commenting last visited gps as it would give bad location
             // if (gps_enabled)
@@ -199,14 +221,16 @@ class LocationHelper {
                                     "Accuracy: " + location.accuracy)
                             Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
                                     "Provider: " + location.provider)
-                            mUpdateLocation?.updateLocationAddressList(getCompleteAddressString(location!!, AppConstant.LOCATION_UPDATE_TYPE_LAST_KNOWN));
+                            getCompleteAddressString(location!!, AppConstant.LOCATION_UPDATE_TYPE_LAST_KNOWN)
 
+                        } else {
+                            AppUtility().showGpsOffNotification(mContext)
                         }
                     } else if (msg.what === 3 && mLocationReceived) {
                         Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "best location accuracy " + bestLocation!!.accuracy)
 
                         locationManager!!.removeUpdates(locationListener)
-                        mUpdateLocation?.updateLocationAddressList(getCompleteAddressString(bestLocation!!, AppConstant.LOCATION_UPDATE_TYPE_CURRENT));
+                        getCompleteAddressString(bestLocation!!, AppConstant.LOCATION_UPDATE_TYPE_CURRENT)
 
                     } else {
                         locationManager!!.removeUpdates(locationListener)
@@ -373,7 +397,7 @@ class LocationHelper {
             }
             visitedLocationInformation.toTime = toTime
             visitedLocationInformation.fromTime = fromTime
-            visitedLocationInformation.locationRequestType=locationType
+            visitedLocationInformation.locationRequestType = locationType
             //
             val insertedId = DataBaseController(mContext).insertVisitedLocation(visitedLocationInformation);
             //

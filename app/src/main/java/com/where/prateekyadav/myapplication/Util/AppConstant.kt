@@ -15,16 +15,20 @@ open class AppConstant {
         var SP_KEY_ACCURACY: String = "sp_key_accuracy";
         var SP_KEY_LAST_TIMER_TIME: String = "sp_key_last_timer_time";
         var SP_KEY_COUNTER_AUTO_START: String = "sp_key_counter_auto_start";
+        var SP_KEY_APP_REACHED_MAIN_SCREEN: String = "sp_key_app_reached_main_screen";
+        var SP_KEY_LAST_NOTIFICATION_TIME: String = "sp_key_last_notification_time";
+
         val FOLDER_PATH = Environment.getExternalStorageDirectory().path + "/WhereApp/"
         val TAG_KOTLIN_DEMO_APP = "KotlinDemoApp"
         // Seconds
-        val LOCATION_SYNC_INSTERVAL: Long = 1* 60 * 1000;
-        val LOCATION_SYNC_TIMEOUT: Long = 30 * 1000;
+        val LOCATION_SYNC_INSTERVAL: Long = 10* 60 * 1000;
+        val LOCATION_SYNC_TIMEOUT: Long = 40 * 1000;
         val RECEIVER_ACTION: String = "LOCATION";
         var MIN_DISTANCE_RANGE: Int = 100;
         var RADIUS_NEARBY_SEARCH: Int = 50;
         var RECENT_COUNT: Int = 10;
         val alarmID: Int = 1001;
+        val notificationRequestCode: Int = 1002;
         //
         val INTENT_FILTER_UPDATE_LOCATION: String = "update_location";
         val INTENT_FILTER_INTERNET_CONNECTION: String = "internet_connection";

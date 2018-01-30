@@ -2,7 +2,6 @@ package com.where.prateekyadav.myapplication.view
 
 import android.content.Context
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.support.v7.app.AppCompatActivity
 import android.view.LayoutInflater
 import android.view.View
@@ -25,7 +24,7 @@ import java.util.*
 /**
  * Created by Infobeans on 1/23/2018.
  */
-class NearByActivity : AppCompatActivity(),ConfirmationListener {
+class NearByActivity : AppCompatActivity(), ConfirmationListener {
 
 
     var mNearByList = ArrayList<NearByPlace>()
@@ -49,15 +48,15 @@ class NearByActivity : AppCompatActivity(),ConfirmationListener {
 
                 try {
 
-                    val confirmationDialog= DialogConfirmationAlert(this@NearByActivity!!,this@NearByActivity)
+                    val confirmationDialog = DialogConfirmationAlert(this@NearByActivity!!, this@NearByActivity)
                     confirmationDialog.showConfirmationDialog(this@NearByActivity!!.getString(R.string.str_alert_message_update_location),
-                            position,AppConstant.REQUEST_CODE_REPLACE);
+                            position, AppConstant.REQUEST_CODE_REPLACE);
 
 
                 } catch (e: Exception) {
                     e.printStackTrace()
                 } finally {
-                    finish()
+
                 }
 
             }
@@ -82,7 +81,7 @@ class NearByActivity : AppCompatActivity(),ConfirmationListener {
             val mViewHolder: MyViewHolder
             var convertView = view
             if (convertView == null) {
-                convertView = inflater!!.inflate(R.layout.layout_list_item, parent, false)
+                convertView = inflater!!.inflate(R.layout.layout_list_item_nearby, parent, false)
                 mViewHolder = MyViewHolder(convertView)
                 convertView.setTag(mViewHolder)
             } else {
@@ -90,21 +89,9 @@ class NearByActivity : AppCompatActivity(),ConfirmationListener {
             }
 
 
-            var addresss =
+            mViewHolder.tvNBAddress.text = mNearByList!!.get(position).address
+            mViewHolder.tvNBVicinity.text = mNearByList!!.get(position).vicinity
 
-                    """   Name:  ${mNearByList!!.get(position).address}
-
-                 Visinity:   ${mNearByList!!.get(position).vicinity}
-
-                 Req Type:=> ${mNearByList!!.get(position).locationRequestType}
-                 Last accuracy :=> ${pref!!.getFloat(AppConstant.SP_KEY_ACCURACY)}
-                 Lat:=> ${mNearByList!!.get(position).latitude}
-                 Long:=> ${mNearByList!!.get(position).longitude} """
-
-
-
-
-            mViewHolder.tvTitle.setText(addresss)
 
             return convertView!!
         }
@@ -122,10 +109,12 @@ class NearByActivity : AppCompatActivity(),ConfirmationListener {
         }
 
         private inner class MyViewHolder(item: View) {
-            internal var tvTitle: TextView
+            internal var tvNBAddress: TextView
+            internal var tvNBVicinity: TextView
 
             init {
-                tvTitle = item.findViewById(R.id.tvTitle) as TextView
+                tvNBAddress = item.findViewById(R.id.tv_nearby_address) as TextView
+                tvNBVicinity = item.findViewById(R.id.tv_nearby_location_vicinity) as TextView
             }
         }
     }
@@ -138,9 +127,10 @@ class NearByActivity : AppCompatActivity(),ConfirmationListener {
 
     override fun onYes(index: Int, requestType: Int) {
 
-        if (requestType==AppConstant.REQUEST_CODE_REPLACE) {
+        if (requestType == AppConstant.REQUEST_CODE_REPLACE) {
             DataBaseController(this@NearByActivity).updateVisitedLocationWithNearBy(mSearchResult!!.visitResults.visitedLocationInformation,
                     mNearByList.get(index))
+            finish()
         }
 
     }

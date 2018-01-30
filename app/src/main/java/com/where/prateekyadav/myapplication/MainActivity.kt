@@ -12,24 +12,22 @@ import android.support.v4.content.ContextCompat
 import android.content.*
 import android.graphics.drawable.Drawable
 import android.os.Build
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
 import com.where.prateekyadav.myapplication.Services.AddressUpdateService
-import com.where.prateekyadav.myapplication.Util.AppConstant
-import com.where.prateekyadav.myapplication.Util.AppUtility
-import com.where.prateekyadav.myapplication.Util.PermissionCheckHandler
 import com.where.prateekyadav.myapplication.database.DataBaseController
 import com.where.prateekyadav.myapplication.modal.SearchResult
 import android.view.MotionEvent
 import android.widget.*
-import com.where.prateekyadav.myapplication.Util.ConnectionDetector
+import com.where.prateekyadav.myapplication.Util.*
 import kotlinx.android.synthetic.main.activity_main.*
 
 
-class MainActivity : AppCompatActivity(), UpdateLocation {
+class MainActivity : AppCompatActivity() {
 
 
     var mLocationHelper: LocationHelper? = null;
@@ -40,6 +38,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation {
     lateinit var mDrawableSearch: Drawable;
     var mSearchEdittext: EditText? = null
     var mRelativeLayout: RelativeLayout? = null
+    var mAlertForGPS: AlertDialog? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -48,7 +47,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation {
         mAdapter = LocationsAdapter(this, mSearchResultsList)
         mListView!!.adapter = mAdapter
         mListView!!.emptyView = findViewById(R.id.tv_no_records) as TextView
-        mLocationHelper = LocationHelper.getInstance(applicationContext, this);
+        mLocationHelper = LocationHelper.getInstance(applicationContext);
         mDrawableClear = getClearDrawable(this);
         //
         setSearchListener()
@@ -126,7 +125,7 @@ class MainActivity : AppCompatActivity(), UpdateLocation {
                         //user accepted,
                         Log.d(AppConstant.TAG_KOTLIN_DEMO_APP, "Permission granted")
 
-                        AppUtility().validateAutoStartTimer(this)
+                        AppUtility().validateAutoStartTimer(this, true)
 
                         AppUtility().startTimerAlarm(applicationContext, true)
                         //startService(Intent(this, TimerService::class.java));
@@ -182,13 +181,29 @@ class MainActivity : AppCompatActivity(), UpdateLocation {
         } else {
 
         }
-        AppUtility().validateAutoStartTimer(this)
+
+        MySharedPref.getinstance(this).setBoolean(true, AppConstant.SP_KEY_APP_REACHED_MAIN_SCREEN)
+
         //registerReceiver()
         //AppUtility().inssertDemoLocation(this)
         //LocationHelper.getInstance(this, this).setLocationListener();
         if (!ConnectionDetector.getInstance(this).isNetworkAvailable()) {
             AppUtility().showSnackBar(getString(R.string.no_net_avail), mRelativeLayout as View)
         }
+
+        try {
+            if (!LocationHelper.getInstance(this).checkLocationAvailable()) {
+                if (mAlertForGPS == null || !mAlertForGPS!!.isShowing){
+                    mAlertForGPS = AppUtility().buildAlertMessageNoGps(this)
+                }
+
+            } else if (mAlertForGPS != null && mAlertForGPS!!.isShowing) {
+                mAlertForGPS!!.dismiss()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        AppUtility().validateAutoStartTimer(this, true)
 
 
     }
@@ -310,10 +325,6 @@ class MainActivity : AppCompatActivity(), UpdateLocation {
 
     }
 
-
-    override fun updateLocationAddressList(addressList: List<SearchResult>) {
-        setLocationResults(addressList, false)
-    }
 
     /**
      * Method to start service to synced the draft forms

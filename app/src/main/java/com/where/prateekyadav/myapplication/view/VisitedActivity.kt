@@ -2,7 +2,6 @@ package com.where.prateekyadav.myapplication.view
 
 import android.content.Context
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.support.v7.app.AppCompatActivity
 import android.view.LayoutInflater
 import android.view.View
@@ -12,12 +11,11 @@ import android.widget.ListView
 import android.widget.TextView
 import com.where.prateekyadav.myapplication.R
 import com.where.prateekyadav.myapplication.Util.AppConstant
+import com.where.prateekyadav.myapplication.Util.AppUtility
 import com.where.prateekyadav.myapplication.Util.MySharedPref
 import com.where.prateekyadav.myapplication.database.DBContract
 import com.where.prateekyadav.myapplication.database.DataBaseController
-import com.where.prateekyadav.myapplication.database.DatabaseHelper
 import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
-import com.where.prateekyadav.myapplication.modal.SearchResult
 import java.util.*
 
 
@@ -30,10 +28,10 @@ class VisitedActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_visited)
 
-        if (intent.hasExtra(DBContract.VisitedLocationData.COLUMN_PLACE_ID)){
+        if (intent.hasExtra(DBContract.VisitedLocationData.COLUMN_PLACE_ID)) {
             var placeID = intent.getStringExtra(DBContract.VisitedLocationData.COLUMN_PLACE_ID)
             mLocationList = DataBaseController(this).getVisitedLocationsFromPlaceid(placeID)
-            val listView:ListView = findViewById<ListView>(R.id.lv_visited)
+            val listView: ListView = findViewById<ListView>(R.id.lv_visited)
             listView.adapter = LocationsAdapter(mLocationList!!)
             listView!!.emptyView = findViewById(R.id.tv_no_records) as TextView
 
@@ -58,7 +56,7 @@ class VisitedActivity : AppCompatActivity() {
             val mViewHolder: MyViewHolder
             var convertView = view
             if (convertView == null) {
-                convertView = inflater!!.inflate(R.layout.layout_list_item, parent, false)
+                convertView = inflater!!.inflate(R.layout.layout_list_item_visited, parent, false)
                 mViewHolder = MyViewHolder(convertView)
                 convertView.setTag(mViewHolder)
             } else {
@@ -70,26 +68,14 @@ class VisitedActivity : AppCompatActivity() {
             calToTime.timeInMillis = mLocationList!!.get(position).toTime
             calFromTime.timeInMillis = mLocationList!!.get(position).fromTime
 
-            var addresss =
-
-                    """   Name:  ${mLocationList!!.get(position).address}
-
-                 Visinity:   ${mLocationList!!.get(position).vicinity}
-
-                 FROM time:=> ${calFromTime.time}
-
-                 TO time:=> ${calToTime.time}
-
-                 Req Type:=> ${mLocationList!!.get(position).locationRequestType}
-                 Provider :=> ${mLocationList!!.get(position).locationProvider}
-                 Last accuracy :=> ${mLocationList!!.get(position).accuracy}
-                 Lat:=> ${mLocationList!!.get(position).latitude}
-                 Long:=> ${mLocationList!!.get(position).longitude} """
+            mViewHolder.tvOrgAddress.text = mLocationList!!.get(position).address
+            mViewHolder.tvOrgVicinity.text = mLocationList!!.get(position).vicinity
 
 
-
-
-            mViewHolder.tvTitle.setText(addresss)
+            mViewHolder.tvTime.text = AppUtility().decorateFromAndToTime(mLocationList!!.get(position).fromTime,
+                    mLocationList!!.get(position).toTime, mContext)
+            mViewHolder.tvDate.text = AppUtility().getDecoratedDate(mLocationList!!.get(position).fromTime,
+                    mContext)
 
             return convertView!!
         }
@@ -107,10 +93,16 @@ class VisitedActivity : AppCompatActivity() {
         }
 
         private inner class MyViewHolder(item: View) {
-            internal var tvTitle: TextView
+            internal var tvOrgAddress: TextView
+            internal var tvOrgVicinity: TextView
+            internal var tvDate: TextView
+            internal var tvTime: TextView
 
             init {
-                tvTitle = item.findViewById(R.id.tvTitle) as TextView
+                tvOrgAddress = item.findViewById(R.id.tv_address) as TextView
+                tvOrgVicinity = item.findViewById(R.id.tv_location_vicinity) as TextView
+                tvDate = item.findViewById(R.id.tv_visit_date) as TextView
+                tvTime = item.findViewById(R.id.tv_time) as TextView
             }
         }
 

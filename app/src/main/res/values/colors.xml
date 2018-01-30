@@ -20,8 +20,8 @@
     <color name="color_cursor">#a0a0a0</color>
     <color name="color_location_details">#333333</color>
     <color name="color_btn_background">#4d90e2</color>
-    <color name="color_location_title_bg">#ffdb58</color>
-    <color name="color_location_title_nearby_bg">#1e8701</color>
+    <color name="color_location_title_nearby_bg">#ffdb58</color>
+    <color name="color_location_title_bg">#1e8701</color>
     <color name="color_location_title">#ffffff</color>
 
 </resources>
