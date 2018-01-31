@@ -31,7 +31,7 @@ class AlarmReceiverLocation : BroadcastReceiver() {
             AppUtility.showToast(context!!, "Receive")
             var pref: MySharedPref = MySharedPref.getinstance(mContext);
             pref.setLong(System.currentTimeMillis(), AppConstant.SP_KEY_LAST_TIMER_TIME)
-            LocationHelper.getInstance(context).fetchLocation();
+            LocationHelper.getInstance(context).fetchLocation(false);
         }
 
 

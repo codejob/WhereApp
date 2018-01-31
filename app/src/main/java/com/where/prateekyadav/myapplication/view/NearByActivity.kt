@@ -130,6 +130,7 @@ class NearByActivity : AppCompatActivity(), ConfirmationListener {
         if (requestType == AppConstant.REQUEST_CODE_REPLACE) {
             DataBaseController(this@NearByActivity).updateVisitedLocationWithNearBy(mSearchResult!!.visitResults.visitedLocationInformation,
                     mNearByList.get(index))
+            setResult(1)
             finish()
         }
 

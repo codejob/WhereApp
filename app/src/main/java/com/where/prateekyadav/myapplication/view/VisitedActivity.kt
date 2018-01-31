@@ -76,6 +76,8 @@ class VisitedActivity : AppCompatActivity() {
                     mLocationList!!.get(position).toTime, mContext)
             mViewHolder.tvDate.text = AppUtility().getDecoratedDate(mLocationList!!.get(position).fromTime,
                     mContext)
+            mViewHolder.tvVisitNo.text = mContext!!.getString(R.string.str_visits) + "${position+1}"
+
 
             return convertView!!
         }
@@ -97,12 +99,14 @@ class VisitedActivity : AppCompatActivity() {
             internal var tvOrgVicinity: TextView
             internal var tvDate: TextView
             internal var tvTime: TextView
+            internal var tvVisitNo: TextView
 
             init {
                 tvOrgAddress = item.findViewById(R.id.tv_address) as TextView
                 tvOrgVicinity = item.findViewById(R.id.tv_location_vicinity) as TextView
                 tvDate = item.findViewById(R.id.tv_visit_date) as TextView
                 tvTime = item.findViewById(R.id.tv_time) as TextView
+                tvVisitNo = item.findViewById(R.id.tv_nearby_your_location) as TextView
             }
         }
 

@@ -61,7 +61,7 @@ class LocationHelper {
     }
 
 
-    fun fetchLocation(): Boolean {
+    fun fetchLocation(forceUpdateLoation: Boolean): Boolean {
         var gps_enabled = false
         var network_enabled = false
 
@@ -72,13 +72,13 @@ class LocationHelper {
 
 
         if (gps_enabled) {
-            getLocationFromListner(LocationManager.GPS_PROVIDER)
+            getLocationFromListner(LocationManager.GPS_PROVIDER, forceUpdateLoation)
             return true
         } else if (network_enabled) {
-            getLocationFromListner(LocationManager.NETWORK_PROVIDER)
+            getLocationFromListner(LocationManager.NETWORK_PROVIDER, forceUpdateLoation)
             return true
         } else {
-            getLocationFromListner(LocationManager.PASSIVE_PROVIDER)
+            getLocationFromListner(LocationManager.PASSIVE_PROVIDER, forceUpdateLoation)
         }
         return false
 
@@ -147,7 +147,7 @@ class LocationHelper {
         return null
     }
 
-    fun getLocationFromListner(provider: String) {
+    fun getLocationFromListner(provider: String, forceUpdateLoation: Boolean) {
         // Acquire a reference to the system Location Manager
         // Define a listener that responds to location updates
         var bestLocation: Location? = null;
@@ -221,7 +221,7 @@ class LocationHelper {
                                     "Accuracy: " + location.accuracy)
                             Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
                                     "Provider: " + location.provider)
-                            getCompleteAddressString(location!!, AppConstant.LOCATION_UPDATE_TYPE_LAST_KNOWN)
+                            getCompleteAddressString(location!!, AppConstant.LOCATION_UPDATE_TYPE_LAST_KNOWN, forceUpdateLoation)
 
                         } else {
                             AppUtility().showGpsOffNotification(mContext)
@@ -230,7 +230,7 @@ class LocationHelper {
                         Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "best location accuracy " + bestLocation!!.accuracy)
 
                         locationManager!!.removeUpdates(locationListener)
-                        getCompleteAddressString(bestLocation!!, AppConstant.LOCATION_UPDATE_TYPE_CURRENT)
+                        getCompleteAddressString(bestLocation!!, AppConstant.LOCATION_UPDATE_TYPE_CURRENT, forceUpdateLoation)
 
                     } else {
                         locationManager!!.removeUpdates(locationListener)
@@ -242,7 +242,12 @@ class LocationHelper {
             //mUpdateLocation?.updateLocationAddressList(DatabaseHelper(mContext).readAllVisitedLocation())
             mLocationReceived = false;
             requestLocation(locationManager!!, provider, locationListener)
-            listHandler.sendEmptyMessageDelayed(2, AppConstant.LOCATION_SYNC_TIMEOUT);
+            if (forceUpdateLoation) {
+                listHandler.sendEmptyMessageDelayed(2, AppConstant.LOCATION_SYNC_TIMEOUT_FORCE);
+            } else {
+                listHandler.sendEmptyMessageDelayed(2, AppConstant.LOCATION_SYNC_TIMEOUT);
+
+            }
             //
             Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
                     "requestLocationUpdates")
@@ -315,7 +320,7 @@ class LocationHelper {
         }
     }
 
-    public fun getCompleteAddressString(location: Location, locationType: String): List<SearchResult> {
+    public fun getCompleteAddressString(location: Location, locationType: String, forceUpdateLoation: Boolean): List<SearchResult> {
         //
         var LATITUDE: Double = location.latitude
         var LONGITUDE: Double = location.longitude
@@ -356,8 +361,9 @@ class LocationHelper {
                     "Distance curr and DB" + currentLocation.distanceTo(dbLastLocation))
             if (previousLocation.distanceTo(currentLocation) < AppConstant.MIN_DISTANCE_RANGE) {
                 insert = true;
-            } else {
-                //pref.setLong(System.currentTimeMillis(), AppConstant.SP_KEY_SPENT_TIME)
+            } else if (!insert && forceUpdateLoation) {
+                insert = true
+
             }
 
             //

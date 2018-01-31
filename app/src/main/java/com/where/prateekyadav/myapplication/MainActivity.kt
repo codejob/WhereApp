@@ -12,6 +12,8 @@ import android.support.v4.content.ContextCompat
 import android.content.*
 import android.graphics.drawable.Drawable
 import android.os.Build
+import android.os.Handler
+import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.text.Editable
@@ -39,10 +41,12 @@ class MainActivity : AppCompatActivity() {
     var mSearchEdittext: EditText? = null
     var mRelativeLayout: RelativeLayout? = null
     var mAlertForGPS: AlertDialog? = null
+    var mSwipeToRefresh: SwipeRefreshLayout? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         mListView = findViewById(R.id.lv_address) as ListView
+        mSwipeToRefresh = findViewById(R.id.swiperefresh)
         mRelativeLayout = findViewById(R.id.rly_lyt_main)
         mAdapter = LocationsAdapter(this, mSearchResultsList)
         mListView!!.adapter = mAdapter
@@ -54,6 +58,22 @@ class MainActivity : AppCompatActivity() {
         setOnTouchListener()
         setClickListener()
         startAddressUpdateServiceToUpdateAnyRemainingAddresss()
+        swiperefresh.setOnRefreshListener(object : SwipeRefreshLayout.OnRefreshListener {
+            override fun onRefresh() {
+
+                if (!LocationHelper.getInstance(this@MainActivity).checkLocationAvailable()) {
+                    openGPSALert()
+                    swiperefresh.isRefreshing = false
+                } else {
+                    LocationHelper.getInstance(this@MainActivity).fetchLocation(true)
+                    val handler = Handler().postDelayed({
+                        swiperefresh.isRefreshing = false
+
+                    }, 12 * 1000)
+                }
+            }
+
+        })
         // AppUtility().startTimerAlarm(this,true);
     }
 
@@ -191,9 +211,16 @@ class MainActivity : AppCompatActivity() {
             AppUtility().showSnackBar(getString(R.string.no_net_avail), mRelativeLayout as View)
         }
 
+        openGPSALert()
+        AppUtility().validateAutoStartTimer(this, true)
+
+
+    }
+
+    fun openGPSALert() {
         try {
             if (!LocationHelper.getInstance(this).checkLocationAvailable()) {
-                if (mAlertForGPS == null || !mAlertForGPS!!.isShowing){
+                if (mAlertForGPS == null || !mAlertForGPS!!.isShowing) {
                     mAlertForGPS = AppUtility().buildAlertMessageNoGps(this)
                 }
 
@@ -203,9 +230,6 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        AppUtility().validateAutoStartTimer(this, true)
-
-
     }
 
     override fun onPause() {
@@ -246,6 +270,9 @@ class MainActivity : AppCompatActivity() {
             val isUpdated = intent.getBooleanExtra(AppConstant.LOCATION_UPDATE_MESSAGE, false);
             if (isUpdated) {
                 runOnUiThread({
+                    if (swiperefresh != null) {
+                        swiperefresh.isRefreshing = false
+                    }
                     setLocationResults(
                             DataBaseController(this@MainActivity).readRecentVisitedLocation(), false)
 
@@ -364,5 +391,17 @@ class MainActivity : AppCompatActivity() {
         editText.setText("")
         editText.setCompoundDrawables(mDrawableSearch, null, null, null)
 
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        when (resultCode) {
+            1 -> {
+                if (mSearchEdittext!!.text != null && !mSearchEdittext!!.text.isBlank()) {
+                    search(mSearchEdittext!!.text.toString())
+                }
+
+            }
+        }
     }
 }

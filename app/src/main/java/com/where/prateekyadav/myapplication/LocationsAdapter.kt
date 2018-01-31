@@ -1,5 +1,6 @@
 package com.where.prateekyadav.myapplication
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.view.View
@@ -77,7 +78,7 @@ class LocationsAdapter() : BaseAdapter(), ConfirmationListener {
                 val visit = listItem!!.listNearByPlace as Serializable
                 var intent = Intent(mContext, NearByActivity::class.java)
                 intent.putExtra("SearchResult", listItem)
-                mContext!!.startActivity(intent)
+                (mContext!! as MainActivity).startActivityForResult(intent,AppConstant.visitActivityRequestCode)
             }
 
         })

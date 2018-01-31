@@ -23,12 +23,15 @@ open class AppConstant {
         // Seconds
         val LOCATION_SYNC_INSTERVAL: Long = 10* 60 * 1000;
         val LOCATION_SYNC_TIMEOUT: Long = 40 * 1000;
+        val LOCATION_SYNC_TIMEOUT_FORCE: Long = 6 * 1000;
         val RECEIVER_ACTION: String = "LOCATION";
         var MIN_DISTANCE_RANGE: Int = 100;
         var RADIUS_NEARBY_SEARCH: Int = 50;
         var RECENT_COUNT: Int = 10;
         val alarmID: Int = 1001;
         val notificationRequestCode: Int = 1002;
+        val visitActivityRequestCode: Int = 1003;
+        val refreshing:Boolean=false
         //
         val INTENT_FILTER_UPDATE_LOCATION: String = "update_location";
         val INTENT_FILTER_INTERNET_CONNECTION: String = "internet_connection";

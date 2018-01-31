@@ -191,7 +191,7 @@ class AppUtility {
             Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Last timer " + diff / 1000 + " seconds ago")
             val locationHelper = LocationHelper.getInstance(context)
             if (locationHelper.checkLocationAvailable() && diff > (AppConstant.LOCATION_SYNC_INSTERVAL)) {
-                locationHelper.fetchLocation()
+                locationHelper.fetchLocation(true)
                 pref.setLong(System.currentTimeMillis(), AppConstant.SP_KEY_LAST_TIMER_TIME)
 
             }
@@ -240,7 +240,7 @@ class AppUtility {
 
     fun getDecoratedDate(from: Long, context: Context?): String? {
         var result = ""
-        val formatter: SimpleDateFormat = SimpleDateFormat("dd/MM/yyyy");
+        val formatter: SimpleDateFormat = SimpleDateFormat("EEE, dd MMM yyyy");
         val fromString = formatter.format(from);
         result = context!!.getString(R.string.str_date) + " " + fromString
         return result
