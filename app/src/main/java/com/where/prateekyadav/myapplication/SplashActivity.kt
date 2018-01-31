@@ -10,8 +10,12 @@ import com.where.prateekyadav.myapplication.Util.PermissionCheckHandler
 import com.where.prateekyadav.myapplication.database.DBContract
 import com.where.prateekyadav.myapplication.database.DataBaseController
 import android.util.Log
+import com.crashlytics.android.Crashlytics
 import com.where.prateekyadav.myapplication.Util.AppConstant
 import com.where.prateekyadav.myapplication.Util.AppUtility
+import io.fabric.sdk.android.Fabric
+
+
 
 
 class SplashActivity : AppCompatActivity() {
@@ -21,6 +25,7 @@ class SplashActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
+        Fabric.with(this, Crashlytics())
         //
         DataBaseController(this).copyDataBaseToSDCard()
     }

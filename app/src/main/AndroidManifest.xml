@@ -89,7 +89,9 @@
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
 
-
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="f2ca9b946ca508b6de39a27362dee180e14ded11" />
     </application>
 
 </manifest>
