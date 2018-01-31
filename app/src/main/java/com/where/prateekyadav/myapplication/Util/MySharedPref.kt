@@ -65,4 +65,15 @@ class MySharedPref {
         editor!!.putFloat(key, float)
         editor!!.commit()
     }
+
+    fun getBoolean(key: String): Boolean {
+        return mPref!!.getBoolean(key, false)
+    }
+
+    fun setBoolean(boolean: Boolean, key: String) {
+        editor = mPref!!.edit()
+        editor!!.putBoolean(key, boolean)
+        editor!!.commit()
+    }
+
 }

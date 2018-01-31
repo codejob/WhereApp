@@ -26,4 +26,11 @@
     <string name="time">Time:</string>
     <string name="from">From:</string>
     <string name="to">To:</string>
+    <string name="no_net_avail">No Network Available!</string>
+    <string name="str_auto_start_permission">Please enable Auto Start permission for</string>
+    <string name="str_gps_notification_msg">Location is off app wont able to save your current location</string>
+    <string name="address">Address</string>
+    <string name="location_turned_off">Location turned off!</string>
+    <string name="msg_ask_to_turn_gps_on">Your Location seems to be disabled, without Location App not able to save your visited places. Do you want to turn it on?</string>
+    <string name="msg_toast_choose_battery_saving">Enable location and choose Battery Saving Mode</string>
 </resources>

@@ -97,7 +97,6 @@ class SplashActivity : AppCompatActivity() {
                     if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                         //user accepted
                         Log.d(AppConstant.TAG_KOTLIN_DEMO_APP,"Permission granted")
-                        AppUtility().validateAutoStartTimer(this)
                         AppUtility().startTimerAlarm(applicationContext, true)
                         //
                         startMainActivity()

@@ -2,6 +2,8 @@ package com.where.prateekyadav.myapplication.Util
 
 import android.Manifest
 import android.app.AlarmManager
+import android.app.Notification
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
@@ -9,30 +11,27 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.support.v4.app.ActivityCompat
 import android.util.Log
-import com.where.prateekyadav.myapplication.AlarmReceiverLocation
 import java.io.File
 import java.util.*
 import android.content.ContentValues.TAG
+import android.content.Context.NOTIFICATION_SERVICE
+import android.content.DialogInterface
 import android.graphics.Typeface
 import android.location.Location
 import android.location.LocationManager
 import android.os.Build
+import android.provider.Settings
 import android.widget.Toast
-import com.where.prateekyadav.myapplication.LocationHelper
-import com.where.prateekyadav.myapplication.R
-import com.where.prateekyadav.myapplication.UpdateLocation
-import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
 import com.where.prateekyadav.myapplication.modal.SearchResult
-import com.where.prateekyadav.myapplication.search.model.placesdetails.Result
 import com.where.prateekyadav.myapplication.search.network.RetroCallImplementor
-import com.where.prateekyadav.myapplication.search.network.RetroCallIneractor
 import java.text.SimpleDateFormat
 import kotlin.collections.ArrayList
 import android.support.design.widget.Snackbar
-import android.text.Layout
+import android.support.v7.app.AlertDialog
 import android.text.SpannableStringBuilder
 import android.text.style.StyleSpan
 import android.view.View
+import com.where.prateekyadav.myapplication.*
 
 
 /**
@@ -50,6 +49,9 @@ class AppUtility {
     companion object {
         fun showToast(context: Context, msg: String) {
             Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+        }
+        fun showToastLong(context: Context, msg: String) {
+            Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
         }
     }
 
@@ -70,16 +72,15 @@ class AppUtility {
     }
 
     fun startTimerAlarm(applicationContext: Context?, forceUpdate: Boolean) {
-        if (!checkAlarmAlreadySet(applicationContext) || forceUpdate) {
+        if ((!checkAlarmAlreadySet(applicationContext) || forceUpdate)
+                && MySharedPref.getinstance(applicationContext).getBoolean(AppConstant.SP_KEY_APP_REACHED_MAIN_SCREEN)) {
 
             var pref: MySharedPref = MySharedPref.getinstance(applicationContext);
             pref.setLong(System.currentTimeMillis(), AppConstant.SP_KEY_LAST_TIMER_TIME)
             //10 seconds later
             val cal = Calendar.getInstance()
-            cal.add(Calendar.SECOND, 5)
+            cal.add(Calendar.SECOND, 2)
 
-            val calTest = Calendar.getInstance()
-            calTest.add(Calendar.SECOND, 60)
 
             val intent = Intent(applicationContext, AlarmReceiverLocation::class.java);
             intent.action = AppConstant.RECEIVER_ACTION
@@ -87,8 +88,6 @@ class AppUtility {
             val pendingIntent = PendingIntent.getBroadcast(applicationContext,
                     AppConstant.alarmID, intent, PendingIntent.FLAG_UPDATE_CURRENT)
             val alarmManager = applicationContext!!.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            alarmManager.set(AlarmManager.RTC_WAKEUP,
-                    calTest.getTimeInMillis(), pendingIntent);
             alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
                     cal.getTimeInMillis(), AppConstant.LOCATION_SYNC_INSTERVAL, pendingIntent);
 
@@ -120,7 +119,7 @@ class AppUtility {
                 location.longitude = lngArr[i]
                 location.accuracy = 50F
                 locationList.add(location)
-                var hanlder = LocationHelper.getInstance(context, DemoUpdate()).Handleupdate()
+                var hanlder = LocationHelper.getInstance(context).Handleupdate()
                 //LocationHelper.getInstance(context, DemoUpdate()).getCompleteAddressString(location!!, AppConstant.LOCATION_UPDATE_TYPE_LAST_KNOWN)
                 //LocationHelper.getInstance(context, DemoUpdate()).getCompleteAddressString(location!!, AppConstant.LOCATION_UPDATE_TYPE_LAST_KNOWN)
                 var retroCallImplementor = RetroCallImplementor()
@@ -133,12 +132,6 @@ class AppUtility {
     }
 
 
-    class DemoUpdate() : UpdateLocation {
-
-        override fun updateLocationAddressList(addressList: List<SearchResult>) {
-        }
-
-    }
     ///////////////////////////Need to delete//////////////////////////////////
 
 
@@ -159,30 +152,54 @@ class AppUtility {
         }
     }
 
-    fun validateAutoStartTimer(context: Context?) {
+    fun validateAutoStartTimer(context: Context?, autoStart: Boolean): Boolean {
         try {
             var pref: MySharedPref = MySharedPref.getinstance(context);
+            if (!pref.getBoolean(AppConstant.SP_KEY_APP_REACHED_MAIN_SCREEN)) {
+                return false
+            }
             val lastTimeStamp = pref.getLong(AppConstant.SP_KEY_LAST_TIMER_TIME)
             val diff = (System.currentTimeMillis() - lastTimeStamp)
             Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Last timer " + diff / 1000 + " seconds ago")
             if (diff > (AppConstant.LOCATION_SYNC_INSTERVAL * 3)) {
                 startTimerAlarm(context, true)
-                if (Build.BRAND.equals("xiaomi") && pref.getLong(AppConstant.SP_KEY_COUNTER_AUTO_START) < 3) {
+                pref.setLong(System.currentTimeMillis(), AppConstant.SP_KEY_LAST_TIMER_TIME)
+                if (autoStart && Build.BRAND.equals("xiaomi") && pref.getLong(AppConstant.SP_KEY_COUNTER_AUTO_START) < 3) {
                     val intent = Intent()
                     intent.setComponent(ComponentName("com.miui.securitycenter", "com.miui.permcenter.autostart.AutoStartManagementActivity"));
                     context!!.startActivity(intent);
-                    showToast(context, "Please enable Auto Start permission for " + context.getString(R.string.app_name))
+                    AppUtility.showToastLong(context, context.getString(R.string.str_auto_start_permission) + " " + context.getString(R.string.app_name))
+                    //PermissionCheckHandler.goToSettings(context, context.getString(R.string.str_auto_start_permission) + context.getString(R.string.app_name))
                     pref.setLong(pref.getLong(AppConstant.SP_KEY_COUNTER_AUTO_START) + 1, AppConstant.SP_KEY_COUNTER_AUTO_START)
                 }
             }
         } catch (e: Exception) {
             e.printStackTrace()
         } finally {
-            var pref: MySharedPref = MySharedPref.getinstance(context);
-            pref.setLong(System.currentTimeMillis(), AppConstant.SP_KEY_LAST_TIMER_TIME)
-
-
         }
+        return true
+    }
+
+    fun fetchLocationAfterLongDelay(context: Context?): Boolean {
+        try {
+            var pref: MySharedPref = MySharedPref.getinstance(context);
+            if (!pref.getBoolean(AppConstant.SP_KEY_APP_REACHED_MAIN_SCREEN)) {
+                return false
+            }
+            val lastTimeStamp = pref.getLong(AppConstant.SP_KEY_LAST_TIMER_TIME)
+            val diff = (System.currentTimeMillis() - lastTimeStamp)
+            Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Last timer " + diff / 1000 + " seconds ago")
+            val locationHelper = LocationHelper.getInstance(context)
+            if (locationHelper.checkLocationAvailable() && diff > (AppConstant.LOCATION_SYNC_INSTERVAL)) {
+                locationHelper.fetchLocation(true)
+                pref.setLong(System.currentTimeMillis(), AppConstant.SP_KEY_LAST_TIMER_TIME)
+
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+        }
+        return true
     }
 
     fun decorateFromAndToTime(from: Long, to: Long, context: Context?): String {
@@ -215,7 +232,7 @@ class AppUtility {
 
 
         result =
-                context!!.getString(R.string.from) + " " + fromTimeString + " " + context!!.getString(R.string.from) + " " +
+                context!!.getString(R.string.from) + " " + fromTimeString + " " + context!!.getString(R.string.to) + " " +
                 toTimeString
         return result
 
@@ -223,7 +240,7 @@ class AppUtility {
 
     fun getDecoratedDate(from: Long, context: Context?): String? {
         var result = ""
-        val formatter: SimpleDateFormat = SimpleDateFormat("dd/MM/yyyy");
+        val formatter: SimpleDateFormat = SimpleDateFormat("EEE, dd MMM yyyy");
         val fromString = formatter.format(from);
         result = context!!.getString(R.string.str_date) + " " + fromString
         return result
@@ -252,5 +269,62 @@ class AppUtility {
         }
 
         return builder;
+    }
+
+
+    fun showGpsOffNotification(context: Context?) {
+        // Prepare intent which is triggered if the
+        // notification is selected
+
+        var pref: MySharedPref = MySharedPref.getinstance(context);
+
+        val lastTimeStamp = pref.getLong(AppConstant.SP_KEY_LAST_NOTIFICATION_TIME)
+        var diff = (System.currentTimeMillis() - lastTimeStamp)
+        diff = diff / (1000 * 60 * 60)
+        Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Last notification " + diff / 1000 * 60 * 60 + " hrs ago")
+        if (diff > 3) {
+            pref.setLong(System.currentTimeMillis(), AppConstant.SP_KEY_LAST_NOTIFICATION_TIME)
+
+            var intent = Intent(context, MainActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT
+            val pIntent = PendingIntent.getActivity(context, AppConstant.notificationRequestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            // Build notification
+            // Actions are just fake
+            val noti = Notification.Builder(context)
+                    .setContentTitle(context!!.getString(R.string.location_turned_off))
+                    .setContentText(context!!.getString(R.string.str_gps_notification_msg))
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setContentIntent(pIntent)
+                    .setDefaults(Notification.DEFAULT_SOUND)
+                    .addAction(R.mipmap.ic_launcher, "And more", pIntent).build();
+
+            val notificationManager = context!!.getSystemService(NOTIFICATION_SERVICE) as NotificationManager;
+            // hide the notification after its selected
+            noti.flags = Notification.FLAG_AUTO_CANCEL
+
+            notificationManager.notify(AppConstant.notificationRequestCode, noti);
+        }
+
+    }
+
+    fun buildAlertMessageNoGps(context: Context?):AlertDialog {
+        var builder: AlertDialog.Builder = AlertDialog.Builder(context!!);
+        builder.setMessage(context.getString(R.string.msg_ask_to_turn_gps_on))
+                .setCancelable(false)
+                .setPositiveButton("Yes", object : DialogInterface.OnClickListener {
+                    override fun onClick(dialog: DialogInterface, id: Int) {
+                        AppUtility.showToastLong(context, context.getString(R.string.msg_toast_choose_battery_saving))
+                        context!!.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                    }
+                })
+                .setNegativeButton("No", object : DialogInterface.OnClickListener {
+                    override fun onClick(dialog: DialogInterface, id: Int) {
+                        dialog.cancel();
+                    }
+                });
+        val alert: AlertDialog = builder.create()
+        alert.show();
+        return alert
     }
 }

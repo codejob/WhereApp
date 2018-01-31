@@ -1,38 +1,28 @@
 package com.where.prateekyadav.myapplication.Services
 
 import android.app.IntentService
-import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.location.Address
-import android.location.Geocoder
 import android.location.Location
 import android.location.LocationManager
-import android.os.Handler
 import android.os.IBinder
-import android.os.Message
 import android.util.Log
 import com.where.prateekyadav.myapplication.LocationHelper
-import com.where.prateekyadav.myapplication.UpdateLocation
 import com.where.prateekyadav.myapplication.Util.AppConstant
 import com.where.prateekyadav.myapplication.Util.ConnectionDetector
-import com.where.prateekyadav.myapplication.Util.MySharedPref
 import com.where.prateekyadav.myapplication.database.DataBaseController
-import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
 import com.where.prateekyadav.myapplication.modal.SearchResult
 import com.where.prateekyadav.myapplication.search.model.placesdetails.Result
 import com.where.prateekyadav.myapplication.search.network.RetroCallImplementor
 import com.where.prateekyadav.myapplication.search.network.RetroCallIneractor
-import java.util.*
 
 /**
  * Created by Infobeans on 21-Jul-16.
  */
-class AddressUpdateService : IntentService("ADDRESS UPDATE"), UpdateLocation {
+class AddressUpdateService : IntentService("ADDRESS UPDATE") {
 
     private var mContext: Context? = null
     private var handler: AddressUpdateService.Handleupdate? = null
-    private var updateLocation: UpdateLocation? = null;
     private lateinit var mConnectionDetector: ConnectionDetector
 
     companion object {
@@ -64,7 +54,6 @@ class AddressUpdateService : IntentService("ADDRESS UPDATE"), UpdateLocation {
         RUNNING = true
         mContext = this
         handler = Handleupdate()
-        updateLocation = this;
         mConnectionDetector = ConnectionDetector.getInstance(this)
         callGetPlacesAPI()
         Log.d("service", "onHandleIntent service")
@@ -160,7 +149,7 @@ class AddressUpdateService : IntentService("ADDRESS UPDATE"), UpdateLocation {
                     }
                 }
                 //
-                var locationHelper = LocationHelper.getInstance(mContext, updateLocation!!)
+                var locationHelper = LocationHelper.getInstance(mContext)
                 locationHelper.addAddressIntoDataBase(result!!, location, locationType, places, rowId,isPreferred)
 
                 callGetPlacesAPI()
@@ -186,8 +175,5 @@ class AddressUpdateService : IntentService("ADDRESS UPDATE"), UpdateLocation {
     }
 
 
-    override fun updateLocationAddressList(addressList: List<SearchResult>) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
 
 }
