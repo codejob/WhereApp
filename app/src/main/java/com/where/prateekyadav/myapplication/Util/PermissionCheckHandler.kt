@@ -224,12 +224,12 @@ object PermissionCheckHandler {
         val permission = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
         val grant = PackageManager.PERMISSION_GRANTED;
         // Verify that all required contact permissions have been granted.
-        if (permissionCheck != grant || permission != grant) {
-            // Contacts permissions have not been granted.
+        if (permissionCheck != grant && permission != grant) {
+            // Locations permissions have not been granted.
             Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "permissions NOT been granted. Requesting permissions.")
             return false
         } else {
-            // Contact permissions have been granted. Show the contacts fragment.
+            // Locations permissions have been granted. Show the contacts fragment.
             Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
                     "permissions have already been granted")
             return true
