@@ -23,10 +23,12 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.View
+import android.view.*
+import android.view.inputmethod.EditorInfo
 import com.where.prateekyadav.myapplication.Services.AddressUpdateService
 import com.where.prateekyadav.myapplication.database.DataBaseController
 import com.where.prateekyadav.myapplication.modal.SearchResult
-import android.view.MotionEvent
+import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import com.where.prateekyadav.myapplication.Util.*
 import kotlinx.android.synthetic.main.activity_main.*
@@ -45,12 +47,14 @@ class MainActivity : AppCompatActivity() {
     var mRelativeLayout: RelativeLayout? = null
     var mAlertForGPS: AlertDialog? = null
     var mSwipeToRefresh: SwipeRefreshLayout? = null
+    var mToolbar: android.support.v7.widget.Toolbar? = null
+    private var mSearchAction: MenuItem? = null
+    private var isSearchOpened = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         initView()
         // AppUtility().startTimerAlarm(this,true);
-
     }
 
 
@@ -60,6 +64,9 @@ class MainActivity : AppCompatActivity() {
      */
     private fun initView() {
         mListView = findViewById(R.id.lv_address)
+        mToolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(mToolbar);
+        mListView = findViewById(R.id.lv_address) as ListView
         mSwipeToRefresh = findViewById(R.id.swiperefresh)
         mRelativeLayout = findViewById(R.id.rly_lyt_main)
         mAdapter = LocationsAdapter(this, mSearchResultsList)
@@ -67,9 +74,10 @@ class MainActivity : AppCompatActivity() {
         mListView!!.emptyView = findViewById(R.id.tv_no_records) as TextView
         mLocationHelper = LocationHelper.getInstance(applicationContext);
         mDrawableClear = getClearDrawable(this);
+
         //
-        setSearchListener()
-        setOnTouchListener()
+        //setSearchListener()
+        //setOnTouchListener()
         setClickListener()
         startAddressUpdateServiceToUpdateAnyRemainingAddresss()
         swiperefresh.setOnRefreshListener(object : SwipeRefreshLayout.OnRefreshListener {
@@ -105,19 +113,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * On create option menu
-     */
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        var inflater = getMenuInflater();
-        inflater.inflate(R.menu.main_activity_menu, menu);
-        return true
-    }
-
-    /**
      *
      */
     fun setOnTouchListener() {
-        edt_search.setOnTouchListener(object : View.OnTouchListener {
+        mSearchEdittext!!.setOnTouchListener(object : View.OnTouchListener {
             override fun onTouch(v: View?, event: MotionEvent?): Boolean {
                 //
                 //
@@ -282,7 +281,7 @@ class MainActivity : AppCompatActivity() {
 
     fun setLocationResults(address: List<SearchResult>, fromSearch: Boolean) {
         try {
-            if (mSearchEdittext!!.text.length == 0 || fromSearch) {
+            if (mSearchEdittext==null || mSearchEdittext!!.text.length == 0 || fromSearch) {
                 mSearchResultsList.clear()
                 mSearchResultsList.addAll(address as ArrayList<SearchResult>)
                 // mSearchResultsList=address as ArrayList<SearchResult>
@@ -444,5 +443,98 @@ class MainActivity : AppCompatActivity() {
 
             }
         }
+    }
+
+
+    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+        mSearchAction = menu!!.findItem(R.id.action_search);
+        return super.onPrepareOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        val id = item!!.getItemId()
+
+        when (id) {
+            R.id.action_search -> {
+                handleMenuSearch()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    fun handleMenuSearch() {
+        val action: ActionBar? = getSupportActionBar(); //get the actionbar
+
+        if (isSearchOpened) { //test if the search is open
+
+            action!!.setDisplayShowCustomEnabled(false); //disable a custom view inside the actionbar
+            action.setDisplayShowTitleEnabled(true); //show the title in the action bar
+
+            //hides the keyboard
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager;
+            imm.hideSoftInputFromWindow(mSearchEdittext!!.getWindowToken(), 0);
+
+            //add the search icon in the action bar
+            mSearchAction!!.setIcon(getResources().getDrawable(R.drawable.icn_search));
+
+            isSearchOpened = false;
+            setLocationResults(DataBaseController(this@MainActivity).readRecentVisitedLocation(), true)
+        } else { //open the search entry
+
+            action!!.setDisplayShowCustomEnabled(true); //enable it to display a
+            // custom view in the action bar.
+            action!!.setCustomView(R.layout.search_bar);//add the custom view
+            action!!.setDisplayShowTitleEnabled(false); //hide the title
+
+            mSearchEdittext = action!!.getCustomView().findViewById(R.id.edtSearch); //the text editor
+
+            //this is a listener to do a search when the user clicks on search button
+            mSearchEdittext!!.setOnEditorActionListener(object : TextView.OnEditorActionListener {
+                override fun onEditorAction(tv: TextView?, actionId: Int, p2: KeyEvent?): Boolean {
+                    if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                        search(tv!!.text.toString())
+                        return true;
+                    }
+                    return false;
+                }
+
+            });
+
+            mSearchEdittext!!.addTextChangedListener(object : TextWatcher {
+                override fun afterTextChanged(p0: Editable?) {
+                }
+
+                override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                }
+
+                override fun onTextChanged(s: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                    if (s!!.length > 2)
+                        search(s.toString())
+                    else if (s!!.length == 0) {
+                        setLocationResults(DataBaseController(this@MainActivity).readRecentVisitedLocation(), true)
+                    }
+                }
+
+            })
+
+
+            mSearchEdittext!!.requestFocus();
+
+            //open the keyboard focused in the edtSearch
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showSoftInput(mSearchEdittext, InputMethodManager.SHOW_IMPLICIT);
+
+
+            //add the close icon
+            mSearchAction!!.setIcon(getResources().getDrawable(R.drawable.btn_clear));
+
+            isSearchOpened = true;
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
     }
 }
