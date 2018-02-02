@@ -837,5 +837,5 @@ class LocationHelper {
 
     }
 
-
 }
+
