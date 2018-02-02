@@ -7,6 +7,7 @@ import android.app.ProgressDialog
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.*
+import android.location.LocationListener
 import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Handler
@@ -14,7 +15,9 @@ import android.os.Message
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.util.Log
-import com.google.android.gms.location.LocationSettingsResult
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.api.GoogleApiClient
+import com.google.android.gms.location.*
 import com.where.prateekyadav.myapplication.Util.*
 import com.where.prateekyadav.myapplication.database.DataBaseController
 import com.where.prateekyadav.myapplication.database.VisitedLocationInformation
@@ -33,7 +36,7 @@ class LocationHelper {
     lateinit var mDataBaseController: DataBaseController
     var locationManager: LocationManager? = null;
     var mContext: Context? = null;
-    var mLocationReceived: Boolean = false;
+    public var mLocationReceived: Boolean = false;
     //
     val ADDRESS_NOT_SET = 0
     val ADDRESS_SET = 1
@@ -71,6 +74,25 @@ class LocationHelper {
         network_enabled = locationManager!!.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 
 
+
+        if (gps_enabled || network_enabled) {
+            FuseLocation(mContext, forceUpdateLoation)
+            return true
+        }
+        return false
+
+    }
+
+    fun fetchLocationFromListener(forceUpdateLoation: Boolean): Boolean {
+        var gps_enabled = false
+        var network_enabled = false
+
+        locationManager = mContext?.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+        gps_enabled = locationManager!!.isProviderEnabled(LocationManager.GPS_PROVIDER)
+        network_enabled = locationManager!!.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+
+
         if (gps_enabled) {
             getLocationFromListner(LocationManager.GPS_PROVIDER, forceUpdateLoation)
             return true
@@ -81,7 +103,6 @@ class LocationHelper {
             getLocationFromListner(LocationManager.PASSIVE_PROVIDER, forceUpdateLoation)
         }
         return false
-
     }
 
 
@@ -147,6 +168,7 @@ class LocationHelper {
         return null
     }
 
+    ////Older way to access location //////////////////////
     fun getLocationFromListner(provider: String, forceUpdateLoation: Boolean) {
         // Acquire a reference to the system Location Manager
         // Define a listener that responds to location updates
@@ -213,7 +235,7 @@ class LocationHelper {
                         Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Location Updates are now removed msg:= " + msg.what)
                         //Location Updates are now
                         var location = getLocation()
-                        if (location != null) {
+                        if (location != null && location.accuracy < 200) {
                             Log.v("Location Changed", location.getLatitude().toString() + " and " + location.getLongitude().toString());
                             Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
                                     "Location received last known")
@@ -223,15 +245,16 @@ class LocationHelper {
                                     "Provider: " + location.provider)
                             getCompleteAddressString(location!!, AppConstant.LOCATION_UPDATE_TYPE_LAST_KNOWN, forceUpdateLoation)
 
-                        } else {
+                        } else if (!checkLocationAvailable()) {
                             AppUtility().showGpsOffNotification(mContext)
                         }
                     } else if (msg.what === 3 && mLocationReceived) {
                         Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "best location accuracy " + bestLocation!!.accuracy)
 
                         locationManager!!.removeUpdates(locationListener)
-                        getCompleteAddressString(bestLocation!!, AppConstant.LOCATION_UPDATE_TYPE_CURRENT, forceUpdateLoation)
-
+                        if (bestLocation!!.accuracy <= 400) {
+                            getCompleteAddressString(bestLocation!!, AppConstant.LOCATION_UPDATE_TYPE_CURRENT, forceUpdateLoation)
+                        }
                     } else {
                         locationManager!!.removeUpdates(locationListener)
                         Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Location Updates are now removed final:= ")
@@ -256,6 +279,152 @@ class LocationHelper {
         }
 
     }
+
+    //////////////New fused location api/////////////////////
+    inner class FuseLocation : GoogleApiClient.ConnectionCallbacks,
+            GoogleApiClient.OnConnectionFailedListener {
+        var mGoogleApiClient: GoogleApiClient? = null
+        var bestLocation: Location? = null;
+        var listHandler: Handler? = null;
+        var forceUpdateLoation: Boolean = false
+
+        constructor(context: Context?, forceUpdate: Boolean) {
+            forceUpdateLoation = forceUpdate
+            try {
+                mGoogleApiClient = GoogleApiClient.Builder(context!!)
+                        .addConnectionCallbacks(this)
+                        .addOnConnectionFailedListener(this)
+                        //.enableAutoManage(context!!, this)
+                        .addApi(LocationServices.API).build()
+
+                mGoogleApiClient!!.connect()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
+
+        fun geLocation() {
+            try {
+                var locationReceived = false
+                val mLocationCallback = object : LocationCallback() {
+                    override fun onLocationResult(locationResult: LocationResult?) {
+                        for (location in locationResult!!.locations) {
+                            Log.v("Location Changed", location.getLatitude().toString() + " and " + location.getLongitude().toString());
+                            Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
+                                    "Location updated changed")
+                            Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
+                                    "Accuracy: " + location.accuracy)
+                            Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
+                                    "Provider: " + location.provider)
+                            if (bestLocation == null) {
+                                bestLocation = location
+                            } else if (location.accuracy < bestLocation!!.accuracy) {
+                                bestLocation = location
+                            }
+                            if (!locationReceived && location.accuracy < 100) {
+                                listHandler?.sendEmptyMessageDelayed(3, 5000);
+
+                                locationReceived = true
+                            }
+                        }
+                    }
+                }
+                val mLocationRequest = LocationRequest()
+                mLocationRequest.interval = (0).toLong()
+                mLocationRequest.fastestInterval = 0
+                mLocationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+
+
+                listHandler = object : Handler() {
+                    override fun handleMessage(msg: Message) {
+                        if (msg.what == 0 && !locationReceived) {
+
+                        } else if (msg.what === 2 && !locationReceived) {
+                            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, mLocationCallback)
+
+                            Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Location Updates are now removed msg:= " + msg.what)
+                            //Location Updates are now
+                            var location: Location? = null
+                            if (mGoogleApiClient!!.isConnected) {
+                                location = LocationServices.FusedLocationApi
+                                        .getLastLocation(mGoogleApiClient)
+                            }
+                            if (location != null && location.accuracy < 100) {
+                                Log.v("Location Changed", location.getLatitude().toString() + " and " + location.getLongitude().toString());
+                                Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
+                                        "Location received last known")
+                                Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
+                                        "Accuracy: " + location.accuracy)
+                                Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
+                                        "Provider: " + location.provider)
+                                getCompleteAddressString(location!!, AppConstant.LOCATION_UPDATE_TYPE_LAST_KNOWN, forceUpdateLoation)
+
+                            } else if (!checkLocationAvailable()) {
+                                AppUtility().showGpsOffNotification(mContext)
+                            } else if (checkLocationAvailable()) {
+                                fetchLocationFromListener(false)
+                            }
+                        } else if (msg.what === 3 && locationReceived) {
+                            Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "best location accuracy " + bestLocation!!.accuracy)
+
+                            if (bestLocation!!.accuracy <= 100) {
+                                getCompleteAddressString(bestLocation!!, AppConstant.LOCATION_UPDATE_TYPE_CURRENT, forceUpdateLoation)
+                            } else if (checkLocationAvailable() && bestLocation!!.accuracy > 100) {
+                                fetchLocationFromListener(false)
+                            }
+                            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, mLocationCallback)
+
+
+                        }
+
+                        try {
+                            mGoogleApiClient!!.disconnect()
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                        super.handleMessage(msg)
+                    }
+                }
+
+                locationReceived = false
+                LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,
+                        mLocationRequest, mLocationCallback, null)
+                if (forceUpdateLoation) {
+                    listHandler!!.sendEmptyMessageDelayed(2, AppConstant.LOCATION_SYNC_TIMEOUT_FORCE);
+                } else {
+                    listHandler!!.sendEmptyMessageDelayed(2, AppConstant.LOCATION_SYNC_TIMEOUT);
+
+                }
+
+            } catch (e: SecurityException) {
+                e.printStackTrace()
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+        }
+
+        override fun onConnected(p0: Bundle?) {
+            geLocation()
+        }
+
+        override fun onConnectionSuspended(p0: Int) {
+            try {
+                if (listHandler != null) {
+                    listHandler!!.removeCallbacks { this }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
+        override fun onConnectionFailed(p0: ConnectionResult) {
+        }
+
+    }
+
 
     fun requestLocation(locationManager: LocationManager, provider: String, locationListener: LocationListener) {
         if (ContextCompat.checkSelfPermission(mContext!!, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -648,4 +817,4 @@ class LocationHelper {
     }
 
 }
-        
+
