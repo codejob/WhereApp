@@ -95,7 +95,17 @@ class MainActivity : AppCompatActivity() {
         edt_search.setOnTouchListener(object : View.OnTouchListener {
             override fun onTouch(v: View?, event: MotionEvent?): Boolean {
                 //
-                clearSearchTextAndSetMessage(v!!)
+                //
+                val editText = v as EditText
+                if (event!!.getAction() != MotionEvent.ACTION_UP)
+                    return false
+
+                if (event!!.getX() > editText.width - mDrawableClear.intrinsicWidth) {
+                    // action here
+                    clearSearchTextAndSetMessage(v!!)
+                    return true
+                }
+
                 return false
             }
 
