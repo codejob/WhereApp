@@ -14,11 +14,14 @@ import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Handler
 import android.support.v4.widget.SwipeRefreshLayout
+import android.support.v7.app.ActionBar
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.view.Menu
+import android.view.MenuInflater
 import android.view.View
 import com.where.prateekyadav.myapplication.Services.AddressUpdateService
 import com.where.prateekyadav.myapplication.database.DataBaseController
@@ -45,7 +48,18 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        mListView = findViewById(R.id.lv_address) as ListView
+        initView()
+        // AppUtility().startTimerAlarm(this,true);
+
+    }
+
+
+
+    /**
+     * Method to initialize the view and object
+     */
+    private fun initView() {
+        mListView = findViewById(R.id.lv_address)
         mSwipeToRefresh = findViewById(R.id.swiperefresh)
         mRelativeLayout = findViewById(R.id.rly_lyt_main)
         mAdapter = LocationsAdapter(this, mSearchResultsList)
@@ -74,9 +88,11 @@ class MainActivity : AppCompatActivity() {
             }
 
         })
-        // AppUtility().startTimerAlarm(this,true);
     }
 
+    /**
+     * set click listener here
+     */
     fun setClickListener() {
 
         mListView!!.onItemClickListener = object : AdapterView.OnItemClickListener {
@@ -86,6 +102,15 @@ class MainActivity : AppCompatActivity() {
 
             }
         }
+    }
+
+    /**
+     * On create option menu
+     */
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        var inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_activity_menu, menu);
+        return true
     }
 
     /**
@@ -112,6 +137,9 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    /**
+     * set search listener
+     */
     fun setSearchListener() {
         mSearchEdittext = findViewById<EditText>(R.id.edt_search)
         mSearchEdittext!!.addTextChangedListener(object : TextWatcher {
@@ -245,7 +273,7 @@ class MainActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         if (ContextCompat.checkSelfPermission(this,
-                        Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
             //locationManager!!.removeUpdates()
         }

@@ -4,6 +4,7 @@
     <dimen name="margin_25dp">25dp</dimen>
     <dimen name="margin_20dp">20dp</dimen>
     <dimen name="margin_10dp">10dp</dimen>
+    <dimen name="margin_15dp">15dp</dimen>
     <dimen name="btn_cancel_save_note">12sp</dimen>
     <dimen name="margin_5dp">5dp</dimen>
     <dimen name="confirmation_alert_msg_title_text_size">17sp</dimen>
