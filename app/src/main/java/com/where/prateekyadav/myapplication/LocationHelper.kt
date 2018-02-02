@@ -74,11 +74,13 @@ class LocationHelper {
         network_enabled = locationManager!!.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 
 
-
-        if (gps_enabled || network_enabled) {
+        /// Will use in next version///////
+        /*if (gps_enabled || network_enabled) {
             FuseLocation(mContext, forceUpdateLoation)
             return true
-        }
+        }*/
+
+        fetchLocationFromListener(forceUpdateLoation)
         return false
 
     }
@@ -247,6 +249,8 @@ class LocationHelper {
 
                         } else if (!checkLocationAvailable()) {
                             AppUtility().showGpsOffNotification(mContext)
+                        } else if (checkLocationAvailable()) {
+                            fetchLocationFromListener(forceUpdateLoation)
                         }
                     } else if (msg.what === 3 && mLocationReceived) {
                         Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "best location accuracy " + bestLocation!!.accuracy)
@@ -341,7 +345,8 @@ class LocationHelper {
                         if (msg.what == 0 && !locationReceived) {
 
                         } else if (msg.what === 2 && !locationReceived) {
-                            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, mLocationCallback)
+                            if (mGoogleApiClient!!.isConnected)
+                                LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, mLocationCallback)
 
                             Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Location Updates are now removed msg:= " + msg.what)
                             //Location Updates are now
@@ -373,13 +378,15 @@ class LocationHelper {
                             } else if (checkLocationAvailable() && bestLocation!!.accuracy > 100) {
                                 fetchLocationFromListener(false)
                             }
-                            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, mLocationCallback)
+                            if (mGoogleApiClient!!.isConnected)
+                                LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, mLocationCallback)
 
 
                         }
 
                         try {
-                            mGoogleApiClient!!.disconnect()
+                            if (mGoogleApiClient!!.isConnected)
+                                mGoogleApiClient!!.disconnect()
                         } catch (e: Exception) {
                             e.printStackTrace()
                         }
@@ -388,8 +395,10 @@ class LocationHelper {
                 }
 
                 locationReceived = false
-                LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,
-                        mLocationRequest, mLocationCallback, null)
+                if (mGoogleApiClient!!.isConnected) {
+                    LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,
+                            mLocationRequest, mLocationCallback, null)
+                }
                 if (forceUpdateLoation) {
                     listHandler!!.sendEmptyMessageDelayed(2, AppConstant.LOCATION_SYNC_TIMEOUT_FORCE);
                 } else {
@@ -408,9 +417,12 @@ class LocationHelper {
 
         override fun onConnected(p0: Bundle?) {
             geLocation()
+            Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "mGoogleApiClient connected")
         }
 
         override fun onConnectionSuspended(p0: Int) {
+            Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "mGoogleApiClient onConnectionSuspended")
+
             try {
                 if (listHandler != null) {
                     listHandler!!.removeCallbacks { this }
@@ -421,6 +433,15 @@ class LocationHelper {
         }
 
         override fun onConnectionFailed(p0: ConnectionResult) {
+            Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "mGoogleApiClient onConnectionFailed")
+
+            try {
+                if (listHandler != null) {
+                    listHandler!!.removeCallbacks { this }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
 
     }
@@ -741,8 +762,8 @@ class LocationHelper {
                 var result: Boolean = false
                 try {
                     val it = places.get(i)
-                    var pref = MySharedPref.getinstance(mContext);
-                    val address = it.name;
+                    var pref = MySharedPref.getinstance(mContext)
+                    val address = it.name
                     val vicinity = it.vicinity
                     val placeId = it.placeId
                     val photoUrl = it.photos.toString()
@@ -766,9 +787,9 @@ class LocationHelper {
                     val postalCode = addresses[0].getPostalCode()
                     val knownName = addresses[0].getFeatureName() // Only if available else return NULL
                     val fromTime = System.currentTimeMillis()
-                    val locationProvider = "NA";
-                    val locationType = "NA";
-                    val toTime: Long = System.currentTimeMillis();
+                    val locationProvider = "NA"
+                    val locationType = "NA"
+                    val toTime: Long = System.currentTimeMillis()
                     // set values for visited location information
                     var visitedLocationInformation = VisitedLocationInformation("NA")
                     visitedLocationInformation.userId = 1
