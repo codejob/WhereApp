@@ -3,11 +3,28 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorPrimary">@color/colorAppTheme</item>
+        <item name="colorPrimaryDark">@color/colorAppTheme</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
+    <!-- Base application theme. -->
+    <style name="AppThemeWithActionBar" parent="Theme.AppCompat.Light">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorAppTheme</item>
+        <item name="colorPrimaryDark">@color/colorAppTheme</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:actionBarStyle">@style/MyTheme.ActionBarStyle</item>
+    </style>
 
+    <style name="MyTheme.ActionBarStyle" parent="@android:style/Widget.Holo.Light.ActionBar">
+        <item name="android:titleTextStyle">@style/MyTheme.ActionBar.TitleTextStyle</item>
+
+    </style>
+
+    <style name="MyTheme.ActionBar.TitleTextStyle" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title">
+        <item name="android:textColor">@color/colorWhite</item>
+        <item name="android:fontFamily">@font/bubblegum_sans</item>
+    </style>
 
     <style name="search_edit_text">
         <item name="android:textColor">@color/color_black</item>

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Kotlin Demo</string>
+    <string name="app_name">Foot Print</string>
     <string name="no_records_found">No Records Found!</string>
     <string name="str_see_all_visits">See All Visits</string>
     <string name="choose_from_nearby_locations">Choose from nearby locations</string>
@@ -33,4 +33,5 @@
     <string name="location_turned_off">Location turned off!</string>
     <string name="msg_ask_to_turn_gps_on">Your Location seems to be disabled, without Location App not able to save your visited places. Do you want to turn it on?</string>
     <string name="msg_toast_choose_battery_saving">Enable location and choose Battery Saving Mode</string>
+    <string name="version_name">Version 1.0</string>
 </resources>
