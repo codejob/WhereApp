@@ -409,11 +409,11 @@ class MainActivity : AppCompatActivity() {
     fun getClearDrawable(context: Context): Drawable {
         var mDrawableClear: Drawable? = null
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            mDrawableClear = context.resources.getDrawable(R.drawable.btn_clear, null)
+            mDrawableClear = context.resources.getDrawable(R.drawable.btn_close_main, null)
             mDrawableSearch = context.resources.getDrawable(R.drawable.icn_search, null)
 
         } else {
-            mDrawableClear = context.resources.getDrawable(R.drawable.btn_clear)
+            mDrawableClear = context.resources.getDrawable(R.drawable.btn_close_main)
             mDrawableSearch = context.resources.getDrawable(R.drawable.icn_search)
         }
         //
@@ -476,7 +476,7 @@ class MainActivity : AppCompatActivity() {
             imm.hideSoftInputFromWindow(mSearchEdittext!!.getWindowToken(), 0);
 
             //add the search icon in the action bar
-            mSearchAction!!.setIcon(getResources().getDrawable(R.drawable.icn_search));
+            mSearchAction!!.setIcon(getResources().getDrawable(R.drawable.btn_search));
 
             isSearchOpened = false;
             setLocationResults(DataBaseController(this@MainActivity).readRecentVisitedLocation(), true)
@@ -527,7 +527,7 @@ class MainActivity : AppCompatActivity() {
 
 
             //add the close icon
-            mSearchAction!!.setIcon(getResources().getDrawable(R.drawable.btn_clear));
+            mSearchAction!!.setIcon(mDrawableClear);
 
             isSearchOpened = true;
         }
