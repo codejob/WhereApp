@@ -279,7 +279,7 @@ class MainActivity : AppCompatActivity() {
                 });
 
             }
-        }
+        }// Receiver
     }
 
     override fun onStop() {
@@ -325,32 +325,35 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-    }
+    }// registerReceiver
 
 
     fun search(place: String) {
         try {
-            // var searchResultsList = DataBaseController(this).searchLocationOnline(place)
-            var searchResultsList = DataBaseController(this).searchLocationOffline(place)
+            Thread {
+                // var searchResultsList = DataBaseController(this).searchLocationOnline(place)
+                var searchResultsList = DataBaseController(this).searchLocationOffline(place)
 
-            if (searchResultsList != null) {
-                searchResultsList.forEach {
-                    //Toast.makeText(this, it.visitedLocationInformation.address, Toast.LENGTH_SHORT).show()
-                    Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Search results: " + it.visitResults.visitedLocationInformation.vicinity)
+                if (searchResultsList != null) {
+                    searchResultsList.forEach {
+                        //Toast.makeText(this, it.visitedLocationInformation.address, Toast.LENGTH_SHORT).show()
+                        Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Search results: " + it.visitResults.visitedLocationInformation.vicinity)
 
+                    }
+                    runOnUiThread(Runnable {
+                        setLocationResults(searchResultsList, true)
+                    })
+                } else {
+                    //setLocation(DataBaseController(this).readAllVisitedLocation())
+
+                    // Toast.makeText(this, "No result found", Toast.LENGTH_SHORT).show()
                 }
-                setLocationResults(searchResultsList, true)
-            } else {
-                //setLocation(DataBaseController(this).readAllVisitedLocation())
-
-                // Toast.makeText(this, "No result found", Toast.LENGTH_SHORT).show()
-
-            }
+            }.run()// Thread
         } catch (e: Exception) {
             e.printStackTrace()
         }
 
-    }
+    }// Search
 
 
     /**
