@@ -208,7 +208,7 @@ class MainActivity : AppCompatActivity() {
                         Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             /* var clear: EditText = autocompleteFragment!!.getView().findViewById(R.id.place_autocomplete_search_input)
              if (clear != null &&
-                     clear.text.isBlank()) {
+                     clear.tex s t.isBlank()) {
              }*/
             setLocationResults(DataBaseController(this).readRecentVisitedLocation(), false)
 
@@ -262,7 +262,7 @@ class MainActivity : AppCompatActivity() {
 
     fun setLocationResults(address: List<SearchResult>, fromSearch: Boolean) {
         try {
-            if (mSearchEdittext==null || mSearchEdittext!!.text.length == 0 || fromSearch) {
+            if (mSearchEdittext == null || mSearchEdittext!!.text.length == 0 || fromSearch) {
                 mSearchResultsList.clear()
                 mSearchResultsList.addAll(address as ArrayList<SearchResult>)
                 // mSearchResultsList=address as ArrayList<SearchResult>

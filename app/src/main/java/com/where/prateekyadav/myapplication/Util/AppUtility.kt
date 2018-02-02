@@ -250,7 +250,6 @@ class AppUtility {
     fun showSnackBar(message: String, layout: View) {
         val snackbar = Snackbar
                 .make(layout, message, Snackbar.LENGTH_LONG)
-
         snackbar.show()
     }
 
