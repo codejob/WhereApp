@@ -20,6 +20,9 @@ import android.support.v7.app.AppCompatActivity
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.View
 import android.view.*
 import android.view.inputmethod.EditorInfo
 import com.where.prateekyadav.myapplication.Services.AddressUpdateService
@@ -50,6 +53,17 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        initView()
+        // AppUtility().startTimerAlarm(this,true);
+    }
+
+
+
+    /**
+     * Method to initialize the view and object
+     */
+    private fun initView() {
+        mListView = findViewById(R.id.lv_address)
         mToolbar = findViewById(R.id.toolbar)
         setSupportActionBar(mToolbar);
         mListView = findViewById(R.id.lv_address) as ListView
@@ -82,9 +96,11 @@ class MainActivity : AppCompatActivity() {
             }
 
         })
-        // AppUtility().startTimerAlarm(this,true);
     }
 
+    /**
+     * set click listener here
+     */
     fun setClickListener() {
 
         mListView!!.onItemClickListener = object : AdapterView.OnItemClickListener {
@@ -120,6 +136,9 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    /**
+     * set search listener
+     */
     fun setSearchListener() {
         mSearchEdittext = findViewById<EditText>(R.id.edt_search)
         mSearchEdittext!!.addTextChangedListener(object : TextWatcher {
@@ -253,7 +272,7 @@ class MainActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         if (ContextCompat.checkSelfPermission(this,
-                        Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
             //locationManager!!.removeUpdates()
         }
