@@ -6,6 +6,8 @@
         <item name="colorPrimary">@color/colorAppTheme</item>
         <item name="colorPrimaryDark">@color/colorAppTheme</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textColorPrimary">@color/colorWhite</item>
+        <item name="android:fontFamily">@font/bubblegum_sans</item>
     </style>
     <!-- Base application theme. -->
     <style name="AppThemeWithActionBar" parent="Theme.AppCompat.Light">
