@@ -30,6 +30,7 @@ import com.where.prateekyadav.myapplication.database.DataBaseController
 import com.where.prateekyadav.myapplication.modal.SearchResult
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
+import com.where.prateekyadav.myapplication.R.id.action_search
 import com.where.prateekyadav.myapplication.Util.*
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -56,7 +57,6 @@ class MainActivity : AppCompatActivity() {
         initView()
         // AppUtility().startTimerAlarm(this,true);
     }
-
 
 
     /**
@@ -272,7 +272,7 @@ class MainActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         if (ContextCompat.checkSelfPermission(this,
-                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                        Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
             //locationManager!!.removeUpdates()
         }
@@ -437,7 +437,7 @@ class MainActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         when (resultCode) {
             1 -> {
-                if (mSearchEdittext!!.text != null && !mSearchEdittext!!.text.isBlank()) {
+                if (mSearchEdittext!=null && mSearchEdittext!!.text != null && !mSearchEdittext!!.text.isBlank()) {
                     search(mSearchEdittext!!.text.toString())
                 }
 
@@ -467,21 +467,26 @@ class MainActivity : AppCompatActivity() {
         val action: ActionBar? = getSupportActionBar(); //get the actionbar
 
         if (isSearchOpened) { //test if the search is open
-
+            isSearchOpened = false;
             action!!.setDisplayShowCustomEnabled(false); //disable a custom view inside the actionbar
             action.setDisplayShowTitleEnabled(true); //show the title in the action bar
 
             //hides the keyboard
-            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager;
-            imm.hideSoftInputFromWindow(mSearchEdittext!!.getWindowToken(), 0);
+            // var view: View? = null
+            var view = View(this@MainActivity);
+            //mSearchEdittext!!.requestFocus().apply {
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            //imm.hideSoftInputFromWindow(view!!.windowToken, 0)
+            // }
+            imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
 
             //add the search icon in the action bar
             mSearchAction!!.setIcon(getResources().getDrawable(R.drawable.btn_search));
 
-            isSearchOpened = false;
+
             setLocationResults(DataBaseController(this@MainActivity).readRecentVisitedLocation(), true)
         } else { //open the search entry
-
+            isSearchOpened = true;
             action!!.setDisplayShowCustomEnabled(true); //enable it to display a
             // custom view in the action bar.
             action!!.setCustomView(R.layout.search_bar);//add the custom view
@@ -509,10 +514,12 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun onTextChanged(s: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                    if (s!!.length > 2)
-                        search(s.toString())
-                    else if (s!!.length == 0) {
-                        setLocationResults(DataBaseController(this@MainActivity).readRecentVisitedLocation(), true)
+                    if (isSearchOpened) {
+                        if (s!!.length > 2) {
+                            search(s.toString())
+                        }else if (s!!.length == 0) {
+                            setLocationResults(DataBaseController(this@MainActivity).readRecentVisitedLocation(), true)
+                        }
                     }
                 }
 
@@ -529,7 +536,7 @@ class MainActivity : AppCompatActivity() {
             //add the close icon
             mSearchAction!!.setIcon(mDrawableClear);
 
-            isSearchOpened = true;
+
         }
     }
 

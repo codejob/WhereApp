@@ -144,8 +144,8 @@ class LocationHelper {
 
         if (PermissionCheckHandler.checkLocationPermissions(mContext!!)) {
             // Commenting last visited gps as it would give bad location
-            // if (gps_enabled)
-            //   gps_loc = locationManager!!.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+            if (gps_enabled)
+                gps_loc = locationManager!!.getLastKnownLocation(LocationManager.GPS_PROVIDER)
             if (network_enabled)
                 net_loc = locationManager!!.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
             else {
@@ -237,7 +237,11 @@ class LocationHelper {
                         Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Location Updates are now removed msg:= " + msg.what)
                         //Location Updates are now
                         var location = getLocation()
-                        if (location != null && location.accuracy < 200) {
+                        if (location != null) {
+                            Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
+                                    "Accuracy: " + location.accuracy)
+                        }
+                        if (location != null && (location.accuracy < 500 || forceUpdateLoation)) {
                             Log.v("Location Changed", location.getLatitude().toString() + " and " + location.getLongitude().toString());
                             Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
                                     "Location received last known")
@@ -250,13 +254,13 @@ class LocationHelper {
                         } else if (!checkLocationAvailable()) {
                             AppUtility().showGpsOffNotification(mContext)
                         } else if (checkLocationAvailable()) {
-                            fetchLocationFromListener(forceUpdateLoation)
+                            //fetchLocationFromListener(forceUpdateLoation)
                         }
                     } else if (msg.what === 3 && mLocationReceived) {
                         Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "best location accuracy " + bestLocation!!.accuracy)
 
                         locationManager!!.removeUpdates(locationListener)
-                        if (bestLocation!!.accuracy <= 400) {
+                        if (bestLocation!!.accuracy <= 500 || forceUpdateLoation) {
                             getCompleteAddressString(bestLocation!!, AppConstant.LOCATION_UPDATE_TYPE_CURRENT, forceUpdateLoation)
                         }
                     } else {
@@ -553,7 +557,9 @@ class LocationHelper {
                 insert = true;
             } else if (!insert && forceUpdateLoation) {
                 insert = true
-
+                pref.setLong(System.currentTimeMillis(), AppConstant.SP_KEY_LAST_TIMER_TIME)
+            } else if (previousLocation.distanceTo(currentLocation) > AppConstant.MIN_DISTANCE_RANGE) {
+                pref.setLong(System.currentTimeMillis(), AppConstant.SP_KEY_LAST_TIMER_TIME)
             }
 
             //
@@ -588,9 +594,9 @@ class LocationHelper {
             visitedLocationInformation.accuracy = currentLocation.accuracy
             var fromTime: Long = System.currentTimeMillis()
             val toTime = System.currentTimeMillis()
-            if (lastDBLocation == null) {
-                fromTime = pref.getLong(AppConstant.SP_KEY_FIRST_TIME)
-            }
+            // if (lastDBLocation == null) {
+            fromTime = pref.getLong(AppConstant.SP_KEY_LAST_TIMER_TIME)
+            //}
             visitedLocationInformation.toTime = toTime
             visitedLocationInformation.fromTime = fromTime
             visitedLocationInformation.locationRequestType = locationType
@@ -612,6 +618,7 @@ class LocationHelper {
         } else {
             pref.setLong(System.currentTimeMillis(), AppConstant.SP_KEY_SPENT_TIME)
         }
+
         //
         var visitedLocationList = mDataBaseController.readAllVisitedLocation()
 
@@ -661,7 +668,8 @@ class LocationHelper {
             visitedLocationInformation.city = city
             visitedLocationInformation.state = state
             visitedLocationInformation.country = country
-            visitedLocationInformation.postalCode = postalCode
+            if (postalCode != null)
+                visitedLocationInformation.postalCode = postalCode
             visitedLocationInformation.knownName = knownName
             visitedLocationInformation.toTime = toTime
             visitedLocationInformation.fromTime = fromTime
@@ -670,7 +678,8 @@ class LocationHelper {
             visitedLocationInformation.locationRequestType = locationType
             visitedLocationInformation.vicinity = vicinity
             visitedLocationInformation.placeId = placeId
-            visitedLocationInformation.photoUrl = photoUrl
+            if (photoUrl != null)
+                visitedLocationInformation.photoUrl = photoUrl
             visitedLocationInformation.nearByPlacesIds = nearByPlaces
             visitedLocationInformation.isAddressSet = isAddressSet
             visitedLocationInformation.accuracy = currentLocation.accuracy
@@ -799,7 +808,8 @@ class LocationHelper {
                     visitedLocationInformation.city = city
                     visitedLocationInformation.state = state
                     visitedLocationInformation.country = country
-                    visitedLocationInformation.postalCode = postalCode
+                    if (postalCode != null)
+                        visitedLocationInformation.postalCode = postalCode
                     visitedLocationInformation.knownName = knownName
                     visitedLocationInformation.toTime = toTime
                     visitedLocationInformation.fromTime = fromTime
@@ -808,7 +818,8 @@ class LocationHelper {
                     visitedLocationInformation.locationRequestType = locationType
                     visitedLocationInformation.vicinity = vicinity
                     visitedLocationInformation.placeId = placeId
-                    visitedLocationInformation.photoUrl = photoUrl
+                    if (photoUrl != null)
+                        visitedLocationInformation.photoUrl = photoUrl
                     visitedLocationInformation.nearByPlacesIds = nearPlaces
                     visitedLocationInformation.isAddressSet = isAddressSet
 

@@ -49,7 +49,6 @@ class VisitedActivity : AppCompatActivity() {
             inflater = LayoutInflater.from(mContext);
             pref = MySharedPref.getinstance(mContext!!.applicationContext)
             pref!!.getFloat(AppConstant.SP_KEY_ACCURACY)
-
         }
 
         override fun getView(position: Int, view: View?, parent: ViewGroup?): View {
@@ -109,8 +108,6 @@ class VisitedActivity : AppCompatActivity() {
                 tvVisitNo = item.findViewById(R.id.tv_nearby_your_location) as TextView
             }
         }
-
-
     }
 
 

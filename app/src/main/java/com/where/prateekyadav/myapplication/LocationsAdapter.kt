@@ -127,6 +127,7 @@ class LocationsAdapter() : BaseAdapter(), ConfirmationListener {
                 mLocationList!!.get(position).visitResults.visitedLocationInformation.toTime, mContext)
         mViewHolder.tvDate.text = AppUtility().getDecoratedDate(mLocationList!!.get(position).visitResults.visitedLocationInformation.fromTime,
                 mContext)
+        AppUtility().setColorBasedOnAccuracy(mLocationList!!.get(position).visitResults.visitedLocationInformation.accuracy,mViewHolder.tvHeaderOrg,mContext)
         /////////////////// Nearby data////////////////////
         if (mLocationList!!.get(position).visitResults.showFromNearBy) {
             mViewHolder.rlyLytNB.visibility = View.VISIBLE
@@ -185,6 +186,7 @@ class LocationsAdapter() : BaseAdapter(), ConfirmationListener {
         internal var btnChooseNearBy: Button
         internal var btnDelete: ImageButton
         internal var rlyLytNB: RelativeLayout
+        internal var tvHeaderOrg: TextView
 
         init {
             tvOrgAddress = item.findViewById(R.id.tv_address) as TextView
@@ -194,6 +196,7 @@ class LocationsAdapter() : BaseAdapter(), ConfirmationListener {
             tvDate = item.findViewById(R.id.tv_visit_date) as TextView
             tvTime = item.findViewById(R.id.tv_time) as TextView
             tvVisits = item.findViewById(R.id.tv_visits) as TextView
+            tvHeaderOrg = item.findViewById(R.id.tv_your_location) as TextView
             rlyLytNB = item.findViewById(R.id.lyt_nearby_location) as RelativeLayout
 
             btnAllVisits = item.findViewById(R.id.btn_all_visits) as Button

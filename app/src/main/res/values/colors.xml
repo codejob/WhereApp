@@ -24,5 +24,8 @@
     <color name="color_location_title_nearby_bg">#ffdb58</color>
     <color name="color_location_title_bg">#1e8701</color>
     <color name="color_location_title">#ffffff</color>
+    <color name="color_location_green">#1e8701</color>
+    <color name="color_location_red">#ec0a06</color>
+    <color name="color_location_yellow">#faee0c</color>
 
 </resources>

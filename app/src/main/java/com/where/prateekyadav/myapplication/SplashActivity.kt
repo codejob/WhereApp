@@ -27,7 +27,7 @@ class SplashActivity : AppCompatActivity() {
         setContentView(R.layout.activity_splash)
         Fabric.with(this, Crashlytics())
         //
-        DataBaseController(this).copyDataBaseToSDCard()
+        //DataBaseController(this).copyDataBaseToSDCard()
     }
 
     override fun onResume() {
@@ -120,10 +120,6 @@ class SplashActivity : AppCompatActivity() {
         //
         }
     }
-
-
-
-
 
 
 }
