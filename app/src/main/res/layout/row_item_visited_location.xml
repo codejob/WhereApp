@@ -33,6 +33,14 @@
                     android:layout_alignParentRight="true"
                     android:background="@android:color/transparent"
                     android:src="@drawable/btn_trash_list_item" />
+                <ImageButton
+                    android:id="@+id/btn_edit_address"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/btn_delete"
+                    android:layout_alignParentRight="true"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/btn_edit_folder" />
 
                 <TextView
                     android:id="@+id/tv_your_location"
@@ -55,7 +63,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/tv_your_location"
-                    android:layout_toLeftOf="@id/btn_delete"
+                    android:layout_toLeftOf="@id/btn_edit_address"
                     android:fontFamily="@font/roboto_light"
                     android:gravity="left"
                     android:text="@string/str_na"
@@ -70,7 +78,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignLeft="@+id/tv_address"
                     android:layout_alignStart="@+id/tv_address"
-                    android:layout_toLeftOf="@id/btn_delete"
+                    android:layout_toLeftOf="@id/btn_edit_address"
                     android:layout_below="@+id/tv_address"
                     android:fontFamily="@font/roboto_light"
                     android:gravity="left"
@@ -83,6 +91,7 @@
                     android:id="@+id/lyt_nearby_location"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@id/btn_edit_address"
                     android:layout_alignLeft="@+id/tv_visit_date"
                     android:layout_alignStart="@+id/tv_visit_date"
                     android:layout_below="@+id/tv_location_vicinity"

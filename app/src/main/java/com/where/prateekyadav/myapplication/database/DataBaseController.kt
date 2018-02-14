@@ -407,7 +407,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         visitedLocationInformation.state = state
         visitedLocationInformation.country = country
         if(postalCode!=null)
-        visitedLocationInformation.postalCode = postalCode
+            visitedLocationInformation.postalCode = postalCode
         visitedLocationInformation.knownName = knownName
         visitedLocationInformation.toTime = stayTime
         visitedLocationInformation.fromTime = dateTime
@@ -417,7 +417,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         visitedLocationInformation.vicinity = vicinity
         visitedLocationInformation.placeId = placeId
         if(photoUrl!=null)
-        visitedLocationInformation.photoUrl = photoUrl
+            visitedLocationInformation.photoUrl = photoUrl
         visitedLocationInformation.nearByPlacesIds = nearByPlacesIds
         visitedLocationInformation.isAddressSet = isAddressSet
         visitedLocationInformation.isPreferred = isPreferred
@@ -639,7 +639,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
     /**
      * Prepare search result here
      */
-     fun parseSearchResult(visitResultsList: List<VisitResults>): List<SearchResult>? {
+    fun parseSearchResult(visitResultsList: List<VisitResults>): List<SearchResult>? {
         var searchResultList = ArrayList<SearchResult>()
 
         try {
@@ -751,15 +751,15 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
             visitResultsList = getVisitedLocationsFromTextMatch(place) as ArrayList<VisitResults>
 
             //if (visitResultsList == null || visitResultsList.size == 0) {
-                //visitResultsList = getVisitedFromNearbyPlaceListMatchesText(place) as ArrayList<VisitResults>
-                visitResultsList.addAll(getVisitedFromNearbyPlaceListMatchesText(place) as ArrayList<VisitResults>)
-                if (visitResultsList != null && visitResultsList.size > 0) {
-                    searchResultList = parseSearchResult(visitResultsList) as ArrayList<SearchResult>
+            //visitResultsList = getVisitedFromNearbyPlaceListMatchesText(place) as ArrayList<VisitResults>
+            visitResultsList.addAll(getVisitedFromNearbyPlaceListMatchesText(place) as ArrayList<VisitResults>)
+            if (visitResultsList != null && visitResultsList.size > 0) {
+                searchResultList = parseSearchResult(visitResultsList) as ArrayList<SearchResult>
 
-                } else {
-                    //searchResultList = readAllVisitedLocation()
-                    ///// No match found from place ID
-                }
+            } else {
+                //searchResultList = readAllVisitedLocation()
+                ///// No match found from place ID
+            }
 
 //            } else {
 //                /////////////// Exact match///////////////////
@@ -1020,6 +1020,29 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         }
 
         return false
+    }
+
+    /**
+     * Method to update stay time into data base for the visited location
+     */
+    fun updateAddress(rowID: Int, address: String):Int {
+        try {// Gets the data repository in write mode
+            val db = getWritableDB()
+            // Create a new map of values, where column names are the keys
+            val values = ContentValues()
+
+            values.put(DBContract.VisitedLocationData.COLUMN_ADDRESS, address)
+            val whereClause = "id = ?"
+            val whereArgs = arrayOf(rowID.toString())
+
+            var updated= db.update(DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION
+                    , values, whereClause, whereArgs)
+            return updated;
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return 0;
     }
 
 }

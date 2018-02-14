@@ -16,7 +16,7 @@ android {
         config {
             keyAlias 'footprints'
             keyPassword 'prat@7388'
-            storeFile file('D:/footprints.jks')
+            storeFile file('E:\\RohitashvJain\\Sample Projects\\WhereApp\\keystore\\footprints.jks')
             storePassword 'prat7388'
         }
     }
@@ -37,7 +37,7 @@ android {
             debuggable false
         }
         debug {
-            debuggable false
+            debuggable true
         }
     }
 }

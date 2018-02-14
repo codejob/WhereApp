@@ -21,7 +21,7 @@ open class AppConstant {
         val FOLDER_PATH = Environment.getExternalStorageDirectory().path + "/WhereApp/"
         val TAG_KOTLIN_DEMO_APP = "KotlinDemoApp"
         // Seconds
-        val LOCATION_SYNC_INSTERVAL: Long = 10*60 * 1000;
+        val LOCATION_SYNC_INSTERVAL: Long = 1*60 * 1000;
         val LOCATION_SYNC_TIMEOUT: Long = 20 * 1000;
         val LOCATION_SYNC_TIMEOUT_FORCE: Long = 6 * 1000;
         val RECEIVER_ACTION: String = "LOCATION";
@@ -47,6 +47,8 @@ open class AppConstant {
         val REQUEST_CODE_DELETE=11;
         val REQUEST_CODE_REPLACE=12;
         val REQUEST_CODE_UPDATE=13;
+        val REQUEST_EDIT_ADDRESS =14
+        val REQUEST_ADDRESS_CHANGE_ALERT =15
 
 
     }

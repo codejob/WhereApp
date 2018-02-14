@@ -15,6 +15,7 @@ import com.where.prateekyadav.myapplication.appinterface.ConfirmationListener
 import com.where.prateekyadav.myapplication.database.DBContract
 import com.where.prateekyadav.myapplication.database.DataBaseController
 import com.where.prateekyadav.myapplication.dialog.DialogConfirmationAlert
+import com.where.prateekyadav.myapplication.dialog.DialogEditAddress
 import com.where.prateekyadav.myapplication.modal.SearchResult
 import com.where.prateekyadav.myapplication.view.NearByActivity
 import com.where.prateekyadav.myapplication.view.VisitedActivity
@@ -91,6 +92,20 @@ class LocationsAdapter() : BaseAdapter(), ConfirmationListener {
                 confirmationDialog.showConfirmationDialog(mContext!!.getString(R.string.str_alert_message_delete_location),
                         position, AppConstant.REQUEST_CODE_DELETE);
 
+
+            }
+
+        })
+
+        mViewHolder.btnEditAddress.setOnClickListener(object : View.OnClickListener {
+            override fun onClick(p0: View?) {
+                // open a dialog to update the address
+                val listItem = getItem(position) as SearchResult
+                val address = listItem.visitResults.visitedLocationInformation.address
+                val rowId=listItem.visitResults.visitedLocationInformation.rowID
+                var mEditAddressDialog = DialogEditAddress(mContext!!,
+                        this@LocationsAdapter,address, rowId.toInt())
+                mEditAddressDialog.showDialog()
 
             }
 
@@ -187,6 +202,7 @@ class LocationsAdapter() : BaseAdapter(), ConfirmationListener {
         internal var btnDelete: ImageButton
         internal var rlyLytNB: RelativeLayout
         internal var tvHeaderOrg: TextView
+        internal var btnEditAddress: ImageButton
 
         init {
             tvOrgAddress = item.findViewById(R.id.tv_address) as TextView
@@ -202,6 +218,7 @@ class LocationsAdapter() : BaseAdapter(), ConfirmationListener {
             btnAllVisits = item.findViewById(R.id.btn_all_visits) as Button
             btnChooseNearBy = item.findViewById(R.id.btn_choose_nearby) as Button
             btnDelete = item.findViewById(R.id.btn_delete) as ImageButton
+            btnEditAddress = item.findViewById(R.id.btn_edit_address) as ImageButton
 
         }
     }
@@ -218,6 +235,10 @@ class LocationsAdapter() : BaseAdapter(), ConfirmationListener {
 
         if (requestType == AppConstant.REQUEST_CODE_DELETE) {
             deleteLocationFromDatabase(index)
+        }else  if (requestType == AppConstant.REQUEST_ADDRESS_CHANGE_ALERT
+                ||requestType == AppConstant.REQUEST_EDIT_ADDRESS) {
+
+            (mContext!! as MainActivity).setLocationResults(DataBaseController(mContext).readRecentVisitedLocation(), true)
         }
 
     }
