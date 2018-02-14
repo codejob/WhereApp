@@ -96,7 +96,6 @@ class NetworkConnectionReceiver : BroadcastReceiver() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-
     }
 
     /**

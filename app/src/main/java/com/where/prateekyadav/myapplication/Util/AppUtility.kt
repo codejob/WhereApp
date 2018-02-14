@@ -31,7 +31,10 @@ import android.support.v7.app.AlertDialog
 import android.text.SpannableStringBuilder
 import android.text.style.StyleSpan
 import android.view.View
+import android.widget.TextView
 import com.where.prateekyadav.myapplication.*
+import com.where.prateekyadav.myapplication.R.drawable.bg_round_corner_near_by
+import com.where.prateekyadav.myapplication.R.drawable.bg_round_corner_original
 
 
 /**
@@ -50,6 +53,7 @@ class AppUtility {
         fun showToast(context: Context, msg: String) {
             Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
         }
+
         fun showToastLong(context: Context, msg: String) {
             Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
         }
@@ -133,7 +137,6 @@ class AppUtility {
 
 
     ///////////////////////////Need to delete//////////////////////////////////
-
 
     // Send an Intent with an action named "custom-event-name". The Intent
     // sent should
@@ -250,7 +253,6 @@ class AppUtility {
     fun showSnackBar(message: String, layout: View) {
         val snackbar = Snackbar
                 .make(layout, message, Snackbar.LENGTH_LONG)
-
         snackbar.show()
     }
 
@@ -308,8 +310,8 @@ class AppUtility {
 
     }
 
-    fun buildAlertMessageNoGps(context: Context?):AlertDialog {
-        var builder: AlertDialog.Builder = AlertDialog.Builder(context!!);
+    fun buildAlertMessageNoGps(context: Context?): AlertDialog {
+        var builder: AlertDialog.Builder = AlertDialog.Builder(context!!,R.style.AlertDialogStyle);
         builder.setMessage(context.getString(R.string.msg_ask_to_turn_gps_on))
                 .setCancelable(false)
                 .setPositiveButton("Yes", object : DialogInterface.OnClickListener {
@@ -326,5 +328,29 @@ class AppUtility {
         val alert: AlertDialog = builder.create()
         alert.show();
         return alert
+    }
+
+    fun setColorBasedOnAccuracy(accuracy: Float, view: TextView, context: Context?): Int {
+        when (true) {
+
+            (accuracy < 30) -> {
+                view.background = context!!.resources.getDrawable(bg_round_corner_original)
+                view.setText(" "+context!!.resources.getString(R.string.str_original_location)+" ")
+                return R.color.color_location_green
+            }
+            (accuracy > 30 && accuracy < 150) -> {
+                view.background = context!!.resources.getDrawable(bg_round_corner_near_by)
+                view.setText(" "+context!!.resources.getString(R.string.str_approx_location)+" ")
+
+                return R.color.color_location_yellow
+            }
+            (accuracy > 150) -> {
+                view.setText(" "+context!!.resources.getString(R.string.str_approx_location)+" ")
+
+                view.background = context!!.resources.getDrawable(bg_round_corner_near_by)
+                return R.color.color_location_red
+            }
+        }
+        return R.color.color_location_green
     }
 }
