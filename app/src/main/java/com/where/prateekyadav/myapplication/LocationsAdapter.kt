@@ -116,6 +116,9 @@ class LocationsAdapter() : BaseAdapter(), ConfirmationListener {
         calToTime.timeInMillis = mLocationList!!.get(position).visitResults.visitedLocationInformation.toTime
         calFromTime.timeInMillis = mLocationList!!.get(position).visitResults.visitedLocationInformation.fromTime
 
+        /*val url = AppUtility().getStaticMapUrl(mLocationList!!.get(position).visitResults.visitedLocationInformation.latitude.toString()
+                ,mLocationList!!.get(position).visitResults.visitedLocationInformation.longitude.toString())
+        GlideApp.with(mContext!!).load(url).into(mViewHolder.ivMap);*/
 
         /*  Req Type:=> ${mLocationList!!.get(position).visitResults.visitedLocationInformation.locationRequestType}
           Provider :=> ${mLocationList!!.get(position).visitResults.visitedLocationInformation.locationProvider}
@@ -175,6 +178,10 @@ class LocationsAdapter() : BaseAdapter(), ConfirmationListener {
         DataBaseController(mContext).deleteVisitedPlaceAndUniqueNearByForIt(visitList)
         this@LocationsAdapter.mLocationList!!.removeAt(position)
         this@LocationsAdapter.notifyDataSetChanged()
+
+        this@LocationsAdapter.mLocationList!!.clear()
+        this@LocationsAdapter.mLocationList!!.addAll(DataBaseController(mContext).readRecentVisitedLocation())
+        this@LocationsAdapter.notifyDataSetChanged()
     }
 
     override fun getItem(p0: Int): Any {
@@ -203,6 +210,7 @@ class LocationsAdapter() : BaseAdapter(), ConfirmationListener {
         internal var rlyLytNB: RelativeLayout
         internal var tvHeaderOrg: TextView
         internal var btnEditAddress: ImageButton
+        //internal var ivMap: ImageView
 
         init {
             tvOrgAddress = item.findViewById(R.id.tv_address) as TextView
@@ -219,6 +227,9 @@ class LocationsAdapter() : BaseAdapter(), ConfirmationListener {
             btnChooseNearBy = item.findViewById(R.id.btn_choose_nearby) as Button
             btnDelete = item.findViewById(R.id.btn_delete) as ImageButton
             btnEditAddress = item.findViewById(R.id.btn_edit_address) as ImageButton
+
+           // ivMap = item.findViewById(R.id.iv_map_item) as ImageView
+
 
         }
     }

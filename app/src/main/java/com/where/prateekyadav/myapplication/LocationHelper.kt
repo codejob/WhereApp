@@ -241,7 +241,7 @@ class LocationHelper {
                             Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
                                     "Accuracy: " + location.accuracy)
                         }
-                        if (location != null && (location.accuracy < 500 || forceUpdateLoation)) {
+                        if (location != null && (location.accuracy < AppConstant.MAX_ACCURACY_RANGE || forceUpdateLoation)) {
                             Log.v("Location Changed", location.getLatitude().toString() + " and " + location.getLongitude().toString());
                             Log.i(AppConstant.TAG_KOTLIN_DEMO_APP,
                                     "Location received last known")
@@ -260,7 +260,7 @@ class LocationHelper {
                         Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "best location accuracy " + bestLocation!!.accuracy)
 
                         locationManager!!.removeUpdates(locationListener)
-                        if (bestLocation!!.accuracy <= 500 || forceUpdateLoation) {
+                        if (bestLocation!!.accuracy <= AppConstant.MAX_ACCURACY_RANGE || forceUpdateLoation) {
                             getCompleteAddressString(bestLocation!!, AppConstant.LOCATION_UPDATE_TYPE_CURRENT, forceUpdateLoation)
                         }
                     } else {

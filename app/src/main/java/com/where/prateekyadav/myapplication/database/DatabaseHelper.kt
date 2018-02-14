@@ -24,7 +24,7 @@ open class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABAS
     }
 
     override fun onCreate(db: SQLiteDatabase) {
-     createTables(db)
+        createTables(db)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -48,7 +48,7 @@ open class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABAS
     protected fun getWritableDB(): SQLiteDatabase {
         if (mOpenCounter.incrementAndGet() == 1) {
             sqLiteDatabase = this.writableDatabase
-           // Log.d("dbcounter", "open db")
+            // Log.d("dbcounter", "open db")
         }
         return sqLiteDatabase
     }
@@ -124,17 +124,11 @@ open class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABAS
         private val SQL_DELETE_NEARBY_PLACES = "DROP TABLE IF EXISTS " + DBContract.NearByLocationData.TABLE_NAME_NEARBY_LOCATION
     }
 
-    protected fun createTables(db: SQLiteDatabase){
+    protected fun createTables(db: SQLiteDatabase) {
         db.execSQL(SQL_CREATE_ENTRIES)
         db.execSQL(SQL_CREATE_VISIT_LOCATION_TABLE)
         db.execSQL(SQL_CREATE_NEARBY_LOCATION_TABLE)
     }
-
-
-
-
-
-
 
 
     @Throws(SQLiteConstraintException::class)
@@ -224,7 +218,6 @@ open class DatabaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABAS
         closeDataBase(sqLiteDatabase)
         return users
     }
-
 
 
 }

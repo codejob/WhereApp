@@ -107,7 +107,6 @@ class MainActivity : AppCompatActivity() {
 
             override fun onItemClick(parent: AdapterView<*>, view: View, position: Int, id: Long) {
 
-
             }
         }
     }
@@ -437,7 +436,7 @@ class MainActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         when (resultCode) {
             1 -> {
-                if (mSearchEdittext!=null && mSearchEdittext!!.text != null && !mSearchEdittext!!.text.isBlank()) {
+                if (mSearchEdittext != null && mSearchEdittext!!.text != null && !mSearchEdittext!!.text.isBlank()) {
                     search(mSearchEdittext!!.text.toString())
                 }
 
@@ -465,7 +464,6 @@ class MainActivity : AppCompatActivity() {
 
     fun handleMenuSearch() {
         val action: ActionBar? = getSupportActionBar(); //get the actionbar
-
         if (isSearchOpened) { //test if the search is open
             isSearchOpened = false;
             action!!.setDisplayShowCustomEnabled(false); //disable a custom view inside the actionbar
@@ -517,7 +515,7 @@ class MainActivity : AppCompatActivity() {
                     if (isSearchOpened) {
                         if (s!!.length > 2) {
                             search(s.toString())
-                        }else if (s!!.length == 0) {
+                        } else if (s!!.length == 0) {
                             setLocationResults(DataBaseController(this@MainActivity).readRecentVisitedLocation(), true)
                         }
                     }

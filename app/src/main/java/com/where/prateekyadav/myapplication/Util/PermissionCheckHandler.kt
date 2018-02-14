@@ -414,7 +414,7 @@ object PermissionCheckHandler {
 
     fun openDialogForPermissionAlert(mActivity: Activity, alertMessage: String) {
         //user denied without Never ask again, just show rationale explanation
-        val builder = AlertDialog.Builder(mActivity)
+        val builder = AlertDialog.Builder(mActivity,R.style.AlertDialogStyle)
         builder.setTitle(mActivity.getString(R.string.str_title_permission_denied))
         builder.setMessage(mActivity.getString(R.string.str_location_permission_alert_message))
         builder.setPositiveButton(mActivity.getString(R.string.str_i_am_sure), DialogInterface.OnClickListener { dialog, which -> dialog.dismiss() })
@@ -426,7 +426,7 @@ object PermissionCheckHandler {
     }
 
     fun promptSettings(mActivity: Activity, mDeniedNeverAskTitle: String, mDeniedNeverAskMsg: String) {
-        val builder = AlertDialog.Builder(mActivity)
+        val builder = AlertDialog.Builder(mActivity,R.style.AlertDialogStyle)
         builder.setTitle(mDeniedNeverAskTitle)
         builder.setMessage(mDeniedNeverAskMsg)
         builder.setPositiveButton(mActivity.getString(R.string.str_go_to_settings), DialogInterface.OnClickListener { dialog, which ->
