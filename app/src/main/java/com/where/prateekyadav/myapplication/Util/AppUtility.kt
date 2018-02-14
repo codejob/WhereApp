@@ -16,6 +16,7 @@ import java.util.*
 import android.content.ContentValues.TAG
 import android.content.Context.NOTIFICATION_SERVICE
 import android.content.DialogInterface
+import android.graphics.Color
 import android.graphics.Typeface
 import android.location.Location
 import android.location.LocationManager
@@ -336,21 +337,29 @@ class AppUtility {
             (accuracy < 30) -> {
                 view.background = context!!.resources.getDrawable(bg_round_corner_original)
                 view.setText(" "+context!!.resources.getString(R.string.str_original_location)+" ")
+                view.setTextColor(Color.WHITE)
                 return R.color.color_location_green
             }
             (accuracy > 30 && accuracy < 150) -> {
                 view.background = context!!.resources.getDrawable(bg_round_corner_near_by)
                 view.setText(" "+context!!.resources.getString(R.string.str_approx_location)+" ")
+                view.setTextColor(Color.GRAY)
 
                 return R.color.color_location_yellow
             }
             (accuracy > 150) -> {
                 view.setText(" "+context!!.resources.getString(R.string.str_approx_location)+" ")
-
+                view.setTextColor(Color.GRAY)
                 view.background = context!!.resources.getDrawable(bg_round_corner_near_by)
                 return R.color.color_location_red
             }
         }
         return R.color.color_location_green
+    }
+
+    fun getStaticMapUrl(lat:String,lng:String):String{
+        return "http://maps.google.com/maps/api/staticmap?center=" + lat + "," + lng + "&zoom=16&size=400x400&sensor=true"+
+        "&markers=color:red%7Clabel:L%7C$lat,$lng&key=${AppConstant.KEY_MAP}"
+
     }
 }

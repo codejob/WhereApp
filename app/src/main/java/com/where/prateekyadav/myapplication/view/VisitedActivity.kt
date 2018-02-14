@@ -7,8 +7,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
+import android.widget.ImageView
 import android.widget.ListView
 import android.widget.TextView
+import com.bumptech.glide.Glide
+import com.where.prateekyadav.myapplication.GlideApp
 import com.where.prateekyadav.myapplication.R
 import com.where.prateekyadav.myapplication.Util.AppConstant
 import com.where.prateekyadav.myapplication.Util.AppUtility
@@ -24,16 +27,20 @@ import java.util.*
  */
 class VisitedActivity : AppCompatActivity() {
     var mLocationList: List<VisitedLocationInformation>? = null;
+    var mIvMap:ImageView?=null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_visited)
-
+        mIvMap=findViewById(R.id.iv_map) as ImageView
         if (intent.hasExtra(DBContract.VisitedLocationData.COLUMN_PLACE_ID)) {
             var placeID = intent.getStringExtra(DBContract.VisitedLocationData.COLUMN_PLACE_ID)
             mLocationList = DataBaseController(this).getVisitedLocationsFromPlaceid(placeID)
             val listView: ListView = findViewById<ListView>(R.id.lv_visited)
             listView.adapter = LocationsAdapter(mLocationList!!)
             listView!!.emptyView = findViewById(R.id.tv_no_records) as TextView
+             val url = AppUtility().getStaticMapUrl(mLocationList!!.get(0).latitude.toString()
+                     ,mLocationList!!.get(0).longitude.toString())
+            GlideApp.with(this).load(url).into(mIvMap!!);
 
         }
 

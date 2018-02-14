@@ -19,6 +19,9 @@ public interface ApiInterface {
     @GET("nearbysearch/json")
     Call<Places> getPlacesNearBy(@Query("location") String location, @Query("radius") String radius, @Query("key") String apiKey);
 
+    @GET("nearbysearch/json")
+    Call<Places> getPlacesNearByDistance(@Query("location") String location, @Query("rankby") String rankby, @Query("key") String apiKey);
+
     @GET("details/json")
     Call<PhotoDetails> getPlaceDeatil(@Query("placeid") String placeid, @Query("key") String apiKey);
     @GET

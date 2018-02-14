@@ -8,6 +8,7 @@ import android.os.Environment
  */
 open class AppConstant {
     companion object {
+        var KEY_MAP="AIzaSyA3B89tmcvD9fqQH982mT7_6sS0XacTF_Y"
         var sharedKeyLatitude: String = "latitude";
         var sharedKeyLongitude: String = "longitude";
         var SP_KEY_SPENT_TIME: String = "sp_key_spent_time"
@@ -28,6 +29,7 @@ open class AppConstant {
         var MIN_DISTANCE_RANGE: Int = 100;
         var RADIUS_NEARBY_SEARCH: Int = 50;
         var RECENT_COUNT: Int = 10;
+        val MAX_ACCURACY_RANGE =700;
         val alarmID: Int = 1001;
         val notificationRequestCode: Int = 1002;
         val visitActivityRequestCode: Int = 1003;

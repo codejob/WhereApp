@@ -23,7 +23,9 @@ import java.io.FileOutputStream
 import java.io.IOException
 import android.database.sqlite.SQLiteStatement
 import com.where.prateekyadav.myapplication.database.DBContract.AND
+import com.where.prateekyadav.myapplication.database.DBContract.ASC
 import com.where.prateekyadav.myapplication.database.DBContract.EQUALS_TO_STRING
+import com.where.prateekyadav.myapplication.database.DBContract.ORDER_BY
 import com.where.prateekyadav.myapplication.database.DBContract.SELECT_COUNT_FROM
 
 
@@ -252,7 +254,9 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
         var cursor: Cursor? = null
         try {
             var query = SELECT_FROM + DBContract.VisitedLocationData.TABLE_NAME_VISITED_LOCATION +
-                    WHERE + DBContract.VisitedLocationData.COLUMN_IS_ADDRESS_SET + EQUALS_TO + 1
+                    WHERE + DBContract.VisitedLocationData.COLUMN_IS_ADDRESS_SET + EQUALS_TO + 1+
+                    " Group BY " + DBContract.VisitedLocationData.COLUMN_PLACE_ID +
+                    ORDER_BY+ DBContract.VisitedLocationData.COLUMN_ROW_ID+ ASC
             cursor = db.rawQuery(query, null)
         } catch (e: SQLiteException) {
             createTables(db)

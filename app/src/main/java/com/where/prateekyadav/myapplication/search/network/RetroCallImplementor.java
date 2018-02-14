@@ -25,13 +25,15 @@ import retrofit2.Response;
 
 public class RetroCallImplementor {
 
-
     public void getAllPlaces(String query , final RetroCallIneractor retroCallIneractor, final Location location,
                              final String locationType,final long rowId){
         ApiInterface apiService =
                 ApiClient.getClient().create(ApiInterface.class);
 
-        Call<Places> call = apiService.getPlacesNearBy(query, AppConstant.Companion.getRADIUS_NEARBY_SEARCH()+"", Constant.API_KEY_PLACES);
+        //Call<Places> call = apiService.getPlacesNearBy(query, AppConstant.Companion.getRADIUS_NEARBY_SEARCH()+"", Constant.API_KEY_PLACES);
+       ///////////// call with rankyby distance//////
+        Call<Places> call = apiService.getPlacesNearByDistance(query, "distance", Constant.API_KEY_PLACES);
+
         call.enqueue(new Callback<Places>() {
             @Override
             public void onResponse(Call<Places> call, Response<Places> response) {
