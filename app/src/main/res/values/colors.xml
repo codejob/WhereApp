@@ -27,5 +27,6 @@
     <color name="color_location_green">#1e8701</color>
     <color name="color_location_red">#ec0a06</color>
     <color name="color_location_yellow">#faee0c</color>
+    <color name="color_note_hint_text">#7e7e7e</color>
 
 </resources>

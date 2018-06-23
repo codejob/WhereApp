@@ -37,4 +37,8 @@
     <string name="version_name">Version 1.2</string>
     <string name="search">Search all places</string>
     <string name="recent_places">Recent places</string>
+    <string name="hint_notation_text">Please enter you address</string>
+    <string name="str_save">Save</string>
+    <string name="str_alert_message_save_text_notation">Do you want to update the address.</string>
+    <string name="str_alert_message_change_address">Do you want to save your changes.</string>
 </resources>

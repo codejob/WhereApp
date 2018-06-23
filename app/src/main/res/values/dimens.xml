@@ -15,4 +15,6 @@
     <dimen name="ts_button_location_screen">14sp</dimen>
     <dimen name="location_screen_btn_height">40dp</dimen>
     <dimen name="dialog_button_height">35dp</dimen>
+    <dimen name="note_text_size">14sp</dimen>
+    <dimen name="add_edit_address_height">140dp</dimen>
 </resources>

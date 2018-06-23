@@ -832,7 +832,6 @@ class LocationHelper {
                         nearByPlacesIds = nearByPlacesIds + "," + placeId;
                     }
 
-
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -847,6 +846,8 @@ class LocationHelper {
         }
 
     }
+
+
 
 }
 
