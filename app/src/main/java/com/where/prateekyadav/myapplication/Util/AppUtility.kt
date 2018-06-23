@@ -5,17 +5,13 @@ import android.app.AlarmManager
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
+import android.content.*
 import android.content.pm.PackageManager
 import android.support.v4.app.ActivityCompat
 import android.util.Log
-import java.io.File
 import java.util.*
 import android.content.ContentValues.TAG
 import android.content.Context.NOTIFICATION_SERVICE
-import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.Typeface
 import android.location.Location
@@ -36,6 +32,8 @@ import android.widget.TextView
 import com.where.prateekyadav.myapplication.*
 import com.where.prateekyadav.myapplication.R.drawable.bg_round_corner_near_by
 import com.where.prateekyadav.myapplication.R.drawable.bg_round_corner_original
+import com.where.prateekyadav.myapplication.database.DatabaseHelper
+import java.io.*
 
 
 /**
@@ -312,7 +310,7 @@ class AppUtility {
     }
 
     fun buildAlertMessageNoGps(context: Context?): AlertDialog {
-        var builder: AlertDialog.Builder = AlertDialog.Builder(context!!,R.style.AlertDialogStyle);
+        var builder: AlertDialog.Builder = AlertDialog.Builder(context!!, R.style.AlertDialogStyle);
         builder.setMessage(context.getString(R.string.msg_ask_to_turn_gps_on))
                 .setCancelable(false)
                 .setPositiveButton("Yes", object : DialogInterface.OnClickListener {
@@ -336,19 +334,19 @@ class AppUtility {
 
             (accuracy < 30) -> {
                 view.background = context!!.resources.getDrawable(bg_round_corner_original)
-                view.setText(" "+context!!.resources.getString(R.string.str_original_location)+" ")
+                view.setText(" " + context!!.resources.getString(R.string.str_original_location) + " ")
                 view.setTextColor(Color.WHITE)
                 return R.color.color_location_green
             }
             (accuracy > 30 && accuracy < 150) -> {
                 view.background = context!!.resources.getDrawable(bg_round_corner_near_by)
-                view.setText(" "+context!!.resources.getString(R.string.str_approx_location)+" ")
+                view.setText(" " + context!!.resources.getString(R.string.str_approx_location) + " ")
                 view.setTextColor(Color.GRAY)
 
                 return R.color.color_location_yellow
             }
             (accuracy > 150) -> {
-                view.setText(" "+context!!.resources.getString(R.string.str_approx_location)+" ")
+                view.setText(" " + context!!.resources.getString(R.string.str_approx_location) + " ")
                 view.setTextColor(Color.GRAY)
                 view.background = context!!.resources.getDrawable(bg_round_corner_near_by)
                 return R.color.color_location_red
@@ -357,9 +355,46 @@ class AppUtility {
         return R.color.color_location_green
     }
 
-    fun getStaticMapUrl(lat:String,lng:String):String{
-        return "http://maps.google.com/maps/api/staticmap?center=" + lat + "," + lng + "&zoom=16&size=400x400&sensor=true"+
-        "&markers=color:red%7Clabel:L%7C$lat,$lng&key=${AppConstant.KEY_MAP}"
+    fun getStaticMapUrl(lat: String, lng: String): String {
+        return "http://maps.google.com/maps/api/staticmap?center=" + lat + "," + lng + "&zoom=16&size=400x400&sensor=true" +
+                "&markers=color:red%7Clabel:L%7C$lat,$lng&key=${AppConstant.KEY_MAP}"
+
+    }
+
+    fun copyDataBase(context: Context?) {
+        Log.i("Database",
+                "New database is being copied to device!")
+        val buffer = ByteArray(1024)
+        var myOutput: OutputStream? = null
+        var length: Int
+        // Open your local db as the input stream
+        var myInput: InputStream? = null
+        var cw: ContextWrapper = ContextWrapper(context!!.getApplicationContext())
+        var DB_PATH = cw.getFilesDir().getAbsolutePath() + "/databases/"; //edited to databases
+        try {
+            val DB_NAME = "Rohitashv.db"
+            myInput = context.getAssets().open(DB_NAME)
+            // transfer bytes from the inputfile to the
+            // outputfile
+            //myOutput = FileOutputStream(DB_PATH + DB_NAME)
+            myOutput = FileOutputStream("/data/data/" + context!!.getPackageName() + "/databases/" + DatabaseHelper.DATABASE_NAME)
+
+            do {
+                length = myInput.read(buffer)
+                if (length > 0) {
+                    myOutput.write(buffer, 0, length)
+                }
+            } while (length > 0)
+            myOutput!!.close()
+            myOutput!!.flush()
+            myInput!!.close()
+            Log.i("Database",
+                    "New database has been copied to device!")
+
+
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
 
     }
 }

@@ -8,6 +8,7 @@
         android:id="@+id/action_search"
         android:icon="@drawable/btn_search"
         android:orderInCategory="200"
+        android:actionLayout="@layout/search_view_item"
         android:title="@string/search"
         app:showAsAction="always" />
 </menu>

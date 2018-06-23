@@ -51,6 +51,12 @@ class MainActivity : AppCompatActivity() {
     var mToolbar: android.support.v7.widget.Toolbar? = null
     private var mSearchAction: MenuItem? = null
     private var isSearchOpened = false
+
+    companion object {
+        var thread = Thread {}
+
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -76,11 +82,12 @@ class MainActivity : AppCompatActivity() {
         mDrawableClear = getClearDrawable(this);
 
         //
-        //setSearchListener()
-        //setOnTouchListener()
-        setClickListener()
+        setSearchListener()
+        setOnTouchListener()
         startAddressUpdateServiceToUpdateAnyRemainingAddresss()
-        swiperefresh.setOnRefreshListener(object : SwipeRefreshLayout.OnRefreshListener {
+
+
+        mSwipeToRefresh!!.setOnRefreshListener(object : SwipeRefreshLayout.OnRefreshListener {
             override fun onRefresh() {
 
                 if (!LocationHelper.getInstance(this@MainActivity).checkLocationAvailable()) {
@@ -98,18 +105,6 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    /**
-     * set click listener here
-     */
-    fun setClickListener() {
-
-        mListView!!.onItemClickListener = object : AdapterView.OnItemClickListener {
-
-            override fun onItemClick(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-
-            }
-        }
-    }
 
     /**
      *
@@ -126,7 +121,7 @@ class MainActivity : AppCompatActivity() {
                 if (event!!.getX() > editText.width - mDrawableClear.intrinsicWidth) {
                     // action here
                     clearSearchTextAndSetMessage(v!!)
-                    return true
+                    return false
                 }
 
                 return false
@@ -145,10 +140,25 @@ class MainActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable) {
 
                 if (edt_search.getText().toString().length > 0) {
-                    edt_search.setCompoundDrawables(mDrawableSearch, null, mDrawableClear, null)
+                    mSearchEdittext!!.setCompoundDrawables(mDrawableSearch, null, mDrawableClear, null)
                 } else {
-                    edt_search.setCompoundDrawables(mDrawableSearch, null, null, null)
+                    mSearchEdittext!!.setCompoundDrawables(mDrawableSearch, null, null, null)
 
+                }
+
+                Log.d(AppConstant.TAG_KOTLIN_DEMO_APP, "text change")
+
+                if (s!!.length > 2) {
+                    swiperefresh.isRefreshing = true;
+                    search(s.toString())
+                } else if (s!!.length == 0) {
+                    swiperefresh.isRefreshing = false;
+                    Thread {
+                        Runnable {
+                            setLocationResults(DataBaseController(this@MainActivity).readRecentVisitedLocation(), true)
+
+                        }.run()
+                    }.start()
                 }
             }
 
@@ -158,11 +168,7 @@ class MainActivity : AppCompatActivity() {
 
             override fun onTextChanged(s: CharSequence, start: Int,
                                        before: Int, count: Int) {
-                if (s.length > 2)
-                    search(s.toString())
-                else if (s.length == 0) {
-                    setLocationResults(DataBaseController(this@MainActivity).readRecentVisitedLocation(), true)
-                }
+
             }
         })
     }
@@ -224,25 +230,25 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         if (ContextCompat.checkSelfPermission(this,
                         Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            /* var clear: EditText = autocompleteFragment!!.getView().findViewById(R.id.place_autocomplete_search_input)
-             if (clear != null &&
-                     clear.tex s t.isBlank()) {
-             }*/
-            setLocationResults(DataBaseController(this).readRecentVisitedLocation(), false)
+            Thread {
+                Runnable {
+                    setLocationResults(DataBaseController(this).readRecentVisitedLocation(), false)
+                }.run()
 
-            //mLocationHelper?.getLocation()
-            /*if (!AppUtility().checkAlarmAlreadySet(this)) {
-                AppUtility().startTimerAlarm(this);
-            }*/
+            }.start()
         } else {
 
         }
+        if (!MySharedPref.getinstance(this).getBoolean(AppConstant.SP_KEY_APP_REACHED_MAIN_SCREEN)) {
+            LocationHelper.getInstance(this@MainActivity).fetchLocation(true)
+            mSwipeToRefresh!!.isRefreshing=true
+            val handler = Handler().postDelayed({
+                swiperefresh.isRefreshing = false
 
+            }, 12 * 1000)
+        }
         MySharedPref.getinstance(this).setBoolean(true, AppConstant.SP_KEY_APP_REACHED_MAIN_SCREEN)
 
-        //registerReceiver()
-        //AppUtility().inssertDemoLocation(this)
-        //LocationHelper.getInstance(this, this).setLocationListener();
         if (!ConnectionDetector.getInstance(this).isNetworkAvailable()) {
             AppUtility().showSnackBar(getString(R.string.no_net_avail), mRelativeLayout as View)
         }
@@ -283,12 +289,16 @@ class MainActivity : AppCompatActivity() {
             if (mSearchEdittext == null || mSearchEdittext!!.text.length == 0 || fromSearch) {
                 mSearchResultsList.clear()
                 mSearchResultsList.addAll(address as ArrayList<SearchResult>)
-                // mSearchResultsList=address as ArrayList<SearchResult>
-                // mAdapter = LocationsAdapter(this, mSearchResultsList)
-                //mListView!!.adapter = mAdapter
+                runOnUiThread(
+                        {
+                            if (fromSearch && mSearchEdittext != null && mSearchEdittext!!.text.length > 2)
+                                tv_header.visibility = View.GONE
+                            else
+                                tv_header.visibility = View.VISIBLE
+                            mAdapter!!.notifyDataSetChanged()
+                        }
+                )
 
-                //mAdapter!!.notifyDataSetInvalidated()
-                mAdapter!!.notifyDataSetChanged()
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -309,11 +319,9 @@ class MainActivity : AppCompatActivity() {
                     if (swiperefresh != null) {
                         swiperefresh.isRefreshing = false
                     }
-                    setLocationResults(
-                            DataBaseController(this@MainActivity).readRecentVisitedLocation(), false)
-
                 });
-
+                setLocationResults(
+                        DataBaseController(this@MainActivity).readRecentVisitedLocation(), false)
             }
         }// Receiver
     }
@@ -363,28 +371,57 @@ class MainActivity : AppCompatActivity() {
         }
     }// registerReceiver
 
+    //@Synchronized
+    fun syncSearch(place: String) {
+        try {
+            var searchResultsList: List<SearchResult>? = null
+            if (mSearchEdittext!!.text.length == place.length/*|| mSearchEdittext!!.text.length==0*/) {
+                searchResultsList = DataBaseController(this).searchLocationOffline(place)
+            }
+
+            if (searchResultsList != null && (mSearchEdittext!!.text.length == place.length/*|| mSearchEdittext!!.text.length==0*/)) {
+                /* searchResultsList.forEach {
+                     Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Search results: " + it.visitResults.visitedLocationInformation.vicinity)
+                 }*/
+                runOnUiThread({
+                    Log.d(AppConstant.TAG_KOTLIN_DEMO_APP, "run UI   $place")
+                    swiperefresh.isRefreshing = false;
+                })
+                setLocationResults(searchResultsList, true)
+
+            } else {
+                // Toast.makeText(this, "No result found", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 
     fun search(place: String) {
         try {
-            Thread {
-                // var searchResultsList = DataBaseController(this).searchLocationOnline(place)
-                var searchResultsList = DataBaseController(this).searchLocationOffline(place)
+            //if(thread.isAlive){
+            Log.d(AppConstant.TAG_KOTLIN_DEMO_APP, "thread  $place")
+            //thread.interrupt()
 
-                if (searchResultsList != null) {
-                    searchResultsList.forEach {
-                        //Toast.makeText(this, it.visitedLocationInformation.address, Toast.LENGTH_SHORT).show()
-                        Log.i(AppConstant.TAG_KOTLIN_DEMO_APP, "Search results: " + it.visitResults.visitedLocationInformation.vicinity)
-
-                    }
-                    runOnUiThread(Runnable {
-                        setLocationResults(searchResultsList, true)
-                    })
+            var runnable = Runnable {
+                if (!Thread.interrupted()) {
+                    syncSearch(place)
                 } else {
-                    //setLocation(DataBaseController(this).readAllVisitedLocation())
+                    Log.d(AppConstant.TAG_KOTLIN_DEMO_APP, "interrupted  $place")
 
-                    // Toast.makeText(this, "No result found", Toast.LENGTH_SHORT).show()
                 }
-            }.run()// Thread
+            }
+            thread = Thread {
+                runnable.run()
+            }
+
+            thread.start()
+
+
+            /* Thread {
+                 runnable.run()
+
+             }.start()// Thread*/
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -408,11 +445,11 @@ class MainActivity : AppCompatActivity() {
     fun getClearDrawable(context: Context): Drawable {
         var mDrawableClear: Drawable? = null
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            mDrawableClear = context.resources.getDrawable(R.drawable.btn_close_main, null)
+            mDrawableClear = context.resources.getDrawable(R.drawable.btn_clear, null)
             mDrawableSearch = context.resources.getDrawable(R.drawable.icn_search, null)
 
         } else {
-            mDrawableClear = context.resources.getDrawable(R.drawable.btn_close_main)
+            mDrawableClear = context.resources.getDrawable(R.drawable.btn_clear)
             mDrawableSearch = context.resources.getDrawable(R.drawable.icn_search)
         }
         //
@@ -445,6 +482,9 @@ class MainActivity : AppCompatActivity() {
     }
 
 
+    ////////////////// Menu search////////////////////////
+
+
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
         mSearchAction = menu!!.findItem(R.id.action_search);
         return super.onPrepareOptionsMenu(menu)
@@ -466,6 +506,7 @@ class MainActivity : AppCompatActivity() {
         val action: ActionBar? = getSupportActionBar(); //get the actionbar
         if (isSearchOpened) { //test if the search is open
             isSearchOpened = false;
+            mSearchEdittext!!.text.clear()
             action!!.setDisplayShowCustomEnabled(false); //disable a custom view inside the actionbar
             action.setDisplayShowTitleEnabled(true); //show the title in the action bar
 
@@ -473,16 +514,23 @@ class MainActivity : AppCompatActivity() {
             // var view: View? = null
             var view = View(this@MainActivity);
             //mSearchEdittext!!.requestFocus().apply {
-            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            //imm.hideSoftInputFromWindow(view!!.windowToken, 0)
-            // }
-            imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+
 
             //add the search icon in the action bar
             mSearchAction!!.setIcon(getResources().getDrawable(R.drawable.btn_search));
 
+            Thread {
+                Runnable {
+                    setLocationResults(DataBaseController(this@MainActivity).readRecentVisitedLocation(), true)
+                }.run()
+            }.start()
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            if (imm.isActive) {
+                imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+            } else {
 
-            setLocationResults(DataBaseController(this@MainActivity).readRecentVisitedLocation(), true)
+            }
+            Log.d(AppConstant.TAG_KOTLIN_DEMO_APP, "hide keyboard")
         } else { //open the search entry
             isSearchOpened = true;
             action!!.setDisplayShowCustomEnabled(true); //enable it to display a
@@ -493,32 +541,38 @@ class MainActivity : AppCompatActivity() {
             mSearchEdittext = action!!.getCustomView().findViewById(R.id.edtSearch); //the text editor
 
             //this is a listener to do a search when the user clicks on search button
-            mSearchEdittext!!.setOnEditorActionListener(object : TextView.OnEditorActionListener {
+            /*mSearchEdittext!!.setOnEditorActionListener(object : TextView.OnEditorActionListener {
                 override fun onEditorAction(tv: TextView?, actionId: Int, p2: KeyEvent?): Boolean {
-                    if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    if (actionId == EditorInfo.IME_ACTION_SEARCH && tv!!.text.length>0) {
+                        swiperefresh.isRefreshing = true;
                         search(tv!!.text.toString())
                         return true;
                     }
-                    return false;
+                    return true;
                 }
 
-            });
+            });*/
 
             mSearchEdittext!!.addTextChangedListener(object : TextWatcher {
                 override fun afterTextChanged(p0: Editable?) {
+                    val s = p0.toString()
+                    if (isSearchOpened) {
+                        Log.d(AppConstant.TAG_KOTLIN_DEMO_APP, "text change")
+
+                        if (s!!.length > 2) {
+                            swiperefresh.isRefreshing = true;
+                            search(s.toString())
+                        } else if (s!!.length == 0) {
+                            setLocationResults(DataBaseController(this@MainActivity).readRecentVisitedLocation(), true)
+                        }
+                    }
                 }
 
                 override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
                 }
 
                 override fun onTextChanged(s: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                    if (isSearchOpened) {
-                        if (s!!.length > 2) {
-                            search(s.toString())
-                        } else if (s!!.length == 0) {
-                            setLocationResults(DataBaseController(this@MainActivity).readRecentVisitedLocation(), true)
-                        }
-                    }
+
                 }
 
             })
@@ -530,6 +584,7 @@ class MainActivity : AppCompatActivity() {
             val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             imm.showSoftInput(mSearchEdittext, InputMethodManager.SHOW_IMPLICIT);
 
+            Log.d(AppConstant.TAG_KOTLIN_DEMO_APP, "show keyboard")
 
             //add the close icon
             mSearchAction!!.setIcon(mDrawableClear);

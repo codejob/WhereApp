@@ -839,7 +839,7 @@ class DataBaseController(context: Context?) : DatabaseHelper(context) {
 
                     val nearbyPlace = prepareNearByLocationObject(cursor)
                     val visited = getLastVisitedLocationsFromNearByPlaceidArray(nearbyPlace!!.placeId)
-                    if (visitedID.contains(visited!!.placeId)) {
+                    if (visited==null || visitedID.contains(visited!!.placeId)) {
                         cursor.moveToPrevious()
                         continue
                     }
